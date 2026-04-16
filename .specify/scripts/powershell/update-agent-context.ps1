@@ -132,17 +132,21 @@ function Validate-Environment {
 function Extract-PlanField {
     param(
         [Parameter(Mandatory=$true)]
-        [string]$FieldPattern,
+        [string[]]$FieldPatterns,
         [Parameter(Mandatory=$true)]
         [string]$PlanFile
     )
     if (-not (Test-Path $PlanFile)) { return '' }
-    # Lines like **Language/Version**: Python 3.12
-    $regex = "^\*\*$([Regex]::Escape($FieldPattern))\*\*: (.+)$"
+    $patterns = @()
+    foreach ($fieldPattern in $FieldPatterns) {
+        $patterns += "^\*\*$([Regex]::Escape($fieldPattern))\*\*: (.+)$"
+    }
     Get-Content -LiteralPath $PlanFile -Encoding utf8 | ForEach-Object {
-        if ($_ -match $regex) { 
-            $val = $Matches[1].Trim()
-            if ($val -notin @('NEEDS CLARIFICATION','N/A')) { return $val }
+        foreach ($regex in $patterns) {
+            if ($_ -match $regex) {
+                $val = $Matches[1].Trim()
+                if ($val -notin @('NEEDS CLARIFICATION','N/A')) { return $val }
+            }
         }
     } | Select-Object -First 1
 }
@@ -154,10 +158,10 @@ function Parse-PlanData {
     )
     if (-not (Test-Path $PlanFile)) { Write-Err "Plan file not found: $PlanFile"; return $false }
     Write-Info "Parsing plan data from $PlanFile"
-    $script:NEW_LANG        = Extract-PlanField -FieldPattern 'Language/Version' -PlanFile $PlanFile
-    $script:NEW_FRAMEWORK   = Extract-PlanField -FieldPattern 'Primary Dependencies' -PlanFile $PlanFile
-    $script:NEW_DB          = Extract-PlanField -FieldPattern 'Storage' -PlanFile $PlanFile
-    $script:NEW_PROJECT_TYPE = Extract-PlanField -FieldPattern 'Project Type' -PlanFile $PlanFile
+    $script:NEW_LANG        = Extract-PlanField -FieldPatterns @('Language/Version','Idioma/Versão') -PlanFile $PlanFile
+    $script:NEW_FRAMEWORK   = Extract-PlanField -FieldPatterns @('Primary Dependencies','Dependências principais') -PlanFile $PlanFile
+    $script:NEW_DB          = Extract-PlanField -FieldPatterns @('Storage','Armazenamento') -PlanFile $PlanFile
+    $script:NEW_PROJECT_TYPE = Extract-PlanField -FieldPatterns @('Project Type','Tipo de projeto') -PlanFile $PlanFile
 
     if ($NEW_LANG) { Write-Info "Found language: $NEW_LANG" } else { Write-WarningMsg 'No language information found in plan' }
     if ($NEW_FRAMEWORK) { Write-Info "Found framework: $NEW_FRAMEWORK" }
@@ -185,7 +189,9 @@ function Get-ProjectStructure {
         [Parameter(Mandatory=$false)]
         [string]$ProjectType
     )
-    if ($ProjectType -match 'web') { return "backend/`nfrontend/`ntests/" } else { return "src/`ntests/" } 
+    if ($ProjectType -match 'web') { return "backend/`nfrontend/`ntests/" }
+    if ($ProjectType -match 'mobile') { return "app/`nsrc/`nsupabase/`ntests/" }
+    return "src/`ntests/"
 }
 
 function Get-CommandsForLanguage { 
@@ -196,7 +202,7 @@ function Get-CommandsForLanguage {
     switch -Regex ($Lang) {
         'Python' { return "cd src; pytest; ruff check ." }
         'Rust' { return "cargo test; cargo clippy" }
-        'JavaScript|TypeScript' { return "npm test; npm run lint" }
+        'JavaScript|TypeScript' { return "pnpm lint; pnpm test; pnpm expo start" }
         default { return "# Add commands for $Lang" }
     }
 }
@@ -206,7 +212,7 @@ function Get-LanguageConventions {
         [Parameter(Mandatory=$false)]
         [string]$Lang
     )
-    if ($Lang) { "${Lang}: Follow standard conventions" } else { 'General: Follow standard conventions' } 
+    if ($Lang) { "${Lang}: seguir convenções padrão da linguagem" } else { 'Geral: seguir convenções padrão' }
 }
 
 function New-AgentFile {
@@ -255,11 +261,11 @@ function New-AgentFile {
     # Build the recent changes string safely
     $recentChangesForTemplate = ""
     if ($escaped_lang -and $escaped_framework) {
-        $recentChangesForTemplate = "- ${escaped_branch}: Added ${escaped_lang} + ${escaped_framework}"
+        $recentChangesForTemplate = "- ${escaped_branch}: adicionou ${escaped_lang} + ${escaped_framework}"
     } elseif ($escaped_lang) {
-        $recentChangesForTemplate = "- ${escaped_branch}: Added ${escaped_lang}"
+        $recentChangesForTemplate = "- ${escaped_branch}: adicionou ${escaped_lang}"
     } elseif ($escaped_framework) {
-        $recentChangesForTemplate = "- ${escaped_branch}: Added ${escaped_framework}"
+        $recentChangesForTemplate = "- ${escaped_branch}: adicionou ${escaped_framework}"
     }
     
     $content = $content -replace '\[LAST 3 FEATURES AND WHAT THEY ADDED\]',$recentChangesForTemplate
@@ -303,8 +309,8 @@ function Update-ExistingAgentFile {
         }
     }
     $newChangeEntry = ''
-    if ($techStack) { $newChangeEntry = "- ${CURRENT_BRANCH}: Added ${techStack}" }
-    elseif ($NEW_DB -and $NEW_DB -notin @('N/A','NEEDS CLARIFICATION')) { $newChangeEntry = "- ${CURRENT_BRANCH}: Added ${NEW_DB}" }
+    if ($techStack) { $newChangeEntry = "- ${CURRENT_BRANCH}: adicionou ${techStack}" }
+    elseif ($NEW_DB -and $NEW_DB -notin @('N/A','NEEDS CLARIFICATION')) { $newChangeEntry = "- ${CURRENT_BRANCH}: adicionou ${NEW_DB}" }
 
     $lines = Get-Content -LiteralPath $TargetFile -Encoding utf8
     $output = New-Object System.Collections.Generic.List[string]
@@ -312,7 +318,7 @@ function Update-ExistingAgentFile {
 
     for ($i=0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
-        if ($line -eq '## Active Technologies') {
+        if ($line -in @('## Active Technologies','## Tecnologias Ativas')) {
             $output.Add($line)
             $inTech = $true
             continue
@@ -325,7 +331,7 @@ function Update-ExistingAgentFile {
             if (-not $techAdded -and $newTechEntries.Count -gt 0) { $newTechEntries | ForEach-Object { $output.Add($_) }; $techAdded = $true }
             $output.Add($line); continue
         }
-        if ($line -eq '## Recent Changes') {
+        if ($line -in @('## Recent Changes','## Mudanças Recentes')) {
             $output.Add($line)
             if ($newChangeEntry) { $output.Add($newChangeEntry); $changeAdded = $true }
             $inChanges = $true
@@ -336,7 +342,7 @@ function Update-ExistingAgentFile {
             if ($existingChanges -lt 2) { $output.Add($line); $existingChanges++ }
             continue
         }
-        if ($line -match '(\*\*)?Last updated(\*\*)?: .*\d{4}-\d{2}-\d{2}') {
+        if ($line -match '((\*\*)?Last updated(\*\*)?:|(\*\*)?Última atualização(\*\*)?:) .*\d{4}-\d{2}-\d{2}') {
             $output.Add(($line -replace '\d{4}-\d{2}-\d{2}',$Date.ToString('yyyy-MM-dd')))
             continue
         }

@@ -1,50 +1,134 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Relatório de sincronização
+Mudança de versão: template -> 1.0.0
+Princípios modificados:
+- Slot 1 do template -> I. Domínio Canônico Primeiro
+- Slot 2 do template -> II. Integridade do Produto Centrado no Dia
+- Slot 3 do template -> III. Separação entre Tarefas e Notas
+- Slot 4 do template -> IV. Segurança Temporal e Cobertura Crítica
+- Slot 5 do template -> V. Disciplina de Entrega com Expo + Supabase
+Seções adicionadas:
+- Guardrails do Produto
+- Fluxo de Entrega
+Seções removidas:
+- Nenhuma
+Templates que exigiram atualização:
+- ✅ .specify/templates/plan-template.md
+- ✅ .specify/templates/spec-template.md
+- ✅ .specify/templates/tasks-template.md
+- ✅ .specify/templates/agent-file-template.md
+- ✅ README.md
+Pendências:
+- Nenhuma
+-->
+# Constituição do Echotes
 
-## Core Principles
+## Princípios Centrais
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Domínio Canônico Primeiro
+Todo trabalho de produto, design, engenharia e planejamento DEVE partir dos
+documentos canônicos em `/docs`. As decisões fechadas em
+`echotes_domain_decisions_final.md`, `echotes_codex_mvp_technical_spec.md` e
+`echotes_schema_types_zod_starter_pack.md` não podem ser reabertas localmente
+por conveniência de implementação. Qualquer mudança de regra de domínio DEVE
+ser feita como emenda explícita desses documentos antes de alterar código,
+specs ou planos derivados.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Justificativa: o Echotes depende de um domínio não trivial, com regras
+temporais e conceituais que se degradam rapidamente quando cada camada improvisa
+sua própria interpretação.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Integridade do Produto Centrado no Dia
+O dia DEVE ser tratado como unidade principal do produto. Cada feature que toca
+navegação, leitura, criação ou visualização de dados DEVE preservar a página do
+dia como superfície soberana e a timeline mista como eixo principal. O sistema
+DEVE manter a sensação de avançar pelo dia, usando posições intradiárias
+derivadas do horário apropriado em vez de reordenar a experiência por critérios
+secundários.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+Justificativa: o valor central do Echotes é organizar continuidade e ação
+dentro do contexto diário, não por módulos isolados.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### III. Separação entre Tarefas e Notas
+Tarefas e notas DEVEM permanecer separadas em modelagem, comportamento e
+linguagem de interface, mesmo quando compartilham a mesma timeline. Tarefas
+tratam ação e projeção temporal; notas tratam registro e continuidade
+conceitual. Ghost cards DEVEM ser exclusivos de tarefas. Ecos DEVEM ser
+exclusivos de notas. Nenhuma abstração técnica pode diluir essa distinção se
+isso reduzir a clareza do domínio.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+Justificativa: a coexistência entre nota e tarefa é estrutural ao produto, mas
+a lógica que sustenta cada uma é deliberadamente diferente.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Segurança Temporal e Cobertura Crítica
+Toda mudança que toque regras temporais, autenticação, derivação da timeline,
+renderização de ghost cards, superfícies de Reader/Editor ou persistência de
+notas e tarefas DEVE vir acompanhada de cobertura de cenários críticos
+proporcional ao risco. O sistema DEVE impedir representações temporais
+inválidas, incluindo `scheduled_at <= created_at`, agendamento no passado e
+derivações incompatíveis com `source_day`, `target_day` e `created_at`.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Justificativa: o produto depende de confiança temporal. Um erro pequeno nessa
+área rompe diretamente a experiência central do usuário.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### V. Disciplina de Entrega com Expo + Supabase
+O MVP DEVE ser planejado e implementado com Expo, React Native, TypeScript,
+Expo Router, Zustand, Supabase JS, React Hook Form, Zod e Legend List, salvo
+emenda explícita desta constituição. `pnpm` DEVE ser o gestor de pacotes
+padrão. Segredos DEVEM permanecer fora do repositório; apenas `.env.example`
+pode ser versionado. O app cliente DEVE usar apenas
+`EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY`; `service_role`
+NÃO DEVE aparecer no cliente.
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+Justificativa: a stack já foi fechada para acelerar a execução do MVP e evitar
+divergência operacional entre planejamento e implementação.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+## Guardrails do Produto
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- O primeiro corte de cada feature DEVE ser uma fatia vertical validável de
+  ponta a ponta, não uma coleção de infraestrutura desconectada.
+- A linguagem de interface DEVE preservar os termos canônicos do produto:
+  `Criar nota`, `Adicionar eco`, `Continuar desta nota`, `Criar tarefa`, `Ecos`
+  e `ghost card`.
+- Specs e planos DEVEM declarar explicitamente o que está fora do corte quando
+  uma capability canônica for adiada, para evitar falsa sensação de cobertura.
+- O calendário e o contexto do dia DEVEM distinguir claramente o dia real do
+  relógio e o dia selecionado pelo usuário quando a feature tocar navegação
+  temporal.
+
+## Fluxo de Entrega
+
+- O fluxo padrão de planejamento DEVE seguir `constitution -> specify -> plan ->
+  tasks -> implement`.
+- Toda feature DEVE nascer em branch numerada do Spec Kit e ter seu diretório
+  persistido em `.specify/feature.json`.
+- `spec.md` DEVE focar em comportamento e valor ao usuário; `plan.md` DEVE
+  traduzir o corte para implementação técnica sem contradizer os canônicos.
+- Antes de iniciar implementação, o plano DEVE fechar: contratos essenciais,
+  estratégia de dados, variáveis de ambiente, critérios de aceite e cenários de
+  verificação.
+- Mudanças que alterem convenções globais do projeto DEVEM atualizar templates,
+  README e arquivos de contexto do agente na mesma rodada.
+
+## Governança
+
+Esta constituição prevalece sobre hábitos locais, prompts temporários e atalhos
+de implementação. Emendas DEVEM documentar o motivo da mudança, os artefatos
+impactados e o tipo de incremento de versão:
+
+- MAJOR: remoção ou redefinição incompatível de princípios ou guardrails.
+- MINOR: adição material de princípio, seção ou restrição nova.
+- PATCH: clarificações editoriais sem mudança de direção.
+
+Toda revisão de spec, plan, tasks ou código DEVE checar conformidade com:
+
+- aderência aos documentos canônicos em `/docs`;
+- preservação do modelo diário e da separação entre notas e tarefas;
+- cobertura dos cenários críticos exigidos pela mudança;
+- respeito às convenções de `pnpm`, `.env.example` e Supabase público no
+  cliente.
+
+Não há placeholders em aberto nesta versão. Quando um artefato violar esta
+constituição, o trabalho DEVE parar para correção ou emenda explícita.
+
+**Versão**: 1.0.0 | **Ratificada em**: 2026-04-15 | **Última emenda**: 2026-04-15

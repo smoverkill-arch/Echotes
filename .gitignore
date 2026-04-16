@@ -1,0 +1,27 @@
+# Node / package manager
+node_modules/
+.pnpm-store/
+
+# Expo / React Native
+.expo/
+dist/
+web-build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
