@@ -50,7 +50,7 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
 
     try {
       const supabase = getSupabaseClient();
-      const [notesResult, tasksResult] = await Promise.all([
+      const [notesResult, sourceTasksResult, targetTasksResult] = await Promise.all([
         supabase
           .from("notes")
           .select("*")
@@ -60,6 +60,10 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
           .from("tasks")
           .select("*")
           .eq("source_day", selectedDay)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("tasks")
+          .select("*")
           .eq("target_day", selectedDay)
           .order("created_at", { ascending: true }),
       ]);
@@ -68,12 +72,31 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
         throw notesResult.error;
       }
 
-      if (tasksResult.error) {
-        throw tasksResult.error;
+      if (sourceTasksResult.error) {
+        throw sourceTasksResult.error;
+      }
+
+      if (targetTasksResult.error) {
+        throw targetTasksResult.error;
       }
 
       const parsedNotes = noteSchema.array().safeParse(notesResult.data ?? []);
-      const parsedTasks = taskSchema.array().safeParse(tasksResult.data ?? []);
+      const mergedTasks = new Map<string, unknown>();
+
+      for (const task of [...(sourceTasksResult.data ?? []), ...(targetTasksResult.data ?? [])]) {
+        if (typeof task.id === "string") {
+          mergedTasks.set(task.id, task);
+        }
+      }
+
+      const mergedTaskRows = Array.from(
+        mergedTasks.values(),
+      ) as Record<string, unknown>[];
+      const parsedTasks = taskSchema.array().safeParse(
+        mergedTaskRows.sort((left, right) =>
+          String(left.created_at ?? "").localeCompare(String(right.created_at ?? "")),
+        ),
+      );
 
       if (!parsedNotes.success) {
         throw new Error(parsedNotes.error.issues[0]?.message ?? "Falha ao validar notas.");

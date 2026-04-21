@@ -10,6 +10,7 @@ import {
 
 import { createTask } from "../../features/tasks/api/create-task";
 import { updateTask } from "../../features/tasks/api/update-task";
+import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { Task } from "../../types/task";
 import { extractTimePart } from "../../utils/date";
 
@@ -18,6 +19,7 @@ interface TaskEditorProps {
   mode: "create" | "edit";
   selectedDay: string;
   task: Task | null;
+  temporalContext: TemporalNavigationContext | null;
   onClose: () => void;
   onSaved: (task: Task) => Promise<void> | void;
 }
@@ -27,11 +29,13 @@ export function TaskEditor({
   mode,
   selectedDay,
   task,
+  temporalContext,
   onClose,
   onSaved,
 }: TaskEditorProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [targetDay, setTargetDay] = useState(selectedDay);
   const [scheduledTime, setScheduledTime] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,9 +47,10 @@ export function TaskEditor({
 
     setTitle(task?.title ?? "");
     setContent(task?.content ?? "");
+    setTargetDay(task?.target_day ?? selectedDay);
     setScheduledTime(task?.scheduled_at ? extractTimePart(task.scheduled_at).slice(0, 5) : "");
     setErrorMessage(null);
-  }, [task, visible]);
+  }, [selectedDay, task, visible]);
 
   if (!visible) {
     return null;
@@ -61,8 +66,8 @@ export function TaskEditor({
       title,
       content,
       source_day: task.source_day,
-      target_day: task.target_day,
-      scheduled_time: scheduledTime.trim() ? scheduledTime.trim() : null,
+      target_day: targetDay,
+      scheduled_time: scheduledTime,
       status: task.status,
       tag_id: task.tag_id,
       color: task.color,
@@ -87,8 +92,8 @@ export function TaskEditor({
           title,
           content,
           source_day: selectedDay,
-          target_day: selectedDay,
-          scheduled_time: scheduledTime.trim() ? scheduledTime.trim() : null,
+          target_day: targetDay,
+          scheduled_time: scheduledTime,
           status: "open",
           tag_id: null,
           color: null,
@@ -117,7 +122,14 @@ export function TaskEditor({
           <Text style={styles.eyebrow}>
             {mode === "create" ? "Criar tarefa" : "Editar tarefa"}
           </Text>
-          <Text style={styles.meta}>Dia: {selectedDay}</Text>
+          <Text style={styles.meta}>
+            Dia de origem: {mode === "edit" && task ? task.source_day : selectedDay}
+          </Text>
+          {temporalContext ? (
+            <Text style={styles.contextMeta}>
+              Editando o item real aberto a partir de {temporalContext.sourceDate}.
+            </Text>
+          ) : null}
 
           <Text style={styles.label}>Titulo</Text>
           <TextInput
@@ -138,6 +150,16 @@ export function TaskEditor({
             testID="task-editor-content-input"
             value={content}
             onChangeText={setContent}
+          />
+
+          <Text style={styles.label}>Dia de destino (YYYY-MM-DD)</Text>
+          <TextInput
+            placeholder="Ex.: 2026-04-20"
+            placeholderTextColor="#9ca3af"
+            style={styles.input}
+            testID="task-editor-target-day-input"
+            value={targetDay}
+            onChangeText={setTargetDay}
           />
 
           <Text style={styles.label}>Horario (HH:mm)</Text>
@@ -206,6 +228,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 13,
     color: "#4b5563",
+  },
+  contextMeta: {
+    marginTop: 6,
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#1d4ed8",
   },
   label: {
     marginTop: 16,

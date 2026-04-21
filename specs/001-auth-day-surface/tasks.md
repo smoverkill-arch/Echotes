@@ -113,14 +113,14 @@ o vínculo temporal.
 
 ### Testes da História do Usuário 3 ⚠️
 
-- [ ] T022 [P] [US3] Adicionar testes de projeção temporal e retorno contextual em `tests/unit/timeline/projected-task-nodes.test.ts` e `tests/integration/day/ghost-navigation.test.tsx`
+- [x] T022 [P] [US3] Adicionar testes de projeção temporal e retorno contextual em `tests/unit/timeline/projected-task-nodes.test.ts` e `tests/integration/day/ghost-navigation.test.tsx`
 
 ### Implementação da História do Usuário 3
 
-- [ ] T023 [P] [US3] Estender persistência e validação de tarefas futuras em `src/features/tasks/api/create-task.ts`, `src/features/tasks/api/update-task.ts`, `src/schemas/task.schema.ts` e `src/features/tasks/utils/build-scheduled-at.ts`
-- [ ] T024 [P] [US3] Implementar a UI de ghost card, breadcrumb e eixo visual da timeline em `src/components/cards/task-card-ghost.tsx`, `src/components/day/breadcrumb-bar.tsx`, `src/components/timeline/timeline-view.tsx` e `src/components/timeline/timeline-item-wrapper.tsx`, garantindo `note -> direita` e `task_* -> esquerda`
-- [ ] T025 [US3] Integrar navegação temporal entre origem e destino em `app/day/[date].tsx`, `src/features/day/hooks/use-day-timeline.ts` e `src/stores/navigation-store.ts`
-- [ ] T026 [US3] Garantir abertura contextual do item real após ghost navigation em `src/components/reader/task-reader.tsx`, `src/components/forms/task-editor.tsx` e `app/day/[date].tsx`
+- [x] T023 [P] [US3] Estender persistência e validação de tarefas futuras em `src/features/tasks/api/create-task.ts`, `src/features/tasks/api/update-task.ts`, `src/schemas/task.schema.ts` e `src/features/tasks/utils/build-scheduled-at.ts`
+- [x] T024 [P] [US3] Implementar a UI de ghost card, breadcrumb e eixo visual da timeline em `src/components/cards/task-card-ghost.tsx`, `src/components/day/breadcrumb-bar.tsx`, `src/components/timeline/timeline-view.tsx` e `src/components/timeline/timeline-item-wrapper.tsx`, garantindo `note -> direita` e `task_* -> esquerda`
+- [x] T025 [US3] Integrar navegação temporal entre origem e destino em `app/day/[date].tsx`, `src/features/day/hooks/use-day-timeline.ts` e `src/stores/navigation-store.ts`
+- [x] T026 [US3] Garantir abertura contextual do item real após ghost navigation em `src/components/reader/task-reader.tsx`, `src/components/forms/task-editor.tsx` e `app/day/[date].tsx`
 
 **Ponto de validação**: A projeção temporal de tarefas está completa, o retorno
 ao dia de origem funciona com contexto preservado e a timeline final exibe

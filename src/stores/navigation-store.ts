@@ -5,14 +5,19 @@ export interface TemporalNavigationContext {
   destinationDate: string;
   sourceTaskId: string;
   returnScrollOffset: number | null;
+  pendingOpenTaskId: string | null;
   isTemporalNavigationActive: boolean;
 }
 
 interface NavigationStore {
   temporalNavigationContext: TemporalNavigationContext | null;
   setTemporalNavigationContext: (
-    context: Omit<TemporalNavigationContext, "isTemporalNavigationActive">,
+    context: Omit<
+      TemporalNavigationContext,
+      "isTemporalNavigationActive" | "pendingOpenTaskId"
+    >,
   ) => void;
+  consumePendingOpenTaskId: () => void;
   setReturnScrollOffset: (offset: number | null) => void;
   clearTemporalNavigationContext: () => void;
 }
@@ -24,9 +29,21 @@ export const useNavigationStore = create<NavigationStore>((set) => ({
     set({
       temporalNavigationContext: {
         ...context,
+        pendingOpenTaskId: context.sourceTaskId,
         isTemporalNavigationActive: true,
       },
     });
+  },
+
+  consumePendingOpenTaskId: () => {
+    set((state) => ({
+      temporalNavigationContext: state.temporalNavigationContext
+        ? {
+            ...state.temporalNavigationContext,
+            pendingOpenTaskId: null,
+          }
+        : null,
+    }));
   },
 
   setReturnScrollOffset: (offset) => {

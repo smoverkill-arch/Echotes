@@ -8,6 +8,7 @@ import { signOut } from "../../src/features/auth/api/sign-out";
 import { useAuthSession } from "../../src/features/auth/hooks/use-auth-session";
 import { useCalendarStore } from "../../src/stores/calendar-store";
 import { useDayTimeline } from "../../src/features/day/hooks/use-day-timeline";
+import { useNavigationStore } from "../../src/stores/navigation-store";
 import { useUIStore } from "../../src/stores/ui-store";
 
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -47,12 +48,24 @@ export default function ProtectedDayRoute() {
   const closeReader = useUIStore((state) => state.closeReader);
   const openEditor = useUIStore((state) => state.openEditor);
   const closeEditor = useUIStore((state) => state.closeEditor);
+  const temporalNavigationContext = useNavigationStore(
+    (state) => state.temporalNavigationContext,
+  );
+  const setTemporalNavigationContext = useNavigationStore(
+    (state) => state.setTemporalNavigationContext,
+  );
+  const consumePendingOpenTaskId = useNavigationStore(
+    (state) => state.consumePendingOpenTaskId,
+  );
+  const clearTemporalNavigationContext = useNavigationStore(
+    (state) => state.clearTemporalNavigationContext,
+  );
   const isSigningOut = authStatus === "signing_out";
 
   const resolvedDate = resolveDateParam(params.date, selectedDate);
   const {
     notes,
-    tasks,
+    taskLookup,
     timelineNodes,
     isLoading: isTimelineLoading,
     errorMessage: timelineErrorMessage,
@@ -69,14 +82,63 @@ export default function ProtectedDayRoute() {
   const activeTask = useMemo(
     () =>
       readerState.kind === "task" || editorState.kind === "task"
-        ? tasks.find((task) => task.id === activeItemId) ?? null
+        ? (activeItemId ? taskLookup.get(activeItemId) ?? null : null)
         : null,
-    [activeItemId, editorState.kind, readerState.kind, tasks],
+    [activeItemId, editorState.kind, readerState.kind, taskLookup],
   );
+  const destinationTemporalContext =
+    temporalNavigationContext?.destinationDate === resolvedDate
+      ? temporalNavigationContext
+      : null;
 
   useEffect(() => {
     setSelectedDate(resolvedDate);
   }, [resolvedDate, setSelectedDate]);
+
+  useEffect(() => {
+    if (!destinationTemporalContext?.pendingOpenTaskId) {
+      return;
+    }
+
+    if (isTimelineLoading || timelineErrorMessage) {
+      return;
+    }
+
+    const task = taskLookup.get(destinationTemporalContext.pendingOpenTaskId);
+
+    if (!task || task.target_day !== resolvedDate) {
+      return;
+    }
+
+    openReader("task", destinationTemporalContext.pendingOpenTaskId);
+    consumePendingOpenTaskId();
+  }, [
+    consumePendingOpenTaskId,
+    destinationTemporalContext,
+    isTimelineLoading,
+    openReader,
+    resolvedDate,
+    taskLookup,
+    timelineErrorMessage,
+  ]);
+
+  useEffect(() => {
+    if (!destinationTemporalContext || isTimelineLoading || timelineErrorMessage) {
+      return;
+    }
+
+    if (taskLookup.has(destinationTemporalContext.sourceTaskId)) {
+      return;
+    }
+
+    clearTemporalNavigationContext();
+  }, [
+    clearTemporalNavigationContext,
+    destinationTemporalContext,
+    isTimelineLoading,
+    taskLookup,
+    timelineErrorMessage,
+  ]);
 
   useEffect(() => {
     if (
@@ -133,6 +195,7 @@ export default function ProtectedDayRoute() {
       timelineNodes={timelineNodes}
       isTimelineLoading={isTimelineLoading}
       timelineErrorMessage={timelineErrorMessage}
+      temporalNavigationContext={destinationTemporalContext}
       activeNote={activeNote}
       activeTask={activeTask}
       onSignOut={async () => {
@@ -148,6 +211,27 @@ export default function ProtectedDayRoute() {
       onOpenReader={openReader}
       onOpenEditor={(kind, id) => {
         openEditor({ mode: "edit", kind, id });
+      }}
+      onNavigateToTask={(task) => {
+        closeReader();
+        closeEditor();
+        setTemporalNavigationContext({
+          sourceDate: resolvedDate,
+          destinationDate: task.target_day,
+          sourceTaskId: task.id,
+          returnScrollOffset: null,
+        });
+        router.push(`/day/${task.target_day}`);
+      }}
+      onReturnToSource={() => {
+        if (!destinationTemporalContext) {
+          return;
+        }
+
+        closeReader();
+        closeEditor();
+        clearTemporalNavigationContext();
+        router.push(`/day/${destinationTemporalContext.sourceDate}`);
       }}
       onCloseReader={closeReader}
       onCloseEditor={closeEditor}

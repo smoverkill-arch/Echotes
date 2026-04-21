@@ -9,6 +9,11 @@ export const useDayTimeline = (
   activeTab: DayTab = "timeline",
 ) => {
   const dayEntries = useDayEntries(selectedDay);
+  const taskLookup = useMemo(
+    () =>
+      new Map(dayEntries.tasks.map((task) => [task.id, task])),
+    [dayEntries.tasks],
+  );
 
   const timelineNodes = useMemo(() => {
     const nodes = deriveTimelineNodes({
@@ -32,6 +37,7 @@ export const useDayTimeline = (
 
   return {
     ...dayEntries,
+    taskLookup,
     timelineNodes,
   };
 };

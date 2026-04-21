@@ -8,7 +8,6 @@ import {
   isSupabaseConfigured,
 } from "../../../lib/supabase";
 import { buildScheduledAt } from "../utils/build-scheduled-at";
-import { SAME_DAY_TASK_ONLY_MESSAGE } from "./create-task";
 
 export interface UpdateTaskResult {
   ok: boolean;
@@ -52,14 +51,6 @@ export const updateTask = async (
     };
   }
 
-  if (parsedInput.data.source_day !== parsedInput.data.target_day) {
-    return {
-      ok: false,
-      task: null,
-      errorMessage: SAME_DAY_TASK_ONLY_MESSAGE,
-    };
-  }
-
   const scheduledAt = buildScheduledAt(
     parsedInput.data.target_day,
     parsedInput.data.scheduled_time,
@@ -80,6 +71,7 @@ export const updateTask = async (
       .update({
         title: parsedInput.data.title,
         content: parsedInput.data.content || null,
+        target_day: parsedInput.data.target_day,
         scheduled_at: scheduledAt,
         status: parsedInput.data.status,
       })

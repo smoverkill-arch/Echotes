@@ -18,6 +18,16 @@ export const colorSchema = z
   );
 
 export const taskStatusSchema = z.enum(TASK_STATUS_VALUES);
+const optionalTimeStringSchema = z
+  .union([timeStringSchema, z.literal(""), z.null()])
+  .optional()
+  .transform((value) => {
+    if (!value) {
+      return null;
+    }
+
+    return value;
+  });
 
 export const taskSchema = z
   .object({
@@ -57,6 +67,6 @@ export const taskFormSchema = z.object({
   is_color_overridden: z.boolean().default(false),
   source_day: dateStringSchema,
   target_day: dateStringSchema,
-  scheduled_time: timeStringSchema.nullable().optional().default(null),
+  scheduled_time: optionalTimeStringSchema.default(null),
   status: taskStatusSchema.default("open"),
 });

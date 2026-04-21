@@ -4,9 +4,11 @@ export const buildScheduledAt = (
   targetDay: string,
   scheduledTime: string | null,
 ) => {
-  if (!scheduledTime) {
+  const normalizedScheduledTime = scheduledTime?.trim() ?? "";
+
+  if (!normalizedScheduledTime) {
     return null;
   }
 
-  return buildDayTimeIso(targetDay, scheduledTime);
+  return buildDayTimeIso(targetDay, normalizedScheduledTime);
 };

@@ -15,9 +15,6 @@ export interface CreateTaskResult {
   errorMessage: string | null;
 }
 
-export const SAME_DAY_TASK_ONLY_MESSAGE =
-  "A US2 suporta apenas tarefas do mesmo dia selecionado.";
-
 export const createTask = async (
   input: TaskFormValues,
 ): Promise<CreateTaskResult> => {
@@ -50,14 +47,6 @@ export const createTask = async (
       task: null,
       errorMessage:
         parsedInput.error.issues[0]?.message ?? "Informe os dados da tarefa corretamente.",
-    };
-  }
-
-  if (parsedInput.data.source_day !== parsedInput.data.target_day) {
-    return {
-      ok: false,
-      task: null,
-      errorMessage: SAME_DAY_TASK_ONLY_MESSAGE,
     };
   }
 

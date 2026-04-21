@@ -2,8 +2,10 @@ import { StyleSheet, View } from "react-native";
 
 import type { Note } from "../../types/note";
 import type { Task } from "../../types/task";
+import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { ReaderState, EditorState } from "../../stores/ui-store";
 import type { DayTab, TimelineItemKind, TimelineNode } from "../../types/timeline";
+import { BreadcrumbBar } from "./breadcrumb-bar";
 import { DayHeader } from "./day-header";
 import { TaskEditor } from "../forms/task-editor";
 import { NoteEditor } from "../forms/note-editor";
@@ -21,6 +23,7 @@ interface DayShellProps {
   timelineNodes: TimelineNode[];
   isTimelineLoading: boolean;
   timelineErrorMessage: string | null;
+  temporalNavigationContext: TemporalNavigationContext | null;
   activeNote: Note | null;
   activeTask: Task | null;
   onSignOut: () => Promise<void> | void;
@@ -29,6 +32,8 @@ interface DayShellProps {
   onCreateTask: () => void;
   onOpenReader: (kind: TimelineItemKind, id: string) => void;
   onOpenEditor: (kind: TimelineItemKind, id: string) => void;
+  onNavigateToTask: (task: Task) => void;
+  onReturnToSource: () => void;
   onCloseReader: () => void;
   onCloseEditor: () => void;
   onSaved: () => Promise<void> | void;
@@ -44,6 +49,7 @@ export function DayShell({
   timelineNodes,
   isTimelineLoading,
   timelineErrorMessage,
+  temporalNavigationContext,
   activeNote,
   activeTask,
   onSignOut,
@@ -52,6 +58,8 @@ export function DayShell({
   onCreateTask,
   onOpenReader,
   onOpenEditor,
+  onNavigateToTask,
+  onReturnToSource,
   onCloseReader,
   onCloseEditor,
   onSaved,
@@ -67,6 +75,14 @@ export function DayShell({
         onSignOut={onSignOut}
       />
 
+      {temporalNavigationContext ? (
+        <BreadcrumbBar
+          sourceDate={temporalNavigationContext.sourceDate}
+          destinationDate={temporalNavigationContext.destinationDate}
+          onReturn={onReturnToSource}
+        />
+      ) : null}
+
       <TimelineView
         nodes={timelineNodes}
         isLoading={isTimelineLoading}
@@ -75,6 +91,7 @@ export function DayShell({
         onCreateTask={onCreateTask}
         onOpenReader={onOpenReader}
         onOpenEditor={onOpenEditor}
+        onNavigateToTask={onNavigateToTask}
       />
 
       <NoteReader
@@ -91,6 +108,11 @@ export function DayShell({
       <TaskReader
         visible={readerState.isOpen && readerState.kind === "task"}
         task={activeTask}
+        temporalContext={
+          temporalNavigationContext && activeTask?.id === temporalNavigationContext.sourceTaskId
+            ? temporalNavigationContext
+            : null
+        }
         onClose={onCloseReader}
         onEdit={() => {
           if (activeTask) {
@@ -115,6 +137,11 @@ export function DayShell({
         mode={editorState.mode === "edit" ? "edit" : "create"}
         selectedDay={date}
         task={editorState.mode === "edit" ? activeTask : null}
+        temporalContext={
+          temporalNavigationContext && activeTask?.id === temporalNavigationContext.sourceTaskId
+            ? temporalNavigationContext
+            : null
+        }
         onClose={onCloseEditor}
         onSaved={async () => {
           await onSaved();
