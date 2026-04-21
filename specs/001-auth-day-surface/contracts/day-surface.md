@@ -14,6 +14,14 @@ primeiro corte.
 | `tasks` | tarefas em que `source_day = selectedDay` ou `target_day = selectedDay` |
 | `notes` | notas em que `day = selectedDay` |
 
+## Recorte por Fase
+
+- **US1**: autenticação, guarda e superfície protegida mínima
+- **US2**: subset same-day da timeline, com `notes.day = selectedDay` e tarefas
+  em que `source_day = target_day = selectedDay`
+- **US3**: timeline completa da feature, incluindo `task_ghost`, breadcrumb e
+  navegação temporal entre origem e destino
+
 ## Saída da Timeline
 
 | Tipo de nó | Quando aparece | Regra de ordenação |
@@ -52,6 +60,17 @@ primeiro corte.
 
 - O ghost card abre o item real no dia de destino
 - A experiência deve expor caminho claro de retorno ao dia de origem
+
+## Contrato Visual da Timeline
+
+- A timeline usa um eixo central persistente.
+- Notas renderizam à direita.
+- Itens de tarefa renderizam à esquerda, incluindo `task_untimed`,
+  `task_creation_marker`, `task_timed` e `task_ghost`.
+- Essa orientação visual pertence à camada de renderização.
+- `TimelineNode` não possui campo `side`; o lado não faz parte do contrato de
+  dados.
+- O fechamento obrigatório desse contrato visual acontece na US3.
 
 ## Invariantes
 

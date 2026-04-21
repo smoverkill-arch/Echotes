@@ -26,9 +26,9 @@ permitir implementação e verificação independentes de cada fatia.
 **Objetivo**: Inicializar o projeto Expo/TypeScript e fixar as convenções
 operacionais do Echotes.
 
-- [ ] T001 Criar a base do app Expo em `package.json`, `tsconfig.json`, `app.json`, `babel.config.js` e `metro.config.js`
-- [ ] T002 Configurar scripts, lint e testes com `pnpm` em `package.json`, `eslint.config.js` e `jest.config.js`
-- [ ] T003 [P] Consolidar a base de ambiente em `.env.example`, `.gitignore` e `src/lib/env.ts`
+- [x] T001 Criar a base do app Expo em `package.json`, `tsconfig.json`, `app.json`, `babel.config.js` e `metro.config.js`
+- [x] T002 Configurar scripts, lint e testes com `pnpm` em `package.json`, `eslint.config.js` e `jest.config.js`
+- [x] T003 [P] Consolidar a base de ambiente em `.env.example`, `.gitignore` e `src/lib/env.ts`
 
 ---
 
@@ -39,12 +39,12 @@ qualquer história do usuário.
 
 **⚠️ CRÍTICO**: Nenhuma história do usuário começa antes desta fase
 
-- [ ] T004 Criar a migração inicial e políticas do Supabase em `supabase/migrations/001_auth_day_surface.sql`
-- [ ] T005 [P] Criar tipos e schemas canônicos em `src/types/auth.ts`, `src/types/note.ts`, `src/types/task.ts`, `src/types/timeline.ts`, `src/schemas/auth.schema.ts`, `src/schemas/note.schema.ts` e `src/schemas/task.schema.ts`
-- [ ] T006 [P] Configurar cliente Supabase e persistência de sessão em `src/lib/supabase.ts`, `src/features/auth/session-storage.ts` e `src/stores/auth-store.ts`
-- [ ] T007 [P] Criar utilitários de data e derivação base da timeline em `src/utils/date.ts`, `src/features/tasks/utils/build-scheduled-at.ts` e `src/features/timeline/utils/derive-timeline-nodes.ts`
-- [ ] T008 Criar stores compartilhadas do dia e navegação temporal em `src/stores/calendar-store.ts`, `src/stores/navigation-store.ts` e `src/stores/ui-store.ts`
-- [ ] T009 Configurar a casca de navegação e guarda básica do app em `app/_layout.tsx` e `app/index.tsx`
+- [x] T004 Criar a migração inicial e políticas do Supabase em `supabase/migrations/001_auth_day_surface.sql`
+- [x] T005 [P] Criar tipos e schemas canônicos em `src/types/auth.ts`, `src/types/note.ts`, `src/types/task.ts`, `src/types/timeline.ts`, `src/schemas/auth.schema.ts`, `src/schemas/note.schema.ts` e `src/schemas/task.schema.ts`
+- [x] T006 [P] Configurar cliente Supabase e persistência de sessão em `src/lib/supabase.ts`, `src/features/auth/session-storage.ts` e `src/stores/auth-store.ts`
+- [x] T007 [P] Criar utilitários de data e derivação base da timeline em `src/utils/date.ts`, `src/features/tasks/utils/build-scheduled-at.ts` e `src/features/timeline/utils/derive-timeline-nodes.ts`
+- [x] T008 Criar stores compartilhadas do dia e navegação temporal em `src/stores/calendar-store.ts`, `src/stores/navigation-store.ts` e `src/stores/ui-store.ts`
+- [x] T009 Configurar a casca de navegação e guarda básica do app em `app/_layout.tsx` e `app/index.tsx`
 
 **Ponto de validação**: Base pronta; a autenticação e a superfície do dia já
 podem começar a ser encaixadas em paralelo.
@@ -61,15 +61,15 @@ que a sessão é restaurada e encerrar sessão com retorno ao fluxo público.
 
 ### Testes da História do Usuário 1 ⚠️
 
-- [ ] T010 [P] [US1] Adicionar testes de ambiente e sessão em `tests/unit/lib/env.test.ts` e `tests/integration/auth/auth-session-flow.test.tsx`
+- [x] T010 [P] [US1] Adicionar testes de ambiente e sessão em `tests/unit/lib/env.test.ts` e `tests/integration/auth/auth-session-flow.test.tsx`
 
 ### Implementação da História do Usuário 1
 
-- [ ] T011 [P] [US1] Implementar ações de autenticação em `src/features/auth/api/sign-up.ts`, `src/features/auth/api/sign-in.ts`, `src/features/auth/api/sign-out.ts` e `src/features/auth/api/restore-session.ts`
-- [ ] T012 [P] [US1] Criar formulários e telas públicas de autenticação em `src/components/auth/auth-form.tsx`, `src/components/auth/auth-error-banner.tsx`, `app/(auth)/sign-in.tsx` e `app/(auth)/sign-up.tsx`
-- [ ] T013 [US1] Implementar bootstrap de sessão e redirecionamento protegido em `src/features/auth/hooks/use-auth-session.ts`, `app/_layout.tsx` e `app/index.tsx`
-- [ ] T014 [US1] Criar a superfície protegida mínima do dia com ação de sair em `app/day/[date].tsx` e `src/components/day/day-shell.tsx`
-- [ ] T015 [US1] Integrar feedback de configuração ausente e expiração de sessão em `src/stores/auth-store.ts`, `src/components/auth/auth-error-banner.tsx` e `app/day/[date].tsx`
+- [x] T011 [P] [US1] Implementar ações de autenticação em `src/features/auth/api/sign-up.ts`, `src/features/auth/api/sign-in.ts`, `src/features/auth/api/sign-out.ts` e `src/features/auth/api/restore-session.ts`
+- [x] T012 [P] [US1] Criar formulários e telas públicas de autenticação em `src/components/auth/auth-form.tsx`, `src/components/auth/auth-error-banner.tsx`, `app/(auth)/sign-in.tsx` e `app/(auth)/sign-up.tsx`
+- [x] T013 [US1] Implementar bootstrap de sessão e redirecionamento protegido em `src/features/auth/hooks/use-auth-session.ts`, `app/_layout.tsx` e `app/index.tsx`
+- [x] T014 [US1] Criar a superfície protegida mínima do dia com ação de sair em `app/day/[date].tsx` e `src/components/day/day-shell.tsx`
+- [x] T015 [US1] Integrar feedback de configuração ausente e expiração de sessão em `src/stores/auth-store.ts`, `src/components/auth/auth-error-banner.tsx` e `app/day/[date].tsx`
 
 **Ponto de validação**: A pessoa usuária já consegue entrar, voltar ao app
 autenticada e sair do contexto protegido. Este é o MVP sugerido.
@@ -87,15 +87,15 @@ renderização correta na timeline.
 
 ### Testes da História do Usuário 2 ⚠️
 
-- [ ] T016 [P] [US2] Adicionar testes de derivação e fluxo do mesmo dia em `tests/unit/timeline/same-day-nodes.test.ts` e `tests/integration/day/day-surface-same-day.test.tsx`
+- [x] T016 [P] [US2] Adicionar testes de derivação e fluxo do mesmo dia em `tests/unit/timeline/same-day-nodes.test.ts` e `tests/integration/day/day-surface-same-day.test.tsx`
 
 ### Implementação da História do Usuário 2
 
-- [ ] T017 [P] [US2] Implementar leitura do dia e composição da timeline em `src/features/day/hooks/use-day-entries.ts` e `src/features/day/hooks/use-day-timeline.ts`
-- [ ] T018 [P] [US2] Implementar criação de nota e tarefa do mesmo dia em `src/features/notes/api/create-note.ts` e `src/features/tasks/api/create-task.ts`
-- [ ] T019 [P] [US2] Criar os componentes visuais da timeline do mesmo dia em `src/components/timeline/timeline-view.tsx`, `src/components/timeline/timeline-plus-button.tsx`, `src/components/cards/note-card-real.tsx`, `src/components/cards/task-card-real.tsx`, `src/components/cards/task-creation-marker.tsx` e `src/components/cards/task-card-timed.tsx`
-- [ ] T020 [P] [US2] Criar as superfícies contextuais de leitura e edição em `src/components/reader/note-reader.tsx`, `src/components/reader/task-reader.tsx`, `src/components/forms/note-editor.tsx` e `src/components/forms/task-editor.tsx`
-- [ ] T021 [US2] Integrar criação, leitura e edição do mesmo dia em `app/day/[date].tsx`, `src/components/day/day-header.tsx` e `src/stores/ui-store.ts`
+- [x] T017 [P] [US2] Implementar leitura do dia e composição da timeline em `src/features/day/hooks/use-day-entries.ts` e `src/features/day/hooks/use-day-timeline.ts`
+- [x] T018 [P] [US2] Implementar criação de nota e tarefa do mesmo dia em `src/features/notes/api/create-note.ts` e `src/features/tasks/api/create-task.ts`
+- [x] T019 [P] [US2] Criar os componentes visuais da timeline do mesmo dia em `src/components/timeline/timeline-view.tsx`, `src/components/timeline/timeline-plus-button.tsx`, `src/components/cards/note-card-real.tsx`, `src/components/cards/task-card-real.tsx`, `src/components/cards/task-creation-marker.tsx` e `src/components/cards/task-card-timed.tsx`
+- [x] T020 [P] [US2] Criar as superfícies contextuais de leitura e edição em `src/components/reader/note-reader.tsx`, `src/components/reader/task-reader.tsx`, `src/components/forms/note-editor.tsx` e `src/components/forms/task-editor.tsx`
+- [x] T021 [US2] Integrar criação, leitura e edição do mesmo dia em `app/day/[date].tsx`, `src/components/day/day-header.tsx` e `src/stores/ui-store.ts`
 
 **Ponto de validação**: Nota e tarefa do mesmo dia já são criadas e lidas no
 contexto diário, incluindo o caso com marcador de criação + item agendado.
@@ -118,12 +118,13 @@ o vínculo temporal.
 ### Implementação da História do Usuário 3
 
 - [ ] T023 [P] [US3] Estender persistência e validação de tarefas futuras em `src/features/tasks/api/create-task.ts`, `src/features/tasks/api/update-task.ts`, `src/schemas/task.schema.ts` e `src/features/tasks/utils/build-scheduled-at.ts`
-- [ ] T024 [P] [US3] Implementar a UI de ghost card e breadcrumb em `src/components/cards/task-card-ghost.tsx` e `src/components/day/breadcrumb-bar.tsx`
+- [ ] T024 [P] [US3] Implementar a UI de ghost card, breadcrumb e eixo visual da timeline em `src/components/cards/task-card-ghost.tsx`, `src/components/day/breadcrumb-bar.tsx`, `src/components/timeline/timeline-view.tsx` e `src/components/timeline/timeline-item-wrapper.tsx`, garantindo `note -> direita` e `task_* -> esquerda`
 - [ ] T025 [US3] Integrar navegação temporal entre origem e destino em `app/day/[date].tsx`, `src/features/day/hooks/use-day-timeline.ts` e `src/stores/navigation-store.ts`
 - [ ] T026 [US3] Garantir abertura contextual do item real após ghost navigation em `src/components/reader/task-reader.tsx`, `src/components/forms/task-editor.tsx` e `app/day/[date].tsx`
 
-**Ponto de validação**: A projeção temporal de tarefas está completa e o retorno
-ao dia de origem funciona com contexto preservado.
+**Ponto de validação**: A projeção temporal de tarefas está completa, o retorno
+ao dia de origem funciona com contexto preservado e a timeline final exibe
+notas à direita e tarefas à esquerda sem quebrar o eixo temporal.
 
 ---
 
@@ -196,7 +197,7 @@ T020 src/components/reader/* + src/components/forms/*
 ```text
 T022 tests/unit/timeline/projected-task-nodes.test.ts + tests/integration/day/ghost-navigation.test.tsx
 T023 src/features/tasks/api/update-task.ts + src/schemas/task.schema.ts + src/features/tasks/utils/build-scheduled-at.ts
-T024 src/components/cards/task-card-ghost.tsx + src/components/day/breadcrumb-bar.tsx
+T024 src/components/cards/task-card-ghost.tsx + src/components/day/breadcrumb-bar.tsx + src/components/timeline/timeline-view.tsx + src/components/timeline/timeline-item-wrapper.tsx
 ```
 
 ## Estratégia de Implementação

@@ -7,11 +7,17 @@ Esta feature usa o modelo canônico do Echotes, mas limita o primeiro corte a:
 - sessão autenticada
 - contexto do dia
 - notas independentes
-- tarefas do mesmo dia e de dia futuro
+- tarefas do mesmo dia e, no modelo, tarefas de dia futuro
 - nós derivados de timeline
 
 Capacidades avançadas de `note_echoes` permanecem preservadas no modelo
 canônico, mas ficam fora da UI deste corte.
+
+Observação de fase:
+
+- até a **US2**, a UI entregue trabalha apenas com o subset same-day
+- a **US3** reabre a projeção temporal completa com `task_ghost`, breadcrumb e
+  navegação contextual
 
 ## Sessão Autenticada
 
@@ -151,3 +157,9 @@ dados do produto.
 - Tarefas projetadas geram apenas ghost card no dia de origem.
 - O item real no destino usa `scheduled_at` quando existir; caso contrário usa a
   posição intradiária derivada de `created_at`.
+
+**Observação de renderização**:
+
+- O posicionamento visual `note -> direita` e `task_* -> esquerda` não pertence
+  ao modelo nem à derivação; ele é responsabilidade da camada de renderização
+  da timeline e fecha na US3.

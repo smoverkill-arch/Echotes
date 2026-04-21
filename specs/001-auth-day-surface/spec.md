@@ -7,6 +7,9 @@
 
 > Esta spec foi derivada da constituição do projeto e dos canônicos em `/docs`.
 > O corte preserva o modelo centrado no dia e a separação entre tarefas e notas.
+> A execução desta feature é faseada: **US1** fecha autenticação e superfície
+> protegida; **US2** fecha nota/tarefa do mesmo dia; **US3** fecha projeção
+> temporal, ghost card, retorno contextual e o eixo visual final da timeline.
 
 ## Cenários do Usuário e Testes *(obrigatório)*
 
@@ -96,6 +99,9 @@ destino e usar o caminho de retorno ao contexto original.
 4. **Dado** uma tentativa de agendar tarefa no passado ou em horário não
    posterior à criação, **Quando** a pessoa tenta salvar, **Então** o sistema
    bloqueia a ação com feedback claro e nada inválido é persistido.
+5. **Dado** um dia com notas e tarefas misturadas após a conclusão da US3,
+   **Quando** a timeline é renderizada, **Então** as notas aparecem à direita e
+   os itens de tarefa à esquerda, sem alterar a ordem temporal do dia.
 
 ---
 
@@ -109,6 +115,8 @@ destino e usar o caminho de retorno ao contexto original.
   ou igual/anterior ao momento real da criação?
 - Como a timeline se comporta quando o mesmo dia possui nota, tarefa sem
   horário, marcador de criação e tarefa agendada em sequência próxima?
+- Como o eixo central da timeline mantém notas à direita e tarefas à esquerda
+  sem quebrar a ordenação temporal local ao dia exibido?
 
 ## Requisitos *(obrigatório)*
 
@@ -161,7 +169,10 @@ destino e usar o caminho de retorno ao contexto original.
   mesmo quando ambas aparecem na mesma timeline.
 - **FR-023**: O sistema DEVE considerar fora deste corte as capacidades
   avançadas de ecos, menções inline, `Continuar desta nota`, customização por
-  tag/cor e modos mensal/abas derivadas, sem impedir sua evolução posterior.
+  tag/cor e modo mensal expandido, sem impedir sua evolução posterior.
+- **FR-024**: O sistema DEVE renderizar a timeline com eixo central persistente,
+  posicionando notas à direita e itens de tarefa à esquerda; essa orientação
+  visual DEVE pertencer à camada de renderização e não ao modelo `TimelineNode`.
 
 ### Entidades-Chave *(inclua se a feature envolver dados)*
 
@@ -192,6 +203,8 @@ destino e usar o caminho de retorno ao contexto original.
   na timeline sem ajuda externa.
 - **SC-005**: Em 100% dos testes do ghost card, a navegação do dia de origem ao
   destino e o retorno ao contexto original permanecem claros e funcionais.
+- **SC-006**: Em 100% dos testes da timeline mista após a US3, notas aparecem à
+  direita e itens de tarefa à esquerda sem quebrar a ordenação temporal do dia.
 
 ## Premissas
 
@@ -200,6 +213,8 @@ destino e usar o caminho de retorno ao contexto original.
 - Recuperação de senha, login social, magic link e gestão de perfil ficam fora
   deste primeiro corte.
 - Ecos, menções inline, `Continuar desta nota`, cores por tag, calendário mensal
-  e lentes separadas de tarefas/notas ficam fora deste primeiro corte.
+  expandido ficam fora deste primeiro corte.
 - O corte precisa entregar a experiência autenticada e a timeline diária de
   ponta a ponta antes de abrir novas capacidades de refinamento do produto.
+- O requisito visual `nota -> direita` e `tarefa -> esquerda` é obrigatório ao
+  final da US3, mas não reabre a aprovação funcional já conquistada pela US2.

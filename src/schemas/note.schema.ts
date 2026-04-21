@@ -1,0 +1,54 @@
+import { z } from "zod";
+
+import { NOTE_ECHO_KIND_VALUES } from "../types/note";
+import { colorSchema, dateStringSchema } from "./task.schema";
+
+export const noteEchoKindSchema = z.enum(NOTE_ECHO_KIND_VALUES);
+
+export const noteSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  day: dateStringSchema,
+  title: z.string().trim().min(1, "Titulo e obrigatorio."),
+  content: z.string().nullable(),
+  brief: z.string().nullable(),
+  tag_id: z.string().uuid().nullable(),
+  color: colorSchema.nullable(),
+  is_color_overridden: z.boolean(),
+  created_at: z.string().datetime({ offset: true }),
+  updated_at: z.string().datetime({ offset: true }),
+});
+
+export const noteFormSchema = z.object({
+  title: z.string().trim().min(1, "Titulo e obrigatorio."),
+  content: z.string().trim().optional().default(""),
+  brief: z.string().trim().optional().default(""),
+  tag_id: z.string().uuid().nullable().optional().default(null),
+  color: colorSchema.nullable().optional().default(null),
+  is_color_overridden: z.boolean().default(false),
+  day: dateStringSchema,
+});
+
+export const noteEchoSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    from_note_id: z.string().uuid(),
+    to_note_id: z.string().uuid(),
+    created_by_user_id: z.string().uuid().optional(),
+    created_at: z.string().datetime({ offset: true }).optional(),
+    context_note_id: z.string().uuid().nullable().optional().default(null),
+    context_day: dateStringSchema.nullable().optional().default(null),
+    kind: noteEchoKindSchema,
+    metadata: z.record(z.string(), z.unknown()).nullable().optional().default(null),
+  })
+  .refine((echo) => echo.from_note_id !== echo.to_note_id, {
+    message: "Uma nota nao pode criar eco com ela mesma.",
+    path: ["to_note_id"],
+  });
+
+export const continueNoteInputSchema = z.object({
+  sourceNoteId: z.string().uuid(),
+  targetDay: dateStringSchema,
+  generatedBrief: z.string().trim().min(1, "Briefing gerado e obrigatorio."),
+  title: z.string().trim().optional(),
+});

@@ -46,13 +46,22 @@ genérico.
 - Unificar nota e tarefa em um único tipo genérico para ganhar velocidade.
 - Adiar a lógica de ghost card para depois da criação básica.
 
-## Decisão: limitar a primeira fatia a auth, superfície do dia e regras centrais da timeline
+## Decisão: executar a feature em três histórias incrementais
 
-**Justificativa**: o melhor corte vertical entrega valor real com acesso
-protegido, criação de nota, tarefa do mesmo dia, tarefa futura e navegação por
-ghost card. Isso valida o eixo central do produto sem diluir o foco.
+**Justificativa**: a feature completa continua cobrindo auth, superfície do dia
+e projeção temporal, mas a execução foi deliberadamente dividida para manter
+gates claros:
+
+- **US1**: autenticação e superfície protegida
+- **US2**: nota e tarefa do mesmo dia
+- **US3**: tarefa futura, ghost card, breadcrumb, retorno contextual e
+  fechamento do eixo visual da timeline
+
+Essa divisão preserva o eixo central do produto sem diluir o foco de cada
+bloco.
 
 **Alternativas consideradas**:
 
-- Tentar cobrir todo o MVP incluindo ecos, menções, tags e calendário expandido.
+- Implementar toda a feature em uma única rodada incluindo ghost card e
+  acabamento visual completo da timeline.
 - Fazer somente infraestrutura técnica sem experiência de ponta a ponta.

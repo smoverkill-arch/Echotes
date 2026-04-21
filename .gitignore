@@ -4,10 +4,13 @@ node_modules/
 
 # Expo / React Native
 .expo/
+.expo-shared/
 dist/
 web-build/
 
 # Environment
+.env*
+!.env.example
 .env
 .env.local
 .env.*.local
@@ -25,3 +28,10 @@ coverage/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

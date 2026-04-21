@@ -8,12 +8,13 @@ documentos canônicos em `/docs`.
 
 ## Resumo
 
-Entregar a primeira fatia vertical autenticada do Echotes: cadastro, login,
-restauração de sessão, superfície diária protegida, criação básica de nota e
-tarefa e a primeira implementação da projeção temporal por ghost card. A
-abordagem técnica usa um único app Expo com Supabase Auth/Postgres, separando
-claramente o domínio de tarefas e notas enquanto deriva a timeline mista por
-nós canônicos.
+Entregar a feature `001-auth-day-surface` em três histórias incrementais:
+**US1** fecha autenticação e superfície protegida; **US2** fecha criação,
+leitura e edição do mesmo dia; **US3** fecha projeção temporal com ghost card,
+breadcrumb, retorno contextual e o eixo visual final da timeline. A abordagem
+técnica usa um único app Expo com Supabase Auth/Postgres, separando claramente
+o domínio de tarefas e notas enquanto deriva a timeline mista por nós
+canônicos.
 
 ## Contexto Técnico
 
@@ -104,20 +105,23 @@ SQL/Supabase em `supabase/`.
   versionado, apenas chaves públicas do Supabase no cliente.
 - Adotar email + senha como método inicial de autenticação para reduzir
   complexidade de deep linking no primeiro corte.
-- Priorizar uma fatia vertical com auth + timeline do dia antes de recursos
+- Priorizar uma entrega faseada: auth na US1, caso de mesmo dia na US2,
+  projeção temporal e acabamento visual da timeline na US3, antes de recursos
   avançados como ecos, menções inline e calendário expandido.
 
-## Foco de Desenho da Fase 1
+## Estratégia de Entrega Faseada
 
-- Auth: fluxo público mínimo com cadastro, login, restauração de sessão,
+- US1: fluxo público mínimo com cadastro, login, restauração de sessão,
   sign-out e guarda de rotas protegidas.
-- Superfície do dia: carregar notas do dia e tarefas com `source_day = D` ou
-  `target_day = D`, derivando nós mistos para a timeline.
-- Integridade temporal: compor `scheduled_at` a partir de `target_day +
-  scheduled_time`, bloquear persistência inválida e garantir ghost card apenas
-  quando `source_day != target_day`.
-- Superfícies: Reader e Editor permanecem sobreposições contextuais sobre a
-  superfície do dia, sem criar destinos de navegação paralelos.
+- US2: superfície do dia limitada ao subset same-day, com nota e tarefa do
+  mesmo dia, marcador de criação + item agendado e Reader/Editor contextuais.
+- US3: extensão da superfície do dia para tarefas futuras, ghost card,
+  breadcrumb, navegação temporal e fechamento do eixo visual da timeline.
+- O layout `note -> direita` e `task_* -> esquerda` é responsabilidade da
+  camada de renderização em `timeline-view`/wrapper, não de schemas, stores ou
+  `TimelineNode`.
+- A validação operacional com Supabase real é pré-requisito para o smoke do
+  frontend, especialmente a partir da US2.
 
 ## Rastreamento de Complexidade
 
