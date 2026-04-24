@@ -56,12 +56,12 @@ export const updateTask = async (
     parsedInput.data.scheduled_time,
   );
 
-  if (scheduledAt && !isIsoAfter(scheduledAt, task.created_at)) {
+  if (scheduledAt && !isIsoAfter(scheduledAt, new Date().toISOString())) {
     return {
       ok: false,
       task: null,
       errorMessage:
-        "O horario da tarefa precisa ser estritamente posterior ao momento real de criacao.",
+        "O horario da tarefa precisa estar no futuro no fuso local.",
     };
   }
 

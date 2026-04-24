@@ -160,7 +160,7 @@ describe("US1 auth session flow", () => {
 
     expect(screen.getByText("Superficie diaria autenticada")).toBeTruthy();
     expect(screen.getByText("Timeline do dia")).toBeTruthy();
-    expect(screen.getByText("2026-04-18")).toBeTruthy();
+    expect(screen.getByText("18-04-2026")).toBeTruthy();
     expect(screen.getByText("pessoa@echotes.app")).toBeTruthy();
     expect(screen.queryByText("/sign-in")).toBeNull();
   });

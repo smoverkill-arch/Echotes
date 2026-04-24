@@ -264,7 +264,7 @@ describe("US3 ghost navigation", () => {
     );
     fireEvent.changeText(
       screen.getByTestId("task-editor-target-day-input"),
-      "2026-04-20",
+      "20-04-2026",
     );
     fireEvent.changeText(screen.getByTestId("task-editor-time-input"), "18:30");
 
@@ -305,6 +305,8 @@ describe("US3 ghost navigation", () => {
       expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-20");
     });
     expect(await screen.findByTestId("breadcrumb-bar")).toBeTruthy();
+    expect(screen.getByText("Item real em 20-04-2026")).toBeTruthy();
+    expect(screen.getByText("Criada em 18-04-2026")).toBeTruthy();
     expect(await screen.findByText("Reader de tarefa")).toBeTruthy();
     expect(screen.getByTestId("task-reader-context-meta")).toBeTruthy();
 

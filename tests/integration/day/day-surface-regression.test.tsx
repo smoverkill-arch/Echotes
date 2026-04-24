@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react-native";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 
 import ProtectedDayRoute from "../../../app/day/[date]";
 import { useAuthStore } from "../../../src/stores/auth-store";
@@ -200,7 +200,7 @@ describe("day surface regressions", () => {
 
     render(<ProtectedDayRoute />);
 
-    expect(await screen.findByText("2026-04-20")).toBeTruthy();
+    expect(await screen.findByText("20-04-2026")).toBeTruthy();
     expect(await screen.findByText("Tarefa projetada sem horario")).toBeTruthy();
     expect(
       screen.getByTestId(
@@ -233,5 +233,62 @@ describe("day surface regressions", () => {
     await waitFor(() => {
       expect(screen.getByTestId("redirect-target")).toBeTruthy();
     });
+  });
+
+  it("renderiza listas filtradas em largura util sem eixo central fora da aba timeline", async () => {
+    mockNotesTable.push({
+      id: "30000000-0000-4000-8000-000000000001",
+      user_id: authenticatedSession.userId,
+      day: "2026-04-18",
+      title: "Nota filtrada",
+      content: "Conteudo",
+      brief: null,
+      tag_id: null,
+      color: null,
+      is_color_overridden: false,
+      created_at: "2026-04-18T09:15:00+00:00",
+      updated_at: "2026-04-18T09:15:00+00:00",
+    });
+    mockTasksTable.push({
+      id: "20000000-0000-4000-8000-000000000002",
+      user_id: authenticatedSession.userId,
+      title: "Tarefa agendada filtrada",
+      content: "Conteudo",
+      tag_id: null,
+      color: null,
+      is_color_overridden: false,
+      source_day: "2026-04-18",
+      target_day: "2026-04-18",
+      created_at: "2026-04-18T10:00:00+00:00",
+      scheduled_at: "2026-04-18T18:30:00+00:00",
+      status: "open",
+      completed_at: null,
+      updated_at: "2026-04-18T10:00:00+00:00",
+    });
+
+    render(<ProtectedDayRoute />);
+
+    expect(await screen.findByTestId("timeline-axis-rail")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("day-tab-tasks"));
+
+    expect(await screen.findByTestId("tasks-list-view")).toBeTruthy();
+    expect(screen.queryByTestId("timeline-axis-rail")).toBeNull();
+    expect(
+      screen.getByTestId("task-card-timed-20000000-0000-4000-8000-000000000002"),
+    ).toBeTruthy();
+    expect(
+      screen.queryByTestId(
+        "task-creation-marker-20000000-0000-4000-8000-000000000002",
+      ),
+    ).toBeNull();
+
+    fireEvent.press(screen.getByTestId("day-tab-notes"));
+
+    expect(await screen.findByTestId("notes-list-view")).toBeTruthy();
+    expect(screen.queryByTestId("timeline-axis-rail")).toBeNull();
+    expect(
+      screen.getByTestId("note-card-real-30000000-0000-4000-8000-000000000001"),
+    ).toBeTruthy();
   });
 });

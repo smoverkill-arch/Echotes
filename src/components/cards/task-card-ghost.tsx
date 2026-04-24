@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import type { Task } from "../../types/task";
-import { extractTimePart } from "../../utils/date";
+import { extractTimePart, formatDisplayDay } from "../../utils/date";
 
 interface TaskCardGhostProps {
   task: Task;
@@ -18,7 +18,7 @@ export function TaskCardGhost({ task }: TaskCardGhostProps) {
       <Text style={styles.title}>{task.title}</Text>
       {task.content ? <Text style={styles.body}>{task.content}</Text> : null}
       <Text style={styles.footer}>
-        Vai para {task.target_day}
+        Vai para {formatDisplayDay(task.target_day)}
         {scheduledTime ? ` as ${scheduledTime}` : ""}
       </Text>
     </View>

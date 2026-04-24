@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { DayTab } from "../../types/timeline";
+import { formatDisplayDay } from "../../utils/date";
 
 interface DayHeaderProps {
   date: string;
@@ -25,12 +26,14 @@ export function DayHeader({
   onTabChange,
   onSignOut,
 }: DayHeaderProps) {
+  const formattedDate = formatDisplayDay(date);
+
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
         <View>
           <Text style={styles.eyebrow}>Superficie diaria autenticada</Text>
-          <Text style={styles.title}>{date}</Text>
+          <Text style={styles.title}>{formattedDate}</Text>
           <Text style={styles.subtitle}>{email}</Text>
         </View>
 
@@ -85,7 +88,7 @@ export function DayHeader({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 16,
+    gap: 10,
   },
   topRow: {
     flexDirection: "row",
@@ -101,23 +104,23 @@ const styles = StyleSheet.create({
     color: "#6b7280",
   },
   title: {
-    marginTop: 8,
-    fontSize: 30,
+    marginTop: 4,
+    fontSize: 24,
     fontWeight: "700",
     color: "#111827",
   },
   subtitle: {
-    marginTop: 8,
-    fontSize: 14,
+    marginTop: 4,
+    fontSize: 13,
     color: "#4b5563",
   },
   signOutButton: {
-    minHeight: 44,
-    borderRadius: 12,
+    minHeight: 38,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#111827",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
   },
   signOutButtonDisabled: {
     backgroundColor: "#9ca3af",
@@ -126,21 +129,21 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   signOutLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
     color: "#ffffff",
   },
   tabsRow: {
     flexDirection: "row",
-    gap: 8,
+    gap: 6,
   },
   tabButton: {
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "#d1d5db",
     backgroundColor: "#ffffff",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   tabButtonActive: {
     borderColor: "#111827",
@@ -150,7 +153,7 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   tabLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
     color: "#4b5563",
   },

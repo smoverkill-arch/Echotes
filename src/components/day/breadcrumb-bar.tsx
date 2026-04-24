@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { formatDisplayDay } from "../../utils/date";
 
 interface BreadcrumbBarProps {
   sourceDate: string;
@@ -11,12 +12,15 @@ export function BreadcrumbBar({
   destinationDate,
   onReturn,
 }: BreadcrumbBarProps) {
+  const formattedSourceDate = formatDisplayDay(sourceDate);
+  const formattedDestinationDate = formatDisplayDay(destinationDate);
+
   return (
     <View style={styles.container} testID="breadcrumb-bar">
       <View style={styles.copyBlock}>
         <Text style={styles.eyebrow}>Contexto temporal</Text>
-        <Text style={styles.title}>Item real em {destinationDate}</Text>
-        <Text style={styles.body}>Criada em {sourceDate}</Text>
+        <Text style={styles.title}>Item real em {formattedDestinationDate}</Text>
+        <Text style={styles.body}>Criada em {formattedSourceDate}</Text>
       </View>
 
       <Pressable
@@ -28,7 +32,7 @@ export function BreadcrumbBar({
         testID="breadcrumb-return-button"
         onPress={onReturn}
       >
-        <Text style={styles.buttonLabel}>Voltar para {sourceDate}</Text>
+        <Text style={styles.buttonLabel}>Voltar para {formattedSourceDate}</Text>
       </Pressable>
     </View>
   );

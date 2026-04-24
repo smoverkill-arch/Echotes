@@ -1,6 +1,7 @@
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { Note } from "../../types/note";
+import { formatDisplayDay } from "../../utils/date";
 
 interface NoteReaderProps {
   visible: boolean;
@@ -25,7 +26,7 @@ export function NoteReader({
         <View style={styles.sheet}>
           <Text style={styles.eyebrow}>Reader de nota</Text>
           <Text style={styles.title}>{note.title}</Text>
-          <Text style={styles.meta}>Dia: {note.day}</Text>
+          <Text style={styles.meta}>Dia: {formatDisplayDay(note.day)}</Text>
           {note.brief ? <Text style={styles.brief}>{note.brief}</Text> : null}
           {note.content ? <Text style={styles.body}>{note.content}</Text> : null}
 

@@ -219,10 +219,46 @@ afterEach(() => {
 });
 
 describe("US2 same-day day surface", () => {
+  it("mantem o botao + fechado por padrao, abre o bottom sheet e fecha ao cancelar ou escolher uma acao", async () => {
+    render(<ProtectedDayRoute />);
+    await waitFor(() => {
+      expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
+    });
+
+    expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
+    expect(screen.queryByTestId("timeline-create-note-button")).toBeNull();
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+    });
+
+    expect(await screen.findByTestId("timeline-plus-sheet")).toBeTruthy();
+    expect(screen.getByTestId("timeline-plus-cancel-button")).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("timeline-plus-cancel-button"));
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+    });
+    fireEvent.press(await screen.findByTestId("timeline-create-note-button"));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
+    });
+    expect(await screen.findByTestId("note-editor-submit-button")).toBeTruthy();
+  });
+
   it("permite criar nota e tarefas do mesmo dia e renderiza a timeline correta", async () => {
     render(<ProtectedDayRoute />);
 
     expect(await screen.findByText("Timeline do dia")).toBeTruthy();
+    expect(screen.getByText("18-04-2026")).toBeTruthy();
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("timeline-plus-button"));
@@ -310,6 +346,90 @@ describe("US2 same-day day surface", () => {
     });
   });
 
+  it("exibe e aceita DD-MM-AAAA no editor e persiste day key interna", async () => {
+    render(<ProtectedDayRoute />);
+    await waitFor(() => {
+      expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+    });
+    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+
+    expect(screen.getByPlaceholderText("DD-MM-AAAA")).toBeTruthy();
+    expect(await screen.findByDisplayValue("18-04-2026")).toBeTruthy();
+
+    fireEvent.changeText(
+      screen.getByTestId("task-editor-title-input"),
+      "Tarefa para outro dia",
+    );
+    fireEvent.changeText(
+      screen.getByTestId("task-editor-target-day-input"),
+      "20-04-2026",
+    );
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("task-editor-submit-button"));
+    });
+
+    expect(mockTasksTable[0]?.target_day).toBe("2026-04-20");
+    expect(await screen.findByText("Vai para 20-04-2026")).toBeTruthy();
+  });
+
+  it("salva horario futuro local e bloqueia horario passado local no mesmo dia", async () => {
+    jest.setSystemTime(new Date(2026, 3, 18, 23, 0, 0, 0));
+
+    render(<ProtectedDayRoute />);
+    await waitFor(() => {
+      expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
+    });
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+    });
+    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+
+    fireEvent.changeText(
+      await screen.findByTestId("task-editor-title-input"),
+      "Tarefa futura local",
+    );
+    fireEvent.changeText(screen.getByTestId("task-editor-time-input"), "23:59");
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("task-editor-submit-button"));
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("task-card-timed-20000000-0000-4000-8000-000000000001"),
+      ).toBeTruthy();
+    });
+    expect(mockTasksTable[0]?.scheduled_at).toBe(
+      `${new Date(2026, 3, 18, 23, 59, 0, 0).toISOString().slice(0, 19)}+00:00`,
+    );
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+    });
+    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+
+    fireEvent.changeText(
+      await screen.findByTestId("task-editor-title-input"),
+      "Tarefa passada local",
+    );
+    fireEvent.changeText(screen.getByTestId("task-editor-time-input"), "22:00");
+
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("task-editor-submit-button"));
+    });
+
+    expect(
+      await screen.findByText("O horario da tarefa precisa estar no futuro no fuso local."),
+    ).toBeTruthy();
+    expect(screen.queryByText("Tarefa passada local")).toBeNull();
+  });
+
   it("aceita timestamps com offset retornados pelo Supabase real", async () => {
     render(<ProtectedDayRoute />);
 
@@ -353,6 +473,8 @@ describe("US2 same-day day surface", () => {
     });
     expect(mockNotesTable[0]?.created_at).toBe("2026-04-18T09:30:00+00:00");
     expect(mockTasksTable[0]?.created_at).toBe("2026-04-18T10:00:00+00:00");
-    expect(mockTasksTable[0]?.scheduled_at).toBe("2026-04-18T20:15:00+00:00");
+    expect(mockTasksTable[0]?.scheduled_at).toBe(
+      `${new Date(2026, 3, 18, 20, 15, 0, 0).toISOString().slice(0, 19)}+00:00`,
+    );
   });
 });

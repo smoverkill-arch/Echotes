@@ -12,7 +12,11 @@ import { createTask } from "../../features/tasks/api/create-task";
 import { updateTask } from "../../features/tasks/api/update-task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { Task } from "../../types/task";
-import { extractTimePart } from "../../utils/date";
+import {
+  extractTimePart,
+  formatDisplayDay,
+  parseDisplayDayInput,
+} from "../../utils/date";
 
 interface TaskEditorProps {
   visible: boolean;
@@ -35,7 +39,7 @@ export function TaskEditor({
 }: TaskEditorProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [targetDay, setTargetDay] = useState(selectedDay);
+  const [targetDayInput, setTargetDayInput] = useState(formatDisplayDay(selectedDay));
   const [scheduledTime, setScheduledTime] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +51,7 @@ export function TaskEditor({
 
     setTitle(task?.title ?? "");
     setContent(task?.content ?? "");
-    setTargetDay(task?.target_day ?? selectedDay);
+    setTargetDayInput(formatDisplayDay(task?.target_day ?? selectedDay));
     setScheduledTime(task?.scheduled_at ? extractTimePart(task.scheduled_at).slice(0, 5) : "");
     setErrorMessage(null);
   }, [selectedDay, task, visible]);
@@ -59,6 +63,17 @@ export function TaskEditor({
   const persistEditedTask = async () => {
     if (!task) {
       setErrorMessage("Selecione uma tarefa valida para editar.");
+      return;
+    }
+
+    let targetDay: string;
+
+    try {
+      targetDay = parseDisplayDayInput(targetDayInput);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Data invalida. Use o formato DD-MM-AAAA.",
+      );
       return;
     }
 
@@ -88,6 +103,17 @@ export function TaskEditor({
 
     try {
       if (mode === "create") {
+        let targetDay: string;
+
+        try {
+          targetDay = parseDisplayDayInput(targetDayInput);
+        } catch (error) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "Data invalida. Use o formato DD-MM-AAAA.",
+          );
+          return;
+        }
+
         const result = await createTask({
           title,
           content,
@@ -123,11 +149,11 @@ export function TaskEditor({
             {mode === "create" ? "Criar tarefa" : "Editar tarefa"}
           </Text>
           <Text style={styles.meta}>
-            Dia de origem: {mode === "edit" && task ? task.source_day : selectedDay}
+            Dia de origem: {formatDisplayDay(mode === "edit" && task ? task.source_day : selectedDay)}
           </Text>
           {temporalContext ? (
             <Text style={styles.contextMeta}>
-              Editando o item real aberto a partir de {temporalContext.sourceDate}.
+              Editando o item real aberto a partir de {formatDisplayDay(temporalContext.sourceDate)}.
             </Text>
           ) : null}
 
@@ -152,14 +178,14 @@ export function TaskEditor({
             onChangeText={setContent}
           />
 
-          <Text style={styles.label}>Dia de destino (YYYY-MM-DD)</Text>
+          <Text style={styles.label}>Dia de destino (DD-MM-AAAA)</Text>
           <TextInput
-            placeholder="Ex.: 2026-04-20"
+            placeholder="DD-MM-AAAA"
             placeholderTextColor="#9ca3af"
             style={styles.input}
             testID="task-editor-target-day-input"
-            value={targetDay}
-            onChangeText={setTargetDay}
+            value={targetDayInput}
+            onChangeText={setTargetDayInput}
           />
 
           <Text style={styles.label}>Horario (HH:mm)</Text>

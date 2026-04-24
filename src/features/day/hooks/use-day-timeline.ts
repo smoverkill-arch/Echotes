@@ -25,7 +25,9 @@ export const useDayTimeline = (
     });
 
     if (activeTab === "tasks") {
-      return nodes.filter((node) => node.itemKind === "task");
+      return nodes.filter(
+        (node) => node.itemKind === "task" && node.type !== "task_creation_marker",
+      );
     }
 
     if (activeTab === "notes") {

@@ -1,6 +1,7 @@
 import { deriveTimelineNodes } from "../../../src/features/timeline/utils/derive-timeline-nodes";
 import type { Note } from "../../../src/types/note";
 import type { Task } from "../../../src/types/task";
+import { buildInDaySortAt } from "../../../src/utils/date";
 
 const selectedDay = "2026-04-18";
 const targetDay = "2026-04-20";
@@ -90,11 +91,11 @@ describe("deriveTimelineNodes regressions", () => {
       "task_timed",
     ]);
     expect(nodes[0]).toMatchObject({
-      sortAt: `${selectedDay}T10:00:00`,
+      sortAt: buildInDaySortAt(selectedDay, `${selectedDay}T10:00:00+00:00`),
       scheduledAt: `${selectedDay}T18:30:00+00:00`,
     });
     expect(nodes[1]).toMatchObject({
-      sortAt: `${selectedDay}T18:30:00`,
+      sortAt: buildInDaySortAt(selectedDay, `${selectedDay}T18:30:00+00:00`),
       scheduledAt: `${selectedDay}T18:30:00+00:00`,
     });
   });
@@ -115,7 +116,7 @@ describe("deriveTimelineNodes regressions", () => {
     expect(nodes).toHaveLength(1);
     expect(nodes[0]).toMatchObject({
       type: "task_ghost",
-      sortAt: `${selectedDay}T10:00:00`,
+      sortAt: buildInDaySortAt(selectedDay, `${selectedDay}T10:00:00+00:00`),
       scheduledAt: null,
     });
   });
@@ -144,11 +145,11 @@ describe("deriveTimelineNodes regressions", () => {
       "task_timed:20000000-0000-4000-8000-000000000005",
     ]);
     expect(nodes[0]).toMatchObject({
-      sortAt: `${targetDay}T10:00:00`,
+      sortAt: buildInDaySortAt(targetDay, `${selectedDay}T10:00:00+00:00`),
       scheduledAt: null,
     });
     expect(nodes[1]).toMatchObject({
-      sortAt: `${targetDay}T18:30:00`,
+      sortAt: buildInDaySortAt(targetDay, `${targetDay}T18:30:00+00:00`),
       scheduledAt: `${targetDay}T18:30:00+00:00`,
     });
   });

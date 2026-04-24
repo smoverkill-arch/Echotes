@@ -1,5 +1,6 @@
 import { deriveTimelineNodes } from "../../../src/features/timeline/utils/derive-timeline-nodes";
 import type { Task } from "../../../src/types/task";
+import { buildInDaySortAt } from "../../../src/utils/date";
 
 const sourceDay = "2026-04-18";
 const targetDay = "2026-04-20";
@@ -36,7 +37,7 @@ describe("projected task timeline nodes", () => {
       type: "task_ghost",
       itemKind: "task",
       itemId: "6f366e86-4d1e-45c1-ab27-57d7f0188ea9",
-      sortAt: `${sourceDay}T10:00:00`,
+      sortAt: buildInDaySortAt(sourceDay, `${sourceDay}T10:00:00+00:00`),
     });
   });
 
@@ -53,7 +54,7 @@ describe("projected task timeline nodes", () => {
       type: "task_untimed",
       itemKind: "task",
       itemId: "6f366e86-4d1e-45c1-ab27-57d7f0188ea9",
-      sortAt: `${targetDay}T10:00:00`,
+      sortAt: buildInDaySortAt(targetDay, `${sourceDay}T10:00:00+00:00`),
     });
   });
 
@@ -74,7 +75,7 @@ describe("projected task timeline nodes", () => {
       type: "task_timed",
       itemKind: "task",
       itemId: "6f366e86-4d1e-45c1-ab27-57d7f0188ea9",
-      sortAt: `${targetDay}T18:30:00`,
+      sortAt: buildInDaySortAt(targetDay, `${targetDay}T18:30:00+00:00`),
       scheduledAt: `${targetDay}T18:30:00+00:00`,
     });
   });

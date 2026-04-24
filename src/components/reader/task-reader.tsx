@@ -2,7 +2,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { Task } from "../../types/task";
-import { extractTimePart } from "../../utils/date";
+import { extractTimePart, formatDisplayDay } from "../../utils/date";
 
 interface TaskReaderProps {
   visible: boolean;
@@ -34,11 +34,11 @@ export function TaskReader({
           <Text style={styles.eyebrow}>Reader de tarefa</Text>
           <Text style={styles.title}>{task.title}</Text>
           <Text style={styles.meta}>Status: {task.status}</Text>
-          <Text style={styles.meta}>Dia de origem: {task.source_day}</Text>
-          <Text style={styles.meta}>Dia de destino: {task.target_day}</Text>
+          <Text style={styles.meta}>Dia de origem: {formatDisplayDay(task.source_day)}</Text>
+          <Text style={styles.meta}>Dia de destino: {formatDisplayDay(task.target_day)}</Text>
           {temporalContext ? (
             <Text style={styles.contextMeta} testID="task-reader-context-meta">
-              Item real aberto a partir do ghost card de {temporalContext.sourceDate}.
+              Item real aberto a partir do ghost card de {formatDisplayDay(temporalContext.sourceDate)}.
             </Text>
           ) : null}
           {scheduledTime ? (

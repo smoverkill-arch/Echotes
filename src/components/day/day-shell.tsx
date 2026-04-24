@@ -155,9 +155,9 @@ export function DayShell({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
     backgroundColor: "#f7f8fb",
   },
 });

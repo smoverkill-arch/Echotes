@@ -1,5 +1,12 @@
-import { useEffect, useRef } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import type { Note } from "../../types/note";
 import type { Task } from "../../types/task";
@@ -37,7 +44,7 @@ const feedbackCopyByTab: Record<DayTab, TimelineFeedbackCopy> = {
   tasks: {
     instructionsTitle: "Tarefas do dia",
     instructionsBody:
-      "Toque uma vez para abrir o Reader. Toque duas vezes para editar. Quando houver ghost card, ele leva ao dia de destino.",
+      "Toque uma vez para abrir o Reader. Toque duas vezes para editar. Quando houver ghost card, ele indica o destino da tarefa.",
     loadingTitle: "Carregando as tarefas...",
     loadingLabel: "Carregando as tarefas do dia.",
     errorTitle: "Falha ao carregar as tarefas",
@@ -84,7 +91,9 @@ export function TimelineView({
     id: string;
     timeoutId: ReturnType<typeof setTimeout>;
   } | null>(null);
+  const [isPlusSheetOpen, setIsPlusSheetOpen] = useState(false);
   const copy = feedbackCopyByTab[activeTab];
+  const isTimelineTab = activeTab === "timeline";
 
   useEffect(() => {
     return () => {
@@ -93,6 +102,12 @@ export function TimelineView({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isLoading) {
+      setIsPlusSheetOpen(false);
+    }
+  }, [isLoading]);
 
   const handleNodePress = (node: TimelineNode) => {
     if (node.type === "task_ghost") {
@@ -118,6 +133,40 @@ export function TimelineView({
     };
   };
 
+  const renderNodeCard = (node: TimelineNode) => {
+    if (node.type === "note") {
+      return <NoteCardReal note={node.data as Note} />;
+    }
+
+    if (node.type === "task_untimed") {
+      return <TaskCardReal task={node.data as Task} />;
+    }
+
+    if (node.type === "task_creation_marker") {
+      return <TaskCreationMarker task={node.data as Task} />;
+    }
+
+    if (node.type === "task_timed") {
+      return <TaskCardTimed task={node.data as Task} />;
+    }
+
+    if (node.type === "task_ghost") {
+      return <TaskCardGhost task={node.data as Task} />;
+    }
+
+    return null;
+  };
+
+  const handleOpenNoteEditor = () => {
+    setIsPlusSheetOpen(false);
+    onCreateNote();
+  };
+
+  const handleOpenTaskEditor = () => {
+    setIsPlusSheetOpen(false);
+    onCreateTask();
+  };
+
   return (
     <View style={styles.container}>
       <View
@@ -129,87 +178,105 @@ export function TimelineView({
         <Text style={styles.instructionsBody}>{copy.instructionsBody}</Text>
       </View>
 
-      {isLoading ? (
-        <View
-          accessible
-          accessibilityLabel={copy.loadingLabel}
-          accessibilityLiveRegion="polite"
-          accessibilityState={{ busy: true }}
-          style={styles.loadingCard}
-          testID="timeline-loading-state"
-        >
-          <ActivityIndicator color="#475569" size="small" />
-          <Text style={styles.loadingTitle}>{copy.loadingTitle}</Text>
-        </View>
-      ) : null}
+      <View style={styles.contentArea}>
+        {isLoading ? (
+          <View
+            accessible
+            accessibilityLabel={copy.loadingLabel}
+            accessibilityLiveRegion="polite"
+            accessibilityState={{ busy: true }}
+            style={styles.loadingCard}
+            testID="timeline-loading-state"
+          >
+            <ActivityIndicator color="#475569" size="small" />
+            <Text style={styles.loadingTitle}>{copy.loadingTitle}</Text>
+          </View>
+        ) : null}
 
-      {!isLoading && errorMessage ? (
-        <View
-          accessible
-          accessibilityLabel={`${copy.errorTitle}. ${errorMessage}`}
-          accessibilityLiveRegion="assertive"
-          accessibilityRole="alert"
-          style={styles.feedbackCard}
-          testID="timeline-error-state"
-        >
-          <Text style={styles.feedbackTitle}>{copy.errorTitle}</Text>
-          <Text style={styles.feedbackBody}>{errorMessage}</Text>
-        </View>
-      ) : null}
+        {!isLoading && errorMessage ? (
+          <View
+            accessible
+            accessibilityLabel={`${copy.errorTitle}. ${errorMessage}`}
+            accessibilityLiveRegion="assertive"
+            accessibilityRole="alert"
+            style={styles.feedbackCard}
+            testID="timeline-error-state"
+          >
+            <Text style={styles.feedbackTitle}>{copy.errorTitle}</Text>
+            <Text style={styles.feedbackBody}>{errorMessage}</Text>
+          </View>
+        ) : null}
 
-      {!isLoading && !errorMessage ? (
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          testID="timeline-view"
-        >
-          {nodes.length === 0 ? (
-            <View
-              accessible
-              accessibilityLabel={`${copy.emptyTitle}. ${copy.emptyBody}`}
-              style={styles.emptyState}
-              testID="timeline-empty-state"
-            >
-              <Text style={styles.emptyTitle}>{copy.emptyTitle}</Text>
-              <Text style={styles.emptyBody}>{copy.emptyBody}</Text>
-            </View>
-          ) : (
-            <View style={styles.timelineFrame}>
-              <View style={styles.axisRail} testID="timeline-axis-rail" />
-              {nodes.map((node) => (
-                <TimelineItemWrapper
-                  key={node.id}
-                  node={node}
-                  onPress={() => {
-                    handleNodePress(node);
-                  }}
-                >
-                  {node.type === "note" ? (
-                    <NoteCardReal note={node.data as Note} />
-                  ) : null}
-                  {node.type === "task_untimed" ? (
-                    <TaskCardReal task={node.data as Task} />
-                  ) : null}
-                  {node.type === "task_creation_marker" ? (
-                    <TaskCreationMarker task={node.data as Task} />
-                  ) : null}
-                  {node.type === "task_timed" ? (
-                    <TaskCardTimed task={node.data as Task} />
-                  ) : null}
-                  {node.type === "task_ghost" ? (
-                    <TaskCardGhost task={node.data as Task} />
-                  ) : null}
-                </TimelineItemWrapper>
-              ))}
-            </View>
-          )}
-        </ScrollView>
-      ) : null}
+        {!isLoading && !errorMessage ? (
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            style={styles.scrollView}
+            testID="timeline-view"
+          >
+            {nodes.length === 0 ? (
+              <View
+                accessible
+                accessibilityLabel={`${copy.emptyTitle}. ${copy.emptyBody}`}
+                style={styles.emptyState}
+                testID="timeline-empty-state"
+              >
+                <Text style={styles.emptyTitle}>{copy.emptyTitle}</Text>
+                <Text style={styles.emptyBody}>{copy.emptyBody}</Text>
+              </View>
+            ) : isTimelineTab ? (
+              <View style={styles.timelineFrame}>
+                <View style={styles.axisRail} testID="timeline-axis-rail" />
+                {nodes.map((node) => (
+                  <TimelineItemWrapper
+                    key={node.id}
+                    node={node}
+                    onPress={() => {
+                      handleNodePress(node);
+                    }}
+                  >
+                    {renderNodeCard(node)}
+                  </TimelineItemWrapper>
+                ))}
+              </View>
+            ) : (
+              <View
+                style={styles.linearList}
+                testID={activeTab === "tasks" ? "tasks-list-view" : "notes-list-view"}
+              >
+                {nodes.map((node) => (
+                  <Pressable
+                    key={node.id}
+                    accessibilityRole="button"
+                    style={({ pressed }) => [
+                      styles.listCardButton,
+                      pressed ? styles.listCardButtonPressed : null,
+                    ]}
+                    testID={`timeline-linear-node-${node.id}`}
+                    onPress={() => {
+                      handleNodePress(node);
+                    }}
+                  >
+                    {renderNodeCard(node)}
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </ScrollView>
+        ) : null}
 
-      <TimelinePlusButton
-        onCreateNote={onCreateNote}
-        onCreateTask={onCreateTask}
-        isDisabled={isLoading}
-      />
+        <TimelinePlusButton
+          isSheetOpen={isPlusSheetOpen}
+          onOpenSheet={() => {
+            setIsPlusSheetOpen(true);
+          }}
+          onCloseSheet={() => {
+            setIsPlusSheetOpen(false);
+          }}
+          onCreateNote={handleOpenNoteEditor}
+          onCreateTask={handleOpenTaskEditor}
+          isDisabled={isLoading}
+        />
+      </View>
     </View>
   );
 }
@@ -217,31 +284,36 @@ export function TimelineView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 16,
+    gap: 10,
   },
   instructions: {
-    borderRadius: 18,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: "#e5e7eb",
     backgroundColor: "#ffffff",
-    padding: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   instructionsTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: "#111827",
   },
   instructionsBody: {
-    marginTop: 6,
-    fontSize: 14,
-    lineHeight: 20,
+    marginTop: 4,
+    fontSize: 13,
+    lineHeight: 18,
     color: "#4b5563",
+  },
+  contentArea: {
+    flex: 1,
+    position: "relative",
   },
   loadingCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#dbe4ee",
     backgroundColor: "#ffffff",
@@ -253,7 +325,7 @@ const styles = StyleSheet.create({
     color: "#334155",
   },
   feedbackCard: {
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#fecaca",
     backgroundColor: "#fef2f2",
@@ -272,11 +344,23 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     gap: 12,
-    paddingBottom: 12,
+    paddingBottom: 96,
+  },
+  scrollView: {
+    flex: 1,
   },
   timelineFrame: {
     position: "relative",
     gap: 10,
+  },
+  linearList: {
+    gap: 12,
+  },
+  listCardButton: {
+    width: "100%",
+  },
+  listCardButtonPressed: {
+    opacity: 0.94,
   },
   axisRail: {
     position: "absolute",
@@ -288,7 +372,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#cbd5e1",
   },
   emptyState: {
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#e5e7eb",
     backgroundColor: "#ffffff",
