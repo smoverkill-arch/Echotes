@@ -29,9 +29,19 @@ export function AuthErrorBanner({
     return null;
   }
 
+  const title = titleByStatus[status];
+  const accessibilityLabel = `${title}. ${message}`;
+
   return (
-    <View style={styles.container} testID="auth-error-banner">
-      <Text style={styles.title}>{titleByStatus[status]}</Text>
+    <View
+      accessible
+      accessibilityLabel={accessibilityLabel}
+      accessibilityLiveRegion="assertive"
+      accessibilityRole="alert"
+      style={styles.container}
+      testID="auth-error-banner"
+    >
+      <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
     </View>
   );
@@ -51,7 +61,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.6,
+    letterSpacing: 0,
     color: "#b91c1c",
   },
   message: {

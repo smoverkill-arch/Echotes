@@ -133,9 +133,9 @@ notas à direita e tarefas à esquerda sem quebrar o eixo temporal.
 **Objetivo**: Fechar documentação, regressões e acabamento dos estados
 compartilhados.
 
-- [ ] T027 [P] Atualizar documentação operacional em `README.md` e `specs/001-auth-day-surface/quickstart.md`
-- [ ] T028 [P] Reforçar regressões transversais em `tests/integration/day/day-surface-regression.test.tsx` e `tests/unit/timeline/derive-timeline-nodes-regression.test.ts`
-- [ ] T029 Revisar estados vazios, erro e acabamento final em `src/components/day/day-shell.tsx`, `src/components/timeline/timeline-view.tsx` e `src/components/auth/auth-error-banner.tsx`
+- [x] T027 [P] Atualizar documentação operacional em `README.md` e `specs/001-auth-day-surface/quickstart.md`
+- [x] T028 [P] Reforçar regressões transversais em `tests/integration/day/day-surface-regression.test.tsx` e `tests/unit/timeline/derive-timeline-nodes-regression.test.ts`
+- [x] T029 Revisar estados vazios, erro e acabamento final em `src/components/day/day-shell.tsx`, `src/components/timeline/timeline-view.tsx` e `src/components/auth/auth-error-banner.tsx`
 
 ---
 

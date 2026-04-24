@@ -84,6 +84,7 @@ export function DayShell({
       ) : null}
 
       <TimelineView
+        activeTab={activeTab}
         nodes={timelineNodes}
         isLoading={isTimelineLoading}
         errorMessage={timelineErrorMessage}

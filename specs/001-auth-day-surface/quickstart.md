@@ -2,8 +2,10 @@
 
 ## Objetivo
 
-Validar localmente a primeira fatia vertical do Echotes com autenticação,
-superfície diária protegida e timeline básica.
+Validar localmente a feature `001-auth-day-surface` fechada: autenticação,
+superfície diária protegida, criação/leitura/edição de notas e tarefas,
+projeção temporal com ghost card, retorno contextual e eixo visual final da
+timeline.
 
 ## Pré-requisitos
 
@@ -36,21 +38,44 @@ superfície diária protegida e timeline básica.
 2. Iniciar o app com `pnpm expo start`.
 3. Abrir o app no simulador ou dispositivo.
 
-## Validação até US2
+## Validação funcional
+
+### US1 - Autenticação e superfície protegida
 
 1. Criar conta com email e senha.
 2. Encerrar e reabrir o app para validar restauração de sessão.
-3. Criar uma nota independente no dia atual.
-4. Criar uma tarefa sem horário para o mesmo dia.
-5. Criar uma tarefa com horário para o mesmo dia e confirmar marcador de
+3. Encerrar sessão e confirmar bloqueio das superfícies protegidas.
+
+### US2 - Registro do mesmo dia
+
+1. Criar uma nota independente no dia atual.
+2. Abrir a nota, editar o conteúdo e confirmar persistência.
+3. Criar uma tarefa sem horário para o mesmo dia.
+4. Criar uma tarefa com horário para o mesmo dia e confirmar marcador de
    criação + item real.
-6. Encerrar sessão e confirmar bloqueio das superfícies protegidas.
+5. Abrir uma tarefa, editar seus dados e confirmar persistência.
 
-## Validação completa da feature (requer US3)
+### US3 - Projeção temporal e navegação contextual
 
-1. Criar uma tarefa para outro dia e confirmar ghost card na origem.
-2. Navegar do ghost card para o item real e retornar ao dia de origem.
-3. Confirmar eixo visual da timeline com notas à direita e tarefas à esquerda.
+1. Criar uma tarefa para outro dia e confirmar ghost card no dia de origem.
+2. Abrir o ghost card, navegar para o item real no dia de destino e confirmar
+   abertura contextual do item.
+3. Usar o breadcrumb para retornar ao dia de origem.
+4. Confirmar eixo visual da timeline com notas à direita e itens de tarefa à
+   esquerda.
+
+## Regressão técnica
+
+Antes de considerar a feature fechada no checkout local, rodar:
+
+```bash
+pnpm lint
+pnpm test
+pnpm typecheck
+```
+
+Para alterações documentais isoladas, `pnpm lint` e `git diff --check` são a
+validação mínima esperada.
 
 ## Falhas Esperadas
 

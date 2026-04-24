@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import type { Note } from "../../types/note";
 import type { Task } from "../../types/task";
-import type { TimelineItemKind, TimelineNode } from "../../types/timeline";
+import type { DayTab, TimelineItemKind, TimelineNode } from "../../types/timeline";
 import { NoteCardReal } from "../cards/note-card-real";
 import { TaskCardGhost } from "../cards/task-card-ghost";
 import { TaskCardReal } from "../cards/task-card-real";
@@ -12,7 +12,53 @@ import { TaskCreationMarker } from "../cards/task-creation-marker";
 import { TimelineItemWrapper } from "./timeline-item-wrapper";
 import { TimelinePlusButton } from "./timeline-plus-button";
 
+interface TimelineFeedbackCopy {
+  instructionsTitle: string;
+  instructionsBody: string;
+  loadingTitle: string;
+  loadingLabel: string;
+  errorTitle: string;
+  emptyTitle: string;
+  emptyBody: string;
+}
+
+const feedbackCopyByTab: Record<DayTab, TimelineFeedbackCopy> = {
+  timeline: {
+    instructionsTitle: "Timeline do dia",
+    instructionsBody:
+      "Toque uma vez para abrir o Reader. Toque duas vezes para editar. O ghost card leva ao dia de destino.",
+    loadingTitle: "Carregando o dia...",
+    loadingLabel: "Carregando a timeline do dia.",
+    errorTitle: "Falha ao carregar a timeline",
+    emptyTitle: "Nada registrado neste dia ainda.",
+    emptyBody:
+      "Use o botao + para criar uma nota, uma tarefa deste dia ou uma tarefa projetada para outro dia.",
+  },
+  tasks: {
+    instructionsTitle: "Tarefas do dia",
+    instructionsBody:
+      "Toque uma vez para abrir o Reader. Toque duas vezes para editar. Quando houver ghost card, ele leva ao dia de destino.",
+    loadingTitle: "Carregando as tarefas...",
+    loadingLabel: "Carregando as tarefas do dia.",
+    errorTitle: "Falha ao carregar as tarefas",
+    emptyTitle: "Nenhuma tarefa neste recorte ainda.",
+    emptyBody:
+      "Use o botao + para criar uma tarefa deste dia ou uma tarefa projetada para outro dia.",
+  },
+  notes: {
+    instructionsTitle: "Notas do dia",
+    instructionsBody:
+      "Toque uma vez para abrir o Reader. Toque duas vezes para editar.",
+    loadingTitle: "Carregando as notas...",
+    loadingLabel: "Carregando as notas do dia.",
+    errorTitle: "Falha ao carregar as notas",
+    emptyTitle: "Nenhuma nota neste recorte ainda.",
+    emptyBody: "Use o botao + para criar uma nota deste dia.",
+  },
+};
+
 interface TimelineViewProps {
+  activeTab: DayTab;
   nodes: TimelineNode[];
   isLoading: boolean;
   errorMessage: string | null;
@@ -24,6 +70,7 @@ interface TimelineViewProps {
 }
 
 export function TimelineView({
+  activeTab,
   nodes,
   isLoading,
   errorMessage,
@@ -37,6 +84,7 @@ export function TimelineView({
     id: string;
     timeoutId: ReturnType<typeof setTimeout>;
   } | null>(null);
+  const copy = feedbackCopyByTab[activeTab];
 
   useEffect(() => {
     return () => {
@@ -72,23 +120,39 @@ export function TimelineView({
 
   return (
     <View style={styles.container}>
-      <View style={styles.instructions}>
-        <Text style={styles.instructionsTitle}>Timeline do dia</Text>
-        <Text style={styles.instructionsBody}>
-          Toque uma vez para abrir o Reader. Toque duas vezes para editar. O
-          ghost card leva ao dia de destino.
-        </Text>
+      <View
+        accessible
+        accessibilityLabel={`${copy.instructionsTitle}. ${copy.instructionsBody}`}
+        style={styles.instructions}
+      >
+        <Text style={styles.instructionsTitle}>{copy.instructionsTitle}</Text>
+        <Text style={styles.instructionsBody}>{copy.instructionsBody}</Text>
       </View>
 
       {isLoading ? (
-        <View style={styles.feedbackCard}>
-          <Text style={styles.feedbackTitle}>Carregando o dia...</Text>
+        <View
+          accessible
+          accessibilityLabel={copy.loadingLabel}
+          accessibilityLiveRegion="polite"
+          accessibilityState={{ busy: true }}
+          style={styles.loadingCard}
+          testID="timeline-loading-state"
+        >
+          <ActivityIndicator color="#475569" size="small" />
+          <Text style={styles.loadingTitle}>{copy.loadingTitle}</Text>
         </View>
       ) : null}
 
       {!isLoading && errorMessage ? (
-        <View style={styles.feedbackCard}>
-          <Text style={styles.feedbackTitle}>Falha ao carregar a timeline</Text>
+        <View
+          accessible
+          accessibilityLabel={`${copy.errorTitle}. ${errorMessage}`}
+          accessibilityLiveRegion="assertive"
+          accessibilityRole="alert"
+          style={styles.feedbackCard}
+          testID="timeline-error-state"
+        >
+          <Text style={styles.feedbackTitle}>{copy.errorTitle}</Text>
           <Text style={styles.feedbackBody}>{errorMessage}</Text>
         </View>
       ) : null}
@@ -99,12 +163,14 @@ export function TimelineView({
           testID="timeline-view"
         >
           {nodes.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>Nada registrado neste dia ainda.</Text>
-              <Text style={styles.emptyBody}>
-                Use o botao + para criar uma nota, uma tarefa deste dia ou uma
-                tarefa projetada para outro dia.
-              </Text>
+            <View
+              accessible
+              accessibilityLabel={`${copy.emptyTitle}. ${copy.emptyBody}`}
+              style={styles.emptyState}
+              testID="timeline-empty-state"
+            >
+              <Text style={styles.emptyTitle}>{copy.emptyTitle}</Text>
+              <Text style={styles.emptyBody}>{copy.emptyBody}</Text>
             </View>
           ) : (
             <View style={styles.timelineFrame}>
@@ -170,6 +236,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: "#4b5563",
+  },
+  loadingCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#dbe4ee",
+    backgroundColor: "#ffffff",
+    padding: 16,
+  },
+  loadingTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#334155",
   },
   feedbackCard: {
     borderRadius: 18,
