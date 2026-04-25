@@ -5,6 +5,7 @@ node_modules/
 # Expo / React Native
 .expo/
 .expo-shared/
+.expo-export-audit/
 dist/
 web-build/
 
