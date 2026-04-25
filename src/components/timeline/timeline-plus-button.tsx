@@ -61,8 +61,8 @@ export function TimelinePlusButton({
       ) : null}
 
       <TouchableOpacity
-        accessibilityHint="Abre o menu de criacao de nota ou tarefa"
-        accessibilityLabel="Abrir menu de criacao"
+        accessibilityHint="Abre o menu de criação de nota ou tarefa"
+        accessibilityLabel="Abrir menu de criação"
         accessibilityRole="button"
         activeOpacity={0.92}
         disabled={isDisabled}
