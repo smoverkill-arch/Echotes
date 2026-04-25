@@ -6,6 +6,7 @@ import { useCalendarStore } from "../../../src/stores/calendar-store";
 import { useNavigationStore } from "../../../src/stores/navigation-store";
 import { useUIStore } from "../../../src/stores/ui-store";
 import type { AuthenticatedSession } from "../../../src/types/auth";
+import { installMockSystemDate } from "../../support/mock-system-date";
 
 const mockRouter = {
   replace: jest.fn(),
@@ -96,6 +97,8 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+let mockSystemDate: ReturnType<typeof installMockSystemDate> | null = null;
+
 const setAuthenticatedState = () => {
   useAuthStore.setState({
     status: "authenticated",
@@ -108,8 +111,7 @@ const setAuthenticatedState = () => {
 };
 
 beforeEach(() => {
-  jest.useFakeTimers();
-  jest.setSystemTime(new Date("2026-04-18T00:00:00Z"));
+  mockSystemDate = installMockSystemDate("2026-04-18T00:00:00Z");
   jest.clearAllMocks();
   mockSearchParams.date = "2026-04-18";
   mockNotesTable.splice(0, mockNotesTable.length);
@@ -132,8 +134,8 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  mockSystemDate?.restore();
+  mockSystemDate = null;
 });
 
 describe("day surface regressions", () => {

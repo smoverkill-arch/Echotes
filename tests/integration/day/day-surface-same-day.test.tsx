@@ -5,6 +5,7 @@ import { useCalendarStore } from "../../../src/stores/calendar-store";
 import { useAuthStore } from "../../../src/stores/auth-store";
 import { useUIStore } from "../../../src/stores/ui-store";
 import type { AuthenticatedSession } from "../../../src/types/auth";
+import { installMockSystemDate } from "../../support/mock-system-date";
 
 const mockRouter = {
   replace: jest.fn(),
@@ -184,9 +185,32 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+let mockSystemDate: ReturnType<typeof installMockSystemDate> | null = null;
+
+const flushMicrotasks = async (passes = 3) => {
+  for (let pass = 0; pass < passes; pass += 1) {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  }
+};
+
+const renderReadyDayRoute = async () => {
+  render(<ProtectedDayRoute />);
+  await flushMicrotasks();
+
+  expect(screen.getByText("Timeline do dia")).toBeTruthy();
+  expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
+
+  const plusButton = screen.getByTestId("timeline-plus-button");
+  const isDisabled =
+    plusButton.props.disabled ?? plusButton.props.accessibilityState?.disabled ?? false;
+
+  expect(isDisabled).toBe(false);
+};
+
 beforeEach(() => {
-  jest.useFakeTimers();
-  jest.setSystemTime(new Date("2026-04-18T00:00:00Z"));
+  mockSystemDate = installMockSystemDate("2026-04-18T00:00:00Z");
   jest.clearAllMocks();
   mockNotesTable.splice(0, mockNotesTable.length);
   mockTasksTable.splice(0, mockTasksTable.length);
@@ -214,16 +238,14 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  jest.runOnlyPendingTimers();
   jest.useRealTimers();
+  mockSystemDate?.restore();
+  mockSystemDate = null;
 });
 
 describe("US2 same-day day surface", () => {
-  it("mantem o botao + fechado por padrao, abre o bottom sheet e fecha ao cancelar ou escolher uma acao", async () => {
-    render(<ProtectedDayRoute />);
-    await waitFor(() => {
-      expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
-    });
+  it("mantem o botao + fechado por padrao, abre o bottom sheet e fecha ao cancelar", async () => {
+    await renderReadyDayRoute();
 
     expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
     expect(screen.queryByTestId("timeline-create-note-button")).toBeNull();
@@ -242,6 +264,10 @@ describe("US2 same-day day surface", () => {
     await waitFor(() => {
       expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
     });
+  });
+
+  it("fecha o bottom sheet ao escolher uma acao e abre o editor correspondente", async () => {
+    await renderReadyDayRoute();
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("timeline-plus-button"));
@@ -255,9 +281,7 @@ describe("US2 same-day day surface", () => {
   });
 
   it("permite criar nota e tarefas do mesmo dia e renderiza a timeline correta", async () => {
-    render(<ProtectedDayRoute />);
-
-    expect(await screen.findByText("Timeline do dia")).toBeTruthy();
+    await renderReadyDayRoute();
     expect(screen.getByText("18-04-2026")).toBeTruthy();
 
     await act(async () => {
@@ -322,11 +346,18 @@ describe("US2 same-day day surface", () => {
     });
     expect(screen.getByTestId("task-card-timed-20000000-0000-4000-8000-000000000002")).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId("timeline-node-10000000-0000-4000-8000-000000000001:note"));
+    jest.useFakeTimers();
+    try {
+      fireEvent.press(
+        screen.getByTestId("timeline-node-10000000-0000-4000-8000-000000000001:note"),
+      );
 
-    await act(async () => {
-      jest.advanceTimersByTime(250);
-    });
+      await act(async () => {
+        jest.advanceTimersByTime(250);
+      });
+    } finally {
+      jest.useRealTimers();
+    }
 
     expect(await screen.findByText("Reader de nota")).toBeTruthy();
 
@@ -347,10 +378,7 @@ describe("US2 same-day day surface", () => {
   });
 
   it("exibe e aceita DD-MM-AAAA no editor e persiste day key interna", async () => {
-    render(<ProtectedDayRoute />);
-    await waitFor(() => {
-      expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
-    });
+    await renderReadyDayRoute();
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("timeline-plus-button"));
@@ -378,12 +406,9 @@ describe("US2 same-day day surface", () => {
   });
 
   it("salva horario futuro local e bloqueia horario passado local no mesmo dia", async () => {
-    jest.setSystemTime(new Date(2026, 3, 18, 23, 0, 0, 0));
+    mockSystemDate?.set(new Date(2026, 3, 18, 23, 0, 0, 0));
 
-    render(<ProtectedDayRoute />);
-    await waitFor(() => {
-      expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
-    });
+    await renderReadyDayRoute();
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("timeline-plus-button"));
@@ -431,9 +456,7 @@ describe("US2 same-day day surface", () => {
   });
 
   it("aceita timestamps com offset retornados pelo Supabase real", async () => {
-    render(<ProtectedDayRoute />);
-
-    expect(await screen.findByText("Timeline do dia")).toBeTruthy();
+    await renderReadyDayRoute();
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("timeline-plus-button"));

@@ -2,7 +2,9 @@ import {
   buildDayTimeIso,
   extractTimePart,
   formatDisplayDay,
+  isValidTimeKey,
   parseDisplayDayInput,
+  TIME_KEY_ERROR_MESSAGE,
 } from "../../../src/utils/date";
 
 describe("date helpers", () => {
@@ -27,4 +29,21 @@ describe("date helpers", () => {
     expect(scheduledAt).toBe(expected);
     expect(extractTimePart(scheduledAt).slice(0, 5)).toBe("20:15");
   });
+
+  it.each(["00:00", "09:30", "23:59"])(
+    "aceita horarios validos dentro da faixa real: %s",
+    (value) => {
+      expect(isValidTimeKey(value)).toBe(true);
+    },
+  );
+
+  it.each(["24:00", "29:99", "12:60", "12:75", "7:30", "1234"])(
+    "rejeita horarios invalidos no helper: %s",
+    (value) => {
+      expect(isValidTimeKey(value)).toBe(false);
+      expect(() => buildDayTimeIso("2026-04-18", value)).toThrow(
+        TIME_KEY_ERROR_MESSAGE,
+      );
+    },
+  );
 });

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { TASK_STATUS_VALUES } from "../types/task";
+import { isValidTimeKey, TIME_KEY_ERROR_MESSAGE } from "../utils/date";
 
 export const dateStringSchema = z
   .string()
@@ -8,7 +9,7 @@ export const dateStringSchema = z
 
 export const timeStringSchema = z
   .string()
-  .regex(/^\d{2}:\d{2}$/, "Use o formato HH:mm.");
+  .refine(isValidTimeKey, TIME_KEY_ERROR_MESSAGE);
 
 export const colorSchema = z
   .string()

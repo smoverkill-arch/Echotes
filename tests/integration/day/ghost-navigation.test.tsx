@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react-native";
 
 import ProtectedDayRoute from "../../../app/day/[date]";
 import { useAuthStore } from "../../../src/stores/auth-store";
@@ -6,6 +6,7 @@ import { useCalendarStore } from "../../../src/stores/calendar-store";
 import { useNavigationStore } from "../../../src/stores/navigation-store";
 import { useUIStore } from "../../../src/stores/ui-store";
 import type { AuthenticatedSession } from "../../../src/types/auth";
+import { installMockSystemDate } from "../../support/mock-system-date";
 
 const navigateToDay = (href: string) => {
   const match = href.match(/^\/day\/(\d{4}-\d{2}-\d{2})$/);
@@ -197,9 +198,57 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+let mockSystemDate: ReturnType<typeof installMockSystemDate> | null = null;
+
+const flushMicrotasks = async (passes = 3) => {
+  for (let pass = 0; pass < passes; pass += 1) {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  }
+};
+
+const renderReadyDayRoute = async () => {
+  render(<ProtectedDayRoute />);
+  await flushMicrotasks();
+
+  expect(screen.getByText("Timeline do dia")).toBeTruthy();
+  expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
+};
+
+const createProjectedTaskFromOrigin = async () => {
+  await act(async () => {
+    fireEvent.press(screen.getByTestId("timeline-plus-button"));
+  });
+  fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+
+  fireEvent.changeText(
+    await screen.findByTestId("task-editor-title-input"),
+    "Tarefa futura",
+  );
+  fireEvent.changeText(
+    screen.getByTestId("task-editor-target-day-input"),
+    "20-04-2026",
+  );
+  fireEvent.changeText(screen.getByTestId("task-editor-time-input"), "18:30");
+
+  await act(async () => {
+    fireEvent.press(screen.getByTestId("task-editor-submit-button"));
+  });
+  await flushMicrotasks();
+};
+
+const navigateToProjectedTaskDestination = async () => {
+  fireEvent.press(
+    screen.getByTestId(
+      "timeline-node-20000000-0000-4000-8000-000000000001:task_ghost",
+    ),
+  );
+  await flushMicrotasks();
+};
+
 beforeEach(() => {
-  jest.useFakeTimers();
-  jest.setSystemTime(new Date("2026-04-18T00:00:00Z"));
+  mockSystemDate = installMockSystemDate("2026-04-18T00:00:00Z");
   jest.clearAllMocks();
   mockSearchParams.date = "2026-04-18";
   mockNotesTable.splice(0, mockNotesTable.length);
@@ -242,43 +291,32 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  mockSystemDate?.restore();
+  mockSystemDate = null;
 });
 
 describe("US3 ghost navigation", () => {
-  it("cria ghost card na origem, navega ao item real com breadcrumb e retorna ao contexto original", async () => {
-    render(<ProtectedDayRoute />);
+  it("renderiza a rota protegida de origem com timeline pronta", async () => {
+    await renderReadyDayRoute();
 
-    expect(await screen.findByText("Timeline do dia")).toBeTruthy();
+    expect(screen.getByTestId("timeline-axis-rail")).toBeTruthy();
+    expect(
+      screen.getByTestId(
+        "timeline-item-wrapper-right-30000000-0000-4000-8000-000000000001:note",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("cria ghost card na origem e navega ao item real com breadcrumb", async () => {
+    await renderReadyDayRoute();
     expect(screen.getByTestId("timeline-axis-rail")).toBeTruthy();
 
-    await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
-    });
-    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
-
-    fireEvent.changeText(
-      await screen.findByTestId("task-editor-title-input"),
-      "Tarefa futura",
-    );
-    fireEvent.changeText(
-      screen.getByTestId("task-editor-target-day-input"),
-      "20-04-2026",
-    );
-    fireEvent.changeText(screen.getByTestId("task-editor-time-input"), "18:30");
-
-    await act(async () => {
-      fireEvent.press(screen.getByTestId("task-editor-submit-button"));
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(
-          "task-card-ghost-20000000-0000-4000-8000-000000000001",
-        ),
-      ).toBeTruthy();
-    });
+    await createProjectedTaskFromOrigin();
+    expect(
+      screen.getByTestId(
+        "task-card-ghost-20000000-0000-4000-8000-000000000001",
+      ),
+    ).toBeTruthy();
     expect(
       screen.queryByTestId(
         "task-card-timed-20000000-0000-4000-8000-000000000001",
@@ -295,20 +333,19 @@ describe("US3 ghost navigation", () => {
       ),
     ).toBeTruthy();
 
-    fireEvent.press(
-      screen.getByTestId(
-        "timeline-node-20000000-0000-4000-8000-000000000001:task_ghost",
-      ),
-    );
-
-    await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-20");
-    });
-    expect(await screen.findByTestId("breadcrumb-bar")).toBeTruthy();
+    await navigateToProjectedTaskDestination();
+    expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-20");
+    expect(screen.getByTestId("breadcrumb-bar")).toBeTruthy();
     expect(screen.getByText("Item real em 20-04-2026")).toBeTruthy();
     expect(screen.getByText("Criada em 18-04-2026")).toBeTruthy();
-    expect(await screen.findByText("Reader de tarefa")).toBeTruthy();
+    expect(screen.getByText("Reader de tarefa")).toBeTruthy();
     expect(screen.getByTestId("task-reader-context-meta")).toBeTruthy();
+  });
+
+  it("permite editar o item real e retornar ao contexto original", async () => {
+    await renderReadyDayRoute();
+    await createProjectedTaskFromOrigin();
+    await navigateToProjectedTaskDestination();
 
     fireEvent.press(screen.getByTestId("task-reader-edit-button"));
 
@@ -321,28 +358,22 @@ describe("US3 ghost navigation", () => {
     await act(async () => {
       fireEvent.press(screen.getByTestId("task-editor-submit-button"));
     });
-
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(
-          "task-card-timed-20000000-0000-4000-8000-000000000001",
-        ),
-      ).toBeTruthy();
-    });
+    await flushMicrotasks();
+    expect(
+      screen.getByTestId(
+        "task-card-timed-20000000-0000-4000-8000-000000000001",
+      ),
+    ).toBeTruthy();
     expect(screen.getByText("Tarefa futura revisada")).toBeTruthy();
 
     fireEvent.press(screen.getByTestId("breadcrumb-return-button"));
-
-    await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-18");
-    });
-    await waitFor(() => {
-      expect(
-        screen.getByTestId(
-          "task-card-ghost-20000000-0000-4000-8000-000000000001",
-        ),
-      ).toBeTruthy();
-    });
+    await flushMicrotasks();
+    expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-18");
+    expect(
+      screen.getByTestId(
+        "task-card-ghost-20000000-0000-4000-8000-000000000001",
+      ),
+    ).toBeTruthy();
     expect(screen.getByText("Tarefa futura revisada")).toBeTruthy();
   });
 });

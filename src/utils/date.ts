@@ -1,6 +1,8 @@
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const DISPLAY_DAY_PATTERN = /^\d{2}-\d{2}-\d{4}$/;
 const TIME_KEY_PATTERN = /^\d{2}:\d{2}$/;
+export const TIME_KEY_ERROR_MESSAGE =
+  "Hora invalida. Use o formato HH:mm entre 00:00 e 23:59.";
 
 const ensureDayKey = (value: string) => {
   if (!DAY_KEY_PATTERN.test(value)) {
@@ -9,8 +11,8 @@ const ensureDayKey = (value: string) => {
 };
 
 const ensureTimeKey = (value: string) => {
-  if (!TIME_KEY_PATTERN.test(value)) {
-    throw new Error("Hora invalida. Use o formato HH:mm.");
+  if (!isValidTimeKey(value)) {
+    throw new Error(TIME_KEY_ERROR_MESSAGE);
   }
 };
 
@@ -43,6 +45,16 @@ const isValidCalendarDate = (year: number, month: number, day: number) => {
     candidate.getMonth() === month - 1 &&
     candidate.getDate() === day
   );
+};
+
+export const isValidTimeKey = (value: string) => {
+  if (!TIME_KEY_PATTERN.test(value)) {
+    return false;
+  }
+
+  const [hours, minutes] = value.split(":").map(Number);
+
+  return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
 };
 
 export const parseDayKey = (value: string) => {

@@ -97,9 +97,7 @@ export function TimelineView({
 
   useEffect(() => {
     return () => {
-      if (pendingPressRef.current) {
-        clearTimeout(pendingPressRef.current.timeoutId);
-      }
+      clearPendingPress();
     };
   }, []);
 
@@ -109,20 +107,35 @@ export function TimelineView({
     }
   }, [isLoading]);
 
+  const clearPendingPress = () => {
+    if (!pendingPressRef.current) {
+      return;
+    }
+
+    clearTimeout(pendingPressRef.current.timeoutId);
+    pendingPressRef.current = null;
+  };
+
   const handleNodePress = (node: TimelineNode) => {
     if (node.type === "task_ghost") {
+      clearPendingPress();
       onNavigateToTask(node.data as Task);
       return;
     }
 
     if (pendingPressRef.current?.id === node.id) {
-      clearTimeout(pendingPressRef.current.timeoutId);
-      pendingPressRef.current = null;
+      clearPendingPress();
       onOpenEditor(node.itemKind, node.itemId);
       return;
     }
 
+    clearPendingPress();
+
     const timeoutId = setTimeout(() => {
+      if (pendingPressRef.current?.id !== node.id) {
+        return;
+      }
+
       onOpenReader(node.itemKind, node.itemId);
       pendingPressRef.current = null;
     }, 220);
