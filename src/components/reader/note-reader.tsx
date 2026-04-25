@@ -21,7 +21,7 @@ export function NoteReader({
   }
 
   return (
-    <Modal animationType="fade" transparent visible={visible}>
+    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
           <Text style={styles.eyebrow}>Reader de nota</Text>

@@ -28,7 +28,7 @@ export function TaskReader({
     : null;
 
   return (
-    <Modal animationType="fade" transparent visible={visible}>
+    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
           <Text style={styles.eyebrow}>Reader de tarefa</Text>
