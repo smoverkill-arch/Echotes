@@ -2,7 +2,7 @@
 
 **Branch da feature**: `001-auth-day-surface`  
 **Criada em**: 2026-04-15  
-**Status**: Rascunho  
+**Status**: Aprovada
 **Entrada**: Descrição do usuário: "Criar a primeira fatia vertical do Echotes com autenticação completa por email e senha, acesso protegido à superfície diária e criação básica de nota e tarefa na timeline do dia."
 
 > Esta spec foi derivada da constituição do projeto e dos canônicos em `/docs`.
