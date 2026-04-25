@@ -217,6 +217,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   beginAuthTransition: ({ status, isRestoring = false }) => {
     set({
       status,
+      isAuthenticated: false,
+      session: null,
       isRestoring,
       errorMessage: null,
     });
