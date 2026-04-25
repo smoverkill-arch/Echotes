@@ -167,7 +167,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     authSyncListeners += 1;
 
-      if (!authSyncUnsubscribe) {
+    if (!authSyncUnsubscribe) {
       const {
         data: { subscription },
       } = getSupabaseClient().auth.onAuthStateChange((event, session) => {

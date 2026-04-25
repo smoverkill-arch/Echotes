@@ -191,13 +191,13 @@ export default function ProtectedDayRoute() {
   }
 
   return (
-      <DayShell
-        date={resolvedDate}
-        email={session.email}
-        isSigningOut={isSigningOut}
-        authStatus={authStatus}
-        authErrorMessage={errorMessage}
-        activeTab={activeTab}
+    <DayShell
+      date={resolvedDate}
+      email={session.email}
+      isSigningOut={isSigningOut}
+      authStatus={authStatus}
+      authErrorMessage={errorMessage}
+      activeTab={activeTab}
       readerState={readerState}
       editorState={editorState}
       timelineNodes={timelineNodes}

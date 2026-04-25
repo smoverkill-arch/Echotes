@@ -28,7 +28,7 @@ const optionalTimeStringSchema = z
     const normalizedValue = value.trim();
 
     return normalizedValue === "" ? null : normalizedValue;
-  }, z.union([timeStringSchema, z.literal(""), z.null()]))
+  }, z.union([timeStringSchema, z.null()]))
   .optional()
   .transform((value) => {
     if (!value) {
