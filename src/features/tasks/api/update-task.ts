@@ -61,7 +61,7 @@ export const updateTask = async (
       ok: false,
       task: null,
       errorMessage:
-        "O horario da tarefa precisa estar no futuro no fuso local.",
+        "O horario da tarefa precisa ser estritamente posterior a criacao.",
     };
   }
 

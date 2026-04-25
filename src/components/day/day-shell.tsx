@@ -1,10 +1,12 @@
 import { StyleSheet, View } from "react-native";
 
+import { AuthErrorBanner } from "../auth/auth-error-banner";
 import type { Note } from "../../types/note";
 import type { Task } from "../../types/task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { ReaderState, EditorState } from "../../stores/ui-store";
 import type { DayTab, TimelineItemKind, TimelineNode } from "../../types/timeline";
+import type { AuthStatus } from "../../types/auth";
 import { BreadcrumbBar } from "./breadcrumb-bar";
 import { DayHeader } from "./day-header";
 import { TaskEditor } from "../forms/task-editor";
@@ -17,6 +19,8 @@ interface DayShellProps {
   date: string;
   email: string;
   isSigningOut: boolean;
+  authStatus: AuthStatus;
+  authErrorMessage: string | null;
   activeTab: DayTab;
   readerState: ReaderState;
   editorState: EditorState;
@@ -43,6 +47,8 @@ export function DayShell({
   date,
   email,
   isSigningOut,
+  authStatus,
+  authErrorMessage,
   activeTab,
   readerState,
   editorState,
@@ -66,6 +72,8 @@ export function DayShell({
 }: DayShellProps) {
   return (
     <View style={styles.container}>
+      <AuthErrorBanner status={authStatus} message={authErrorMessage} />
+
       <DayHeader
         date={date}
         email={email}

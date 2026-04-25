@@ -8,7 +8,7 @@ export const installMockSystemDate = (initialValue: DateValue) => {
 
   function MockDate(this: unknown, ...args: unknown[]) {
     if (!new.target) {
-      return RealDate();
+      return new RealDate(currentTimestamp).toString();
     }
 
     const values = args.length > 0 ? args : [currentTimestamp];

@@ -10,13 +10,14 @@ interface AuthErrorBannerProps {
 const titleByStatus: Record<AuthStatus, string> = {
   unauthenticated: "Falha de autenticacao",
   authenticating: "Autenticando",
-  authenticated: "Sessao ativa",
+  authenticated: "Falha de sessao",
   signing_out: "Encerrando sessao",
   session_expired: "Sessao expirada",
   config_error: "Configuracao ausente",
 };
 
 const isVisibleStatus = (status: AuthStatus) =>
+  status === "authenticated" ||
   status === "config_error" ||
   status === "session_expired" ||
   status === "unauthenticated";

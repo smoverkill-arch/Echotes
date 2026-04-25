@@ -9,14 +9,8 @@ import {
 } from "react-native";
 
 import { createNote } from "../../features/notes/api/create-note";
-import { noteFormSchema, noteSchema } from "../../schemas/note.schema";
-import { useAuthStore } from "../../stores/auth-store";
+import { updateNote } from "../../features/notes/api/update-note";
 import type { Note } from "../../types/note";
-import {
-  getSupabaseClient,
-  getSupabaseConfigurationError,
-  isSupabaseConfigured,
-} from "../../lib/supabase";
 
 interface NoteEditorProps {
   visible: boolean;
@@ -62,22 +56,7 @@ export function NoteEditor({
       return;
     }
 
-    if (!isSupabaseConfigured) {
-      setErrorMessage(
-        getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.",
-      );
-      return;
-    }
-
-    const authStore = useAuthStore.getState();
-
-    if (!authStore.session?.userId) {
-      authStore.setSessionExpired();
-      setErrorMessage("Sua sessao expirou. Entre novamente.");
-      return;
-    }
-
-    const parsedInput = noteFormSchema.safeParse({
+    const result = await updateNote(note, {
       title,
       content,
       brief,
@@ -87,39 +66,12 @@ export function NoteEditor({
       is_color_overridden: note.is_color_overridden,
     });
 
-    if (!parsedInput.success) {
-      setErrorMessage(
-        parsedInput.error.issues[0]?.message ?? "Informe os dados da nota corretamente.",
-      );
+    if (!result.ok || !result.note) {
+      setErrorMessage(result.errorMessage);
       return;
     }
 
-    const { data, error } = await getSupabaseClient()
-      .from("notes")
-      .update({
-        title: parsedInput.data.title,
-        content: parsedInput.data.content || null,
-        brief: parsedInput.data.brief || null,
-      })
-      .eq("id", note.id)
-      .select("*")
-      .single();
-
-    if (error) {
-      setErrorMessage(`Nao foi possivel salvar a nota. ${error.message}`);
-      return;
-    }
-
-    const parsedNote = noteSchema.safeParse(data);
-
-    if (!parsedNote.success) {
-      setErrorMessage(
-        parsedNote.error.issues[0]?.message ?? "Nota salva com formato invalido.",
-      );
-      return;
-    }
-
-    await onSaved(parsedNote.data);
+    await onSaved(result.note);
   };
 
   const handleSubmit = async () => {

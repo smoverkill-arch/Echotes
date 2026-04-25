@@ -184,6 +184,29 @@ describe("US1 auth session flow", () => {
     expect(screen.getByText("/sign-in")).toBeTruthy();
   });
 
+  it("mantem a sessao autenticada e exibe feedback quando o logout falha", async () => {
+    setAuthenticatedState();
+    mockSignOut.mockRejectedValue(new Error("Falha de rede"));
+
+    render(<ProtectedDayRoute />);
+
+    await act(async () => {
+      await signOut();
+    });
+
+    expect(useAuthStore.getState()).toMatchObject({
+      status: "authenticated",
+      isAuthenticated: true,
+      session: authenticatedSession,
+      errorMessage: "Nao foi possivel encerrar a sessao. Falha de rede",
+    });
+    expect(screen.getByTestId("auth-error-banner")).toBeTruthy();
+    expect(screen.getByText("Falha de sessao")).toBeTruthy();
+    expect(
+      screen.getByText("Nao foi possivel encerrar a sessao. Falha de rede"),
+    ).toBeTruthy();
+  });
+
   it("retorna ao fluxo publico com feedback quando a sessao expira", async () => {
     await act(async () => {
       useAuthStore.setState({
