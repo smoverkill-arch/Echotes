@@ -495,7 +495,7 @@ describe("US2 same-day day surface", () => {
       expect(screen.getByTestId("task-card-timed-20000000-0000-4000-8000-000000000001")).toBeTruthy();
     });
     expect(mockNotesTable[0]?.created_at).toBe("2026-04-18T09:30:00+00:00");
-    expect(mockTasksTable[0]?.created_at).toBe("2026-04-18T10:00:00+00:00");
+    expect(mockTasksTable[0]?.created_at).toBe("2026-04-18T00:00:00.000Z");
     expect(mockTasksTable[0]?.scheduled_at).toBe(
       `${new Date(2026, 3, 18, 20, 15, 0, 0).toISOString().slice(0, 19)}+00:00`,
     );

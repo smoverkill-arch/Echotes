@@ -77,6 +77,7 @@ export const createTask = async (
         is_color_overridden: parsedInput.data.is_color_overridden,
         source_day: parsedInput.data.source_day,
         target_day: parsedInput.data.target_day,
+        created_at: createdAt,
         scheduled_at: scheduledAt,
         status: parsedInput.data.status,
       })

@@ -1,7 +1,3 @@
-declare const process: {
-  env: Record<string, string | undefined>;
-};
-
 describe("src/lib/env", () => {
   const originalEnv = process.env;
 

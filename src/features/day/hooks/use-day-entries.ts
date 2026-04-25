@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { noteSchema } from "../../../schemas/note.schema";
 import { taskSchema } from "../../../schemas/task.schema";
@@ -27,9 +27,18 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
   const [entries, setEntries] = useState<DayEntries>(EMPTY_DAY_ENTRIES);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   const reload = useCallback(async () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    const isCurrentRequest = () => requestIdRef.current === requestId;
+
     if (!isSupabaseConfigured) {
+      if (!isCurrentRequest()) {
+        return;
+      }
+
       setEntries(EMPTY_DAY_ENTRIES);
       setErrorMessage(
         getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.",
@@ -39,6 +48,10 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
     }
 
     if (!session?.userId) {
+      if (!isCurrentRequest()) {
+        return;
+      }
+
       setEntries(EMPTY_DAY_ENTRIES);
       setErrorMessage("Sua sessao expirou. Entre novamente.");
       setIsLoading(false);
@@ -106,6 +119,10 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
         throw new Error(parsedTasks.error.issues[0]?.message ?? "Falha ao validar tarefas.");
       }
 
+      if (!isCurrentRequest()) {
+        return;
+      }
+
       setEntries({
         notes: parsedNotes.data,
         tasks: parsedTasks.data,
@@ -116,10 +133,17 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
         error instanceof Error
           ? `Nao foi possivel carregar o dia. ${error.message}`
           : "Nao foi possivel carregar o dia.";
+
+      if (!isCurrentRequest()) {
+        return;
+      }
+
       setEntries(EMPTY_DAY_ENTRIES);
       setErrorMessage(message);
     } finally {
-      setIsLoading(false);
+      if (isCurrentRequest()) {
+        setIsLoading(false);
+      }
     }
   }, [selectedDay, session?.userId]);
 

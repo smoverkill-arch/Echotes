@@ -56,7 +56,7 @@ export const updateTask = async (
     parsedInput.data.scheduled_time,
   );
 
-  if (scheduledAt && !isIsoAfter(scheduledAt, new Date().toISOString())) {
+  if (scheduledAt && !isIsoAfter(scheduledAt, task.created_at)) {
     return {
       ok: false,
       task: null,

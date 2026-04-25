@@ -237,6 +237,16 @@ describe("day surface regressions", () => {
     });
   });
 
+  it("faz fallback para o dia selecionado quando o parametro da rota e uma data impossivel", async () => {
+    mockSearchParams.date = "2026-02-31";
+
+    render(<ProtectedDayRoute />);
+
+    expect(await screen.findByText("18-04-2026")).toBeTruthy();
+    expect(screen.queryByText("31-02-2026")).toBeNull();
+    expect(useCalendarStore.getState().selectedDate).toBe("2026-04-18");
+  });
+
   it("renderiza listas filtradas em largura util sem eixo central fora da aba timeline", async () => {
     mockNotesTable.push({
       id: "30000000-0000-4000-8000-000000000001",

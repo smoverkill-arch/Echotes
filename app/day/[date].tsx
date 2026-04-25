@@ -10,6 +10,7 @@ import { useCalendarStore } from "../../src/stores/calendar-store";
 import { useDayTimeline } from "../../src/features/day/hooks/use-day-timeline";
 import { useNavigationStore } from "../../src/stores/navigation-store";
 import { useUIStore } from "../../src/stores/ui-store";
+import { parseDayKey } from "../../src/utils/date";
 
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -20,7 +21,12 @@ const resolveDateParam = (
   const rawValue = Array.isArray(value) ? value[0] : value;
 
   if (rawValue && DAY_KEY_PATTERN.test(rawValue)) {
-    return rawValue;
+    try {
+      parseDayKey(rawValue);
+      return rawValue;
+    } catch {
+      return fallbackDate;
+    }
   }
 
   return fallbackDate;
