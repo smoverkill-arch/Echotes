@@ -15,7 +15,7 @@ Neste corte, a experiência cobre:
   breadcrumb de retorno
 - eixo visual da timeline com notas à direita e itens de tarefa à esquerda
 
-## Canonicos
+## Canônicos
 
 Os documentos soberanos do projeto ficam em `docs/`:
 
@@ -51,7 +51,7 @@ O fluxo padrao do projeto e:
 
 A primeira feature aberta neste repositório e `001-auth-day-surface`.
 
-## Convencoes
+## Convenções
 
 - gestor de pacotes: `pnpm`
 - segredos locais: `.env`

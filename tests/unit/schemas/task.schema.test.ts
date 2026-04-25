@@ -35,4 +35,21 @@ describe("task time validation", () => {
     expect(parsed.success).toBe(false);
     expect(parsed.error?.issues[0]?.message).toBe(TIME_KEY_ERROR_MESSAGE);
   });
+
+  it("trata scheduled_time com apenas espacos como ausencia de horario", () => {
+    const parsed = taskFormSchema.safeParse({
+      title: "Tarefa",
+      content: "",
+      source_day: "2026-04-18",
+      target_day: "2026-04-18",
+      scheduled_time: "   ",
+      status: "open",
+      tag_id: null,
+      color: null,
+      is_color_overridden: false,
+    });
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.scheduled_time).toBeNull();
+  });
 });

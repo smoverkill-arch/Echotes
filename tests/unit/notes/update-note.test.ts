@@ -8,13 +8,17 @@ const mockUpdate = jest.fn();
 const mockEq = jest.fn();
 const mockSelect = jest.fn();
 const mockFrom = jest.fn();
+let mockIsSupabaseConfigured = true;
+let mockSupabaseConfigurationError: string | null = null;
 
 jest.mock("../../../src/lib/supabase", () => ({
   getSupabaseClient: () => ({
     from: mockFrom,
   }),
-  getSupabaseConfigurationError: () => null,
-  isSupabaseConfigured: true,
+  getSupabaseConfigurationError: () => mockSupabaseConfigurationError,
+  get isSupabaseConfigured() {
+    return mockIsSupabaseConfigured;
+  },
 }));
 
 const authenticatedSession: AuthenticatedSession = {
@@ -41,6 +45,8 @@ const existingNote: Note = {
 describe("updateNote", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsSupabaseConfigured = true;
+    mockSupabaseConfigurationError = null;
 
     mockFrom.mockReturnValue({
       update: mockUpdate,
@@ -66,6 +72,31 @@ describe("updateNote", () => {
       isRestoring: false,
       isAuthenticated: true,
     });
+  });
+
+  it("propaga erro de configuracao tambem para o estado global de auth", async () => {
+    mockIsSupabaseConfigured = false;
+    mockSupabaseConfigurationError = "Supabase indisponivel para o ambiente atual.";
+
+    const result = await updateNote(existingNote, {
+      title: "Nota revisada",
+      content: existingNote.content ?? "",
+      brief: existingNote.brief ?? "",
+      day: existingNote.day,
+      tag_id: existingNote.tag_id,
+      color: existingNote.color,
+      is_color_overridden: existingNote.is_color_overridden,
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      note: null,
+      errorMessage: "Supabase indisponivel para o ambiente atual.",
+    });
+    expect(useAuthStore.getState().status).toBe("config_error");
+    expect(useAuthStore.getState().errorMessage).toBe(
+      "Supabase indisponivel para o ambiente atual.",
+    );
   });
 
   it("transforma rejection de transporte em erro amigavel", async () => {

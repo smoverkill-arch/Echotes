@@ -18,13 +18,15 @@ export const updateNote = async (
   input: NoteFormValues,
 ): Promise<UpdateNoteResult> => {
   const authStore = useAuthStore.getState();
+  const configErrorMessage =
+    getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.";
 
   if (!isSupabaseConfigured) {
+    authStore.setConfigError(configErrorMessage);
     return {
       ok: false,
       note: null,
-      errorMessage:
-        getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.",
+      errorMessage: configErrorMessage,
     };
   }
 

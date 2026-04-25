@@ -3,6 +3,7 @@ import type { AuthenticatedSession } from "../../../src/types/auth";
 import type { Task } from "../../../src/types/task";
 import { createTask } from "../../../src/features/tasks/api/create-task";
 import { updateTask } from "../../../src/features/tasks/api/update-task";
+import { buildScheduledAt } from "../../../src/features/tasks/utils/build-scheduled-at";
 
 const mockSingle = jest.fn();
 const mockInsert = jest.fn();
@@ -37,7 +38,7 @@ const existingTask: Task = {
   source_day: "2026-04-18",
   target_day: "2026-04-20",
   created_at: "2026-04-18T10:00:00+00:00",
-  scheduled_at: "2026-04-20T21:30:00+00:00",
+  scheduled_at: buildScheduledAt("2026-04-20", "18:30"),
   status: "open",
   completed_at: null,
   updated_at: "2026-04-18T10:00:00+00:00",
@@ -137,8 +138,8 @@ describe("task temporal validation regressions", () => {
 
     expect(result.ok).toBe(true);
     expect(mockUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-        scheduled_at: "2026-04-20T21:30:00+00:00",
+      expect.objectContaining({
+        scheduled_at: buildScheduledAt("2026-04-20", "18:30"),
         title: "Tarefa futura revisada",
       }),
     );

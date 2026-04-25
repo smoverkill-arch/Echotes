@@ -20,7 +20,15 @@ export const colorSchema = z
 
 export const taskStatusSchema = z.enum(TASK_STATUS_VALUES);
 const optionalTimeStringSchema = z
-  .union([timeStringSchema, z.literal(""), z.null()])
+  .preprocess((value) => {
+    if (typeof value !== "string") {
+      return value;
+    }
+
+    const normalizedValue = value.trim();
+
+    return normalizedValue === "" ? null : normalizedValue;
+  }, z.union([timeStringSchema, z.literal(""), z.null()]))
   .optional()
   .transform((value) => {
     if (!value) {
