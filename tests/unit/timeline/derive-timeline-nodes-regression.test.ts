@@ -48,7 +48,7 @@ describe("deriveTimelineNodes regressions", () => {
       tasks: [
         buildTask({
           id: "20000000-0000-4000-8000-000000000003",
-          scheduled_at: `${selectedDay}T10:00:00+00:00`,
+          scheduled_at: `${selectedDay}T10:01:00+00:00`,
         }),
         buildTask({
           id: "20000000-0000-4000-8000-000000000001",
@@ -65,8 +65,8 @@ describe("deriveTimelineNodes regressions", () => {
       "note:10000000-0000-4000-8000-000000000001",
       "task_untimed:20000000-0000-4000-8000-000000000001",
       "task_creation_marker:20000000-0000-4000-8000-000000000003",
-      "task_timed:20000000-0000-4000-8000-000000000003",
       "task_ghost:20000000-0000-4000-8000-000000000002",
+      "task_timed:20000000-0000-4000-8000-000000000003",
     ]);
 
     for (const node of nodes) {

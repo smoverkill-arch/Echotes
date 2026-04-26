@@ -68,6 +68,7 @@ export default function ProtectedDayRoute() {
   );
   const isSigningOut = authStatus === "signing_out";
 
+  const rawDateParam = Array.isArray(params.date) ? params.date[0] : params.date;
   const resolvedDate = resolveDateParam(params.date, selectedDate);
   const {
     notes,
@@ -187,6 +188,10 @@ export default function ProtectedDayRoute() {
   }
 
   if (protectedDayHref !== `/day/${resolvedDate}`) {
+    return <Redirect href={`/day/${resolvedDate}`} />;
+  }
+
+  if (rawDateParam && rawDateParam !== resolvedDate) {
     return <Redirect href={`/day/${resolvedDate}`} />;
   }
 
