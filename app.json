@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Echotes",
+    "slug": "echotes",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "echotes",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "plugins": [
+      "expo-router"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    }
+  }
+}

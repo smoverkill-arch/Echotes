@@ -1,26 +1,26 @@
-# [PROJECT NAME] Development Guidelines
+# Diretrizes de Desenvolvimento do [PROJECT NAME]
 
-Auto-generated from all feature plans. Last updated: [DATE]
+Gerado automaticamente a partir de todos os planos de feature. Última atualização: [DATE]
 
-## Active Technologies
+## Tecnologias Ativas
 
 [EXTRACTED FROM ALL PLAN.MD FILES]
 
-## Project Structure
+## Estrutura do Projeto
 
 ```text
 [ACTUAL STRUCTURE FROM PLANS]
 ```
 
-## Commands
+## Comandos
 
 [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES]
 
-## Code Style
+## Estilo de Código
 
 [LANGUAGE-SPECIFIC, ONLY FOR LANGUAGES IN USE]
 
-## Recent Changes
+## Mudanças Recentes
 
 [LAST 3 FEATURES AND WHAT THEY ADDED]
 

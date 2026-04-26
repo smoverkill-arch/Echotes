@@ -1,0 +1,38 @@
+# Node / package manager
+node_modules/
+.pnpm-store/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+.expo-export-audit/
+dist/
+web-build/
+
+# Environment
+.env*
+!.env.example
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

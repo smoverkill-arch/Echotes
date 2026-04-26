@@ -1,104 +1,97 @@
-# Implementation Plan: [FEATURE]
+# Plano de Implementação: [FEATURE]
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `[###-nome-da-feature]` | **Data**: [DATE] | **Spec**: [link]
+**Entrada**: Especificação da feature em `/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Observação**: Este template é preenchido pelo comando `/speckit.plan`. Use a
+constituição do projeto e os documentos canônicos em `/docs` antes de fechar
+qualquer decisão técnica.
 
-## Summary
+## Resumo
 
-[Extract from feature spec: primary requirement + technical approach from research]
+[Extrair da spec: requisito principal + abordagem técnica derivada da pesquisa]
 
-## Technical Context
+## Contexto Técnico
 
 <!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
+  AÇÃO NECESSÁRIA: Substitua o conteúdo desta seção por detalhes concretos.
+  Planos do Echotes DEVEM explicitar o gestor de pacotes, a política de ambiente
+  do Supabase e os invariantes do dia/timeline que impactam a implementação.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Idioma/Versão**: [ex.: TypeScript 5.x ou NEEDS CLARIFICATION]
+**Dependências principais**: [ex.: Expo, Expo Router, Zustand, Supabase JS ou NEEDS CLARIFICATION]
+**Gestor de pacotes**: [pnpm]
+**Armazenamento**: [ex.: Supabase Postgres + persistência local de sessão ou NEEDS CLARIFICATION]
+**Testes**: [ex.: Jest + React Native Testing Library + validação manual de cenários críticos ou NEEDS CLARIFICATION]
+**Plataforma-alvo**: [ex.: iOS/Android via Expo ou NEEDS CLARIFICATION]
+**Tipo de projeto**: [ex.: app mobile]
+**Metas de performance**: [ex.: tela do dia utilizável em até 2 segundos em conectividade móvel comum]
+**Restrições**: [ex.: sem service_role no cliente, preservar separação task/note, garantir invariantes temporais]
+**Escala/Escopo**: [ex.: primeira fatia vertical autenticada da superfície do dia]
 
-## Constitution Check
+## Checagem da Constituição
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*BLOQUEIO: deve passar antes da Fase 0 de pesquisa. Revalidar após a Fase 1 de desenho.*
 
-[Gates determined based on constitution file]
+- [ ] As fontes canônicas em `/docs` foram revisadas e citadas quando originam decisões.
+- [ ] A navegação centrada no dia e a timeline diária continuam como interação principal.
+- [ ] Os comportamentos de tarefa e nota continuam distintos; nenhuma abstração enfraquece ghost cards ou ecos.
+- [ ] Os invariantes temporais e cenários críticos têm cobertura explícita de verificação.
+- [ ] `pnpm`, `.env.example`, as chaves públicas do cliente Supabase e a política de segredos do cliente foram respeitados.
 
-## Project Structure
+## Estrutura do Projeto
 
-### Documentation (this feature)
+### Documentação (desta feature)
 
 ```text
 specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+└── tasks.md
 ```
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+### Código-fonte (raiz do repositório)
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+app/
+├── _layout.tsx
+├── index.tsx
+├── (auth)/
+│   ├── sign-in.tsx
+│   └── sign-up.tsx
+└── day/
+    └── [date].tsx
+
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+├── components/
+├── features/
+├── lib/
+├── schemas/
+├── stores/
+├── types/
+└── utils/
+
+supabase/
+└── migrations/
 
 tests/
-├── contract/
 ├── integration/
 └── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Decisão de estrutura**: manter um único app Expo com superfícies por rota em
+`app/`, regras de domínio em `src/` e artefatos SQL/Supabase em `supabase/`.
 
-## Complexity Tracking
+## Rastreamento de Complexidade
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+Use esta tabela apenas quando a feature exigir uma exceção explícita à
+constituição. Caso contrário, substitua o conteúdo por
+`Nenhuma violação da constituição é esperada.`
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| Violação | Por que é necessária | Alternativa mais simples rejeitada porque |
+|----------|----------------------|-------------------------------------------|
+| [ex.: adaptador temporário] | [necessidade atual] | [por que a rota canônica foi insuficiente] |
