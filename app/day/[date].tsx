@@ -17,19 +17,19 @@ const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const resolveDateParam = (
   value: string | string[] | undefined,
   fallbackDate: string,
-) => {
+): { resolved: string; needsRedirect: boolean } => {
   const rawValue = Array.isArray(value) ? value[0] : value;
 
   if (rawValue && DAY_KEY_PATTERN.test(rawValue)) {
     try {
       parseDayKey(rawValue);
-      return rawValue;
+      return { resolved: rawValue, needsRedirect: false };
     } catch {
-      return fallbackDate;
+      return { resolved: fallbackDate, needsRedirect: true };
     }
   }
 
-  return fallbackDate;
+  return { resolved: fallbackDate, needsRedirect: Boolean(rawValue) };
 };
 
 export default function ProtectedDayRoute() {
@@ -68,8 +68,8 @@ export default function ProtectedDayRoute() {
   );
   const isSigningOut = authStatus === "signing_out";
 
-  const rawDateParam = Array.isArray(params.date) ? params.date[0] : params.date;
-  const resolvedDate = resolveDateParam(params.date, selectedDate);
+  const { resolved: resolvedDate, needsRedirect: dateParamNeedsRedirect } =
+    resolveDateParam(params.date, selectedDate);
   const {
     notes,
     taskLookup,
@@ -189,7 +189,7 @@ export default function ProtectedDayRoute() {
 
   if (
     protectedDayHref !== `/day/${resolvedDate}` ||
-    (rawDateParam && rawDateParam !== resolvedDate)
+    dateParamNeedsRedirect
   ) {
     return <Redirect href={`/day/${resolvedDate}`} />;
   }
