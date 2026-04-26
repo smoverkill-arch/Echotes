@@ -187,11 +187,10 @@ export default function ProtectedDayRoute() {
     return <Redirect href={signInHref} />;
   }
 
-  if (protectedDayHref !== `/day/${resolvedDate}`) {
-    return <Redirect href={`/day/${resolvedDate}`} />;
-  }
-
-  if (rawDateParam && rawDateParam !== resolvedDate) {
+  if (
+    protectedDayHref !== `/day/${resolvedDate}` ||
+    (rawDateParam && rawDateParam !== resolvedDate)
+  ) {
     return <Redirect href={`/day/${resolvedDate}`} />;
   }
 
