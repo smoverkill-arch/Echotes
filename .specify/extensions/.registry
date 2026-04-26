@@ -37,6 +37,75 @@
       },
       "registered_skills": [],
       "installed_at": "2026-04-26T01:45:43.928059+00:00"
+    },
+    "archive": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:ffa3831c0dd8aceeadad88efe4411676142d654dfbc1987e6e030ba6cdceb83e",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.archive.run"
+        ],
+        "codex": [
+          "speckit.archive.run"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-26T01:48:51.083479+00:00"
+    },
+    "critique": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:0b63a1835415df730cbd487c90c1252b294980176c10c14a3fa9c31a7cb882e0",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.critique.run"
+        ],
+        "codex": [
+          "speckit.critique.run"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-26T02:04:02.510284+00:00"
+    },
+    "docguard": {
+      "version": "0.9.9",
+      "source": "local",
+      "manifest_hash": "sha256:fc17a9e01896a6e497e4bc29435064b604f064a9a1ba8873cef4b9cd8e2efc65",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.docguard.guard",
+          "docguard.guard",
+          "speckit.docguard.fix",
+          "docguard.fix",
+          "speckit.docguard.review",
+          "docguard.review",
+          "speckit.docguard.score",
+          "docguard.score",
+          "speckit.docguard.diagnose",
+          "speckit.docguard.generate"
+        ],
+        "codex": [
+          "speckit.docguard.guard",
+          "docguard.guard",
+          "speckit.docguard.fix",
+          "docguard.fix",
+          "speckit.docguard.review",
+          "docguard.review",
+          "speckit.docguard.score",
+          "docguard.score",
+          "speckit.docguard.diagnose",
+          "speckit.docguard.generate"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-26T02:58:42.745678+00:00"
     }
   }
 }

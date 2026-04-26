@@ -5,13 +5,14 @@
 **Status**: Aprovada
 **Entrada**: Descrição do usuário: "Criar a primeira fatia vertical do Echotes com autenticação completa por email e senha, acesso protegido à superfície diária e criação básica de nota e tarefa na timeline do dia."
 
-> Esta spec foi derivada da constituição do projeto e dos canônicos em `/docs`.
+> Esta spec foi derivada da constituicao do projeto e do canon historico que, a
+> epoca de sua abertura, vivia em `/docs`.
 > O corte preserva o modelo centrado no dia e a separação entre tarefas e notas.
 > A execução desta feature é faseada: **US1** fecha autenticação e superfície
 > protegida; **US2** fecha nota/tarefa do mesmo dia; **US3** fecha projeção
 > temporal, ghost card, retorno contextual e o eixo visual final da timeline.
 
-## Cenários do Usuário e Testes *(obrigatório)*
+## Cenarios do Usuario e Testes / User Scenarios *(obrigatorio)*
 
 ### História do Usuário 1 - Entrar e acessar o dia (Prioridade: P1)
 
@@ -118,7 +119,7 @@ destino e usar o caminho de retorno ao contexto original.
 - Como o eixo central da timeline mantém notas à direita e tarefas à esquerda
   sem quebrar a ordenação temporal local ao dia exibido?
 
-## Requisitos *(obrigatório)*
+## Requisitos / Requirements *(obrigatorio)*
 
 ### Requisitos Funcionais
 
@@ -188,7 +189,7 @@ destino e usar o caminho de retorno ao contexto original.
   incluindo nota, tarefa sem horário, marcador de criação, tarefa agendada e
   ghost card.
 
-## Critérios de Sucesso *(obrigatório)*
+## Criterios de Sucesso / Success Criteria *(obrigatorio)*
 
 ### Resultados Mensuráveis
 

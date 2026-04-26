@@ -21,7 +21,7 @@ permitir implementação e verificação independentes de cada fatia.
 - App mobile: `app/`, `src/`, `supabase/`, `tests/`
 - Use os caminhos planejados nesta feature; não introduza estruturas paralelas
 
-## Fase 1: Configuração (Infraestrutura Compartilhada)
+## Fase 1 / Phase 1: Configuracao (Infraestrutura Compartilhada)
 
 **Objetivo**: Inicializar o projeto Expo/TypeScript e fixar as convenções
 operacionais do Echotes.
@@ -32,7 +32,7 @@ operacionais do Echotes.
 
 ---
 
-## Fase 2: Base (Pré-requisitos Bloqueantes)
+## Fase 2 / Phase 2: Base (Pre-requisitos Bloqueantes)
 
 **Objetivo**: Entregar a infraestrutura central que precisa existir antes de
 qualquer história do usuário.
@@ -51,7 +51,7 @@ podem começar a ser encaixadas em paralelo.
 
 ---
 
-## Fase 3: História do Usuário 1 - Entrar e acessar o dia (Prioridade: P1) 🎯 MVP
+## Fase 3 / Phase 3: Historia do Usuario 1 - Entrar e acessar o dia (Prioridade: P1) MVP
 
 **Objetivo**: Permitir cadastro, login, restauração de sessão e acesso ao dia
 protegido com possibilidade de logout.
@@ -76,7 +76,7 @@ autenticada e sair do contexto protegido. Este é o MVP sugerido.
 
 ---
 
-## Fase 4: História do Usuário 2 - Registrar o dia com nota e tarefa (Prioridade: P2)
+## Fase 4 / Phase 4: Historia do Usuario 2 - Registrar o dia com nota e tarefa (Prioridade: P2)
 
 **Objetivo**: Permitir criação de nota e tarefa do mesmo dia e exibir a
 timeline com os nós corretos de criação e agendamento.
@@ -102,7 +102,7 @@ contexto diário, incluindo o caso com marcador de criação + item agendado.
 
 ---
 
-## Fase 5: História do Usuário 3 - Projetar tarefa para outro dia e navegar com contexto (Prioridade: P3)
+## Fase 5 / Phase 5: Historia do Usuario 3 - Projetar tarefa para outro dia e navegar com contexto (Prioridade: P3)
 
 **Objetivo**: Completar a projeção temporal de tarefas com ghost card,
 navegação ao destino e retorno contextual à origem.
@@ -128,7 +128,7 @@ notas à direita e tarefas à esquerda sem quebrar o eixo temporal.
 
 ---
 
-## Fase 6: Polimento e Itens Transversais
+## Fase 6 / Phase 6: Polimento e Itens Transversais
 
 **Objetivo**: Fechar documentação, regressões e acabamento dos estados
 compartilhados.

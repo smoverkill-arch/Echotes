@@ -1,0 +1,54 @@
+{
+  "projectName": "echotes",
+  "version": "1.0.0",
+  "profile": "enterprise",
+  "projectType": "expo-react-native",
+  "projectTypeConfig": {
+    "needsEnvVars": true,
+    "needsEnvExample": true,
+    "needsE2E": false,
+    "needsDatabase": true
+  },
+  "requiredFiles": {
+    "canonical": [
+      "ARCHITECTURE.md",
+      "DATA-MODEL.md",
+      "SECURITY.md",
+      "TEST-SPEC.md",
+      "ENVIRONMENT.md",
+      "REQUIREMENTS.md"
+    ]
+  },
+  "testPatterns": [
+    "tests/**/*.test.ts",
+    "tests/**/*.test.tsx"
+  ],
+  "ignore": [
+    ".agent/**",
+    "commands/**",
+    "node_modules/**",
+    ".expo/**",
+    ".expo-shared/**",
+    ".expo-web.log",
+    ".expo-web.err.log",
+    "dist/**",
+    "coverage/**",
+    "test-results/**",
+    ".specify/extensions/.cache/**",
+    "docs/**"
+  ],
+  "securityIgnore": [
+    "tests/**"
+  ],
+  "validators": {
+    "structure": true,
+    "docsSync": true,
+    "drift": true,
+    "changelog": true,
+    "architecture": true,
+    "testSpec": true,
+    "security": true,
+    "environment": true,
+    "freshness": false
+  }
+}

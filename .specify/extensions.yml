@@ -42,6 +42,13 @@ hooks:
     prompt: Commit outstanding changes before task generation?
     description: Auto-commit before task generation
     condition: null
+  - extension: docguard
+    command: speckit.docguard.review
+    enabled: true
+    optional: true
+    prompt: Review documentation consistency before generating tasks?
+    description: ''
+    condition: null
   before_implement:
   - extension: git
     command: speckit.git.commit
@@ -106,6 +113,13 @@ hooks:
     prompt: Commit plan changes?
     description: Auto-commit after implementation planning
     condition: null
+  - extension: critique
+    command: speckit.critique.run
+    enabled: true
+    optional: true
+    prompt: Run spec critique before proceeding to tasks?
+    description: Challenges the spec and plan through product and engineering lenses
+    condition: null
   after_tasks:
   - extension: git
     command: speckit.git.commit
@@ -121,6 +135,13 @@ hooks:
     prompt: Generate blueprint from tasks?
     description: Auto-generate blueprint.md after task generation
     condition: null
+  - extension: docguard
+    command: speckit.docguard.guard
+    enabled: true
+    optional: true
+    prompt: Run DocGuard validation after task generation?
+    description: Validate the root canon before implementation starts
+    condition: null
   after_implement:
   - extension: git
     command: speckit.git.commit
@@ -128,6 +149,13 @@ hooks:
     optional: true
     prompt: Commit implementation changes?
     description: Auto-commit after implementation
+    condition: null
+  - extension: docguard
+    command: speckit.docguard.guard
+    enabled: true
+    optional: true
+    prompt: Run DocGuard validation after implementation?
+    description: Quality gate â€” ensures docs stay in sync with code
     condition: null
   after_checklist:
   - extension: git

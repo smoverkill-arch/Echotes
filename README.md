@@ -1,47 +1,78 @@
 # Echotes
 
-Echotes é um app centrado no dia que combina tarefas e notas em uma timeline
-única. A primeira feature implementada (`001-auth-day-surface`) entrega o corte
-operacional de autenticação, superfície diária protegida e registro básico do
-dia.
+Echotes e um app centrado no dia que combina tarefas e notas em uma timeline
+unica. O corte funcional atual do repositorio e o baseline consolidado da
+feature fechada `001-auth-day-surface`.
 
-Neste corte, a experiência cobre:
+O baseline entregue cobre:
 
-- cadastro, entrada, restauração de sessão e logout por email/senha
-- acesso protegido à superfície diária
-- criação, leitura e edição de notas e tarefas
-- tarefas do mesmo dia com ou sem horário
-- tarefas projetadas para outro dia com `ghost card`, navegação ao destino e
+- cadastro, login, restauracao de sessao e logout com Supabase Auth
+- rota protegida do dia em `app/day/[date].tsx`
+- criacao, leitura e edicao de notas e tarefas
+- tarefas do mesmo dia com ou sem horario
+- tarefas projetadas para outro dia com ghost card, navegacao ao destino e
   breadcrumb de retorno
-- eixo visual da timeline com notas à direita e itens de tarefa à esquerda
+- timeline com notas e tarefas derivadas do estado real do dia
 
-## Canônicos
+## Canon Soberano
 
-Os documentos soberanos do projeto ficam em `docs/`:
+O canon soberano do projeto agora vive na raiz do repositorio:
 
-- `echotes_domain_decisions_final.md`
-- `echotes_codex_mvp_technical_spec.md`
-- `echotes_schema_types_zod_starter_pack.md`
+- `README.md`
+- `AGENTS.md`
+- `ARCHITECTURE.md`
+- `DATA-MODEL.md`
+- `SECURITY.md`
+- `TEST-SPEC.md`
+- `ENVIRONMENT.md`
+- `REQUIREMENTS.md`
+- `CHANGELOG.md`
+- `DRIFT-LOG.md`
+- `ROADMAP.md`
+- `DEPLOYMENT.md`
+- `RUNBOOKS.md`
+- `TROUBLESHOOTING.md`
+- `KNOWN-GOTCHAS.md`
+- `CURRENT-STATE.md`
 
-Qualquer planejamento ou implementacao nova deve partir desses arquivos e da
-constituicao em `.specify/memory/constitution.md`.
+`.specify/memory/constitution.md` continua soberana como constituicao do
+projeto.
 
-## Operação local
+`specs/001-auth-day-surface/` continua no repositorio como registro da feature
+que definiu o baseline atual. Nao trate esse pacote como trabalho em aberto.
 
-1. Criar `.env` local a partir de `.env.example`.
-2. Preencher `EXPO_PUBLIC_SUPABASE_URL` e
+Os arquivos historicos em `docs/` deixaram de ser canon vigente. Eles existem
+apenas como fonte historica de migracao e nao devem voltar a ser usados como
+fonte soberana para novas decisoes.
+
+## Operacao Local
+
+1. Instale dependencias com `corepack pnpm install`.
+2. Crie `.env` a partir de `.env.example`.
+3. Preencha `EXPO_PUBLIC_SUPABASE_URL` e
    `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-3. Aplicar `supabase/migrations/001_auth_day_surface.sql` no projeto Supabase
+4. Aplique `supabase/migrations/001_auth_day_surface.sql` no projeto Supabase
    usado para desenvolvimento.
-4. Instalar dependências com `pnpm install`.
-5. Iniciar o app com `pnpm expo start`.
+5. Inicie o app com `corepack pnpm expo start`.
 
-Para validação operacional da feature fechada, siga
-`specs/001-auth-day-surface/quickstart.md`.
+Se o shell ja tiver `pnpm` no PATH, `pnpm install` e `pnpm expo start` tambem
+funcionam.
 
-## Fluxo Speckit
+## Validacao
 
-O fluxo padrao do projeto e:
+As validacoes basicas do repositorio sao:
+
+- `corepack pnpm run doc:guard`
+- `corepack pnpm run lint`
+- `corepack pnpm run test`
+- `corepack pnpm run typecheck`
+- `corepack pnpm run validate`
+
+O gate real de merge passa por CI e inclui DocGuard, lint, testes e typecheck.
+
+## Fluxo Spec Kit
+
+O fluxo padrao continua sendo:
 
 1. `constitution`
 2. `specify`
@@ -49,13 +80,42 @@ O fluxo padrao do projeto e:
 4. `tasks`
 5. `implement`
 
-A primeira feature aberta neste repositório e `001-auth-day-surface`.
+O Spec Kit continua gerando e mantendo os artifacts operacionais em
+`specs/<feature>/`. O DocGuard passa a fiscalizar o canon soberano do repo e a
+consistencia dele com o estado do codigo e dos testes.
 
-## Convenções
+## Usage
 
-- gestor de pacotes: `pnpm`
-- segredos locais: `.env`
-- exemplo versionado: `.env.example`
-- chaves publicas do cliente: `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-- `service_role` nunca entra no cliente
-- regressão básica: `pnpm lint`, `pnpm test` e `pnpm typecheck`
+- iniciar desenvolvimento: `corepack pnpm expo start`
+- validar o canon: `corepack pnpm run doc:guard`
+- validar o repo inteiro: `corepack pnpm run validate`
+
+## Arquivos de Configuracao e Automacao
+
+Arquivos e diretorios relevantes para a operacao do repo:
+
+- `.docguard.json` define o layout e os validadores do DocGuard
+- `.agents/` guarda skills do Codex/Spec Kit instaladas por projeto
+- `.agent/` e `commands/` podem ser gerados por automacao do DocGuard
+- `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` definem o
+  bootstrap do app Expo/TypeScript
+- `eslint.config.js` define lint
+- `jest.config.js` define a suite de testes
+- `.expo/`, `.expo-export-audit/`, `.expo-web.log` e `.expo-web.err.log` sao
+  artefatos locais de desenvolvimento e nao fazem parte do canon soberano
+
+## Leitura Rapida por Papel
+
+- produto e contrato funcional: `REQUIREMENTS.md`
+- arquitetura, rotas e fluxo de dados: `ARCHITECTURE.md`
+- entidades e schema: `DATA-MODEL.md`
+- setup local e configuracao: `ENVIRONMENT.md`
+- testes e gates: `TEST-SPEC.md`
+- estado entregue hoje: `CURRENT-STATE.md`
+- regras para agentes: `AGENTS.md`
+
+## License
+
+Este repositorio permanece sob a politica de licenciamento definida pelo
+proprietario do projeto. Se um arquivo de licenca formal for adicionado, este
+README deve ser atualizado para apontar para ele explicitamente.

@@ -81,6 +81,9 @@ importers:
       babel-preset-expo:
         specifier: ~54.0.10
         version: 54.0.10(@babel/core@7.29.0)(@babel/runtime@7.29.2)(expo@54.0.33)(react-refresh@0.14.2)
+      docguard-cli:
+        specifier: 0.9.11
+        version: 0.9.11
       eslint:
         specifier: ^9.18.0
         version: 9.39.4
@@ -2136,6 +2139,11 @@ packages:
   diff-sequences@29.6.3:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+
+  docguard-cli@0.9.11:
+    resolution: {integrity: sha512-SfaYMvrS+yJMdNlvCZwz4PJTVc21KSFjGgCL04SrX0bbFXEla3QbJoqiWUv1TBKY6axrt4qLq5HwYwaVYUGdiA==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
 
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
@@ -7379,6 +7387,8 @@ snapshots:
   detect-node-es@1.1.0: {}
 
   diff-sequences@29.6.3: {}
+
+  docguard-cli@0.9.11: {}
 
   doctrine@2.1.0:
     dependencies:

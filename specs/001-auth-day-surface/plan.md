@@ -3,10 +3,10 @@
 **Branch**: `001-auth-day-surface` | **Data**: 2026-04-15 | **Spec**: [spec.md](./spec.md)  
 **Entrada**: Especificação da feature em `/specs/001-auth-day-surface/spec.md`
 
-**Observação**: Este plano está ancorado na constituição do Echotes e nos três
-documentos canônicos em `/docs`.
+**Observacao**: Este plano foi aberto com base na constituicao do Echotes e no
+canon historico que, naquele momento, ainda estava concentrado em `/docs`.
 
-## Resumo
+## Resumo / Summary
 
 Entregar a feature `001-auth-day-surface` em três histórias incrementais:
 **US1** fecha autenticação e superfície protegida; **US2** fecha criação,
@@ -16,7 +16,7 @@ técnica usa um único app Expo com Supabase Auth/Postgres, separando claramente
 o domínio de tarefas e notas enquanto deriva a timeline mista por nós
 canônicos.
 
-## Contexto Técnico
+## Contexto Tecnico / Technical Context
 
 **Idioma/Versão**: TypeScript 5.x
 **Dependências principais**: Expo, React Native, Expo Router, Zustand, Supabase JS, React Hook Form, Zod, Legend List
@@ -39,7 +39,7 @@ canônicos.
 - [x] Os invariantes temporais e cenários críticos têm cobertura explícita de verificação.
 - [x] `pnpm`, `.env.example`, as chaves públicas do cliente Supabase e a política de segredos do cliente foram respeitados.
 
-## Estrutura do Projeto
+## Estrutura do Projeto / Project Structure
 
 ### Documentação (desta feature)
 

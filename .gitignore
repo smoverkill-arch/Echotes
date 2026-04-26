@@ -1,6 +1,8 @@
 # Node / package manager
 node_modules/
 .pnpm-store/
+.agent/
+/commands/
 
 # Expo / React Native
 .expo/
