@@ -2,41 +2,49 @@
 
 ## Delivered Baseline
 
-`001-auth-day-surface` is closed and defines the current product baseline.
+`001-auth-day-surface` esta fechada e define o baseline funcional atual do
+produto neste repositorio.
 
-Delivered today:
+Entregue hoje:
 
-- auth by email and password
-- local session restore
-- protected day route
-- same-day notes and tasks
-- projected tasks with ghost navigation and breadcrumb
-- automated regression coverage for the baseline
+- auth por email e senha
+- restauracao local de sessao
+- rota protegida do dia
+- nota e tarefa same-day
+- tarefa projected com ghost navigation e breadcrumb
+- cobertura automatizada do corte
 
 ## Canon Status
 
-The sovereign canon now lives in the repo root. Legacy files in `docs/` are
-historical migration sources only.
+O canon vigente vive na raiz do repositorio. A absorcao material dos tres
+arquivos antigos de `docs/` esta registrada em `CANON-MIGRATION-COVERAGE.md`.
+
+Hoje:
+
+- a raiz contem a estrutura compatibilizada com DocGuard
+- `docs/` e acervo historico, nao fonte material obrigatoria
+- capacidades futuras absorvidas do canon historico continuam separadas do que o
+  baseline atual entrega
 
 ## Technical Status
 
-- environment validation exists in `src/lib/env.ts`
-- Supabase client bootstrap exists in `src/lib/supabase.ts`
-- baseline migration exists in `supabase/migrations/001_auth_day_surface.sql`
-- tests cover auth, same-day flow, projected flow, timeline derivation and key
-  regressions
+- validacao de ambiente existe em `src/lib/env.ts`
+- bootstrap do cliente Supabase existe em `src/lib/supabase.ts`
+- migration base existe em `supabase/migrations/001_auth_day_surface.sql`
+- testes cobrem auth, same-day, projected flow, timeline e regresses chave
 
 ## Deferred Areas
 
-Not delivered in the current baseline:
+Ainda nao consolidados como entrega do baseline:
 
-- user-facing note echo workflows
-- deployment automation
-- broader roadmap commitments beyond the closed day-surface cut
+- fluxos completos de ecos de nota
+- `continue_note`
+- mencoes inline persistidas com semantica completa
+- deploy e release de producao
 
 ## Operational Gate
 
-The minimum merge gate is:
+O gate minimo do repo continua sendo:
 
 - `doc:guard`
 - `lint`

@@ -28,6 +28,18 @@ O acesso ao dia protegido depende de sessao valida.
 
 RLS esta definida em `supabase/migrations/001_auth_day_surface.sql`.
 
+## RLS Contract
+
+O contrato de RLS absorvido do starter pack e:
+
+- `tags`: usuario autenticado so acessa linhas com `auth.uid() = user_id`
+- `tasks`: usuario autenticado so acessa linhas com `auth.uid() = user_id`
+- `notes`: usuario autenticado so acessa linhas com `auth.uid() = user_id`
+- `note_echoes`: acesso exige ownership das notas envolvidas
+- insert de `note_echoes` exige `created_by_user_id = auth.uid()`
+
+Novas policies nao devem enfraquecer essas garantias.
+
 ## Secrets Management
 
 O cliente usa apenas:

@@ -18,11 +18,24 @@
 
 ## Update the Canon After a Closed Feature
 
-1. treat the closed feature package as historical record
-2. update the root canon with delivered behavior
-3. update `CHANGELOG.md`
-4. register intentional temporary mismatch in `DRIFT-LOG.md` if needed
-5. re-run `corepack pnpm run doc:guard`
+1. treat the closed feature package as implementation record
+2. compare the root canon with the relevant sections in `docs/`
+3. update `CANON-MIGRATION-COVERAGE.md` with `absorvida`, `parcialmente absorvida`
+   or `ausente`
+4. update the root canon with the absorbed behavior and detail
+5. update `CHANGELOG.md`
+6. register temporary mismatch in `DRIFT-LOG.md` if needed
+7. re-run `corepack pnpm run doc:guard`
+
+## Promote a Partially Absorbed Canon Section
+
+1. read the original section in `docs/`
+2. identify the destination root canon
+3. move the rule, behavior, schema or test expectation into the destination
+4. update `CANON-MIGRATION-COVERAGE.md` from `parcialmente absorvida` to
+   `absorvida`
+5. keep baseline status honest in `CURRENT-STATE.md`
+6. run `corepack pnpm run doc:guard`
 
 ## Recover from Missing Supabase Setup
 

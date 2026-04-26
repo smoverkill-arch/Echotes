@@ -2,27 +2,31 @@
 
 ## Projeto
 
-Echotes e um app Expo/React Native orientado ao dia. O baseline atual ja esta
-fechado e corresponde a `001-auth-day-surface`.
+Echotes e um app Expo/React Native orientado ao dia. O baseline funcional
+implementado hoje corresponde a `001-auth-day-surface`.
 
 Nao trate `001-auth-day-surface` como backlog aberto. Use esse pacote como
-registro do corte entregue e como referencia para rastreabilidade.
+registro do corte entregue e como referencia de rastreabilidade.
+
+## Estado do Canon
+
+O repo adotou o canon da raiz como fonte vigente, com cobertura de migracao
+registrada em `CANON-MIGRATION-COVERAGE.md`.
+
+`docs/` permanece como acervo historico. Nao use `docs/` para reabrir ou
+sobrescrever o canon vigente sem registrar uma decisao explicita.
 
 ## Ordem de Autoridade
 
-Leia e siga nesta ordem:
-
 1. `.specify/memory/constitution.md`
-2. os canones soberanos da raiz do repo
-3. o pacote ativo em `specs/<feature>/` quando houver uma nova feature aberta
+2. canones da raiz
+3. o pacote ativo em `specs/<feature>/`, quando houver feature nova aberta
 4. o codigo e os testes como estado executavel atual
 
-`docs/` antigo nao e mais canon vigente. Se ele divergir do canon da raiz, o
-canon da raiz vence.
+Se um arquivo historico em `docs/` parecer contradizer a raiz, trate isso como
+achado de auditoria documental, nao como autoridade automatica.
 
-## Canon Soberano da Raiz
-
-Os documentos abaixo sao a fonte de verdade do repo:
+## Canones da Raiz
 
 - `README.md`
 - `ARCHITECTURE.md`
@@ -31,27 +35,28 @@ Os documentos abaixo sao a fonte de verdade do repo:
 - `TEST-SPEC.md`
 - `ENVIRONMENT.md`
 - `REQUIREMENTS.md`
-- `CHANGELOG.md`
-- `DRIFT-LOG.md`
+- `CURRENT-STATE.md`
 - `ROADMAP.md`
 - `DEPLOYMENT.md`
 - `RUNBOOKS.md`
 - `TROUBLESHOOTING.md`
 - `KNOWN-GOTCHAS.md`
-- `CURRENT-STATE.md`
+- `CHANGELOG.md`
+- `DRIFT-LOG.md`
+- `CANON-MIGRATION-COVERAGE.md`
 
 ## Regras Operacionais
 
 1. Nao reabra `001-auth-day-surface` como se ainda estivesse em execucao.
-2. Nao reintroduza dupla soberania documental.
-3. Nao adicione `side` ao `TimelineNode`; esquerda e direita pertencem apenas a
-   camada de renderizacao.
-4. Nao coloque `service_role` no cliente.
-5. Nao trate DocGuard como cerimonial. Se o guard falhar, o trabalho nao esta
+2. Nao trate DocGuard como cerimonial. Guard vermelho significa trabalho nao
    fechado.
+3. Nao use a migracao de canon para apagar detalhe relevante.
+4. Nao adicione `side` ao `TimelineNode`; esquerda e direita pertencem apenas a
+   camada de renderizacao.
+5. Nao coloque `service_role` no cliente.
 6. Atualize `CHANGELOG.md` quando o canon ou o comportamento mudarem.
-7. Registre desvio consciente em `DRIFT-LOG.md` quando codigo e canon precisarem
-   ficar temporariamente desalinhados.
+7. Registre desvio temporario em `DRIFT-LOG.md` quando codigo e canon
+   precisarem ficar desalinhados.
 
 ## Comandos de Trabalho
 
@@ -69,8 +74,8 @@ Use `corepack pnpm` quando `pnpm` nao estiver disponivel diretamente.
 ## Workflow Obrigatorio
 
 1. Leia o canon relevante antes de mudar codigo ou docs.
-2. Se a mudanca tocar comportamento, confirme quais canones precisam ser
-   atualizados.
+2. Ao tocar docs da raiz, preserve a rastreabilidade em
+   `CANON-MIGRATION-COVERAGE.md` quando a mudanca vier de auditoria documental.
 3. Rode `corepack pnpm run doc:guard` antes de considerar o trabalho fechado.
 4. Rode `corepack pnpm run lint`, `corepack pnpm run test` e
    `corepack pnpm run typecheck` quando a mudanca tocar implementacao.
@@ -83,8 +88,9 @@ Atualize o canon correspondente quando mexer em:
 - auth, sessao ou protecao de rota -> `SECURITY.md`, `ARCHITECTURE.md`
 - schema, queries, RLS ou entidades -> `DATA-MODEL.md`
 - setup, env ou bootstrap local -> `ENVIRONMENT.md`, `RUNBOOKS.md`
-- journeys de usuario ou escopo do produto -> `REQUIREMENTS.md`,
+- journeys, escopo de produto ou regras fechadas -> `REQUIREMENTS.md`,
   `CURRENT-STATE.md`, `ROADMAP.md`
+- stores, algoritmo da timeline ou overlays -> `ARCHITECTURE.md`
 - suite de testes ou gates -> `TEST-SPEC.md`
 
 ## Politica de Fechamento
@@ -92,7 +98,9 @@ Atualize o canon correspondente quando mexer em:
 Uma branch nao esta fechada so porque o agente parou de iterar. O fechamento
 aceitavel exige:
 
-- canon soberano atualizado
+- canon atualizado de forma honesta
 - `doc:guard` verde
 - `lint`, `test` e `typecheck` verdes quando aplicavel
 - `CHANGELOG.md` atualizado
+- `CANON-MIGRATION-COVERAGE.md` revisado quando a mudanca tocar conteudo
+  historico migrado de `docs/`

@@ -29,6 +29,20 @@ assumed delivered:
 - automated product workflows
 - release and deployment automation for production mobile delivery
 
+## Historical Implementation Order
+
+The original MVP technical spec ordered work as:
+
+1. foundations: project setup, Supabase client, types, schemas, stores and routes
+2. notes: note CRUD, echoes, continuation, reader details and direct echo count
+3. tasks: task CRUD, temporal validation, ghost card, breadcrumb and scheduled
+   item behavior
+4. timeline: unified derivation, `sortAt`, tabs and double tap
+5. refinement: tag colors, empty states, loading/error and critical tests
+
+This order is retained as historical guidance. Future commitments still require
+a new Spec Kit feature.
+
 ## Planning Rule
 
 Future roadmap items only become commitments after they are opened and closed

@@ -12,11 +12,17 @@ versioned releases when they start to exist.
 - root canon for Echotes with operational CDD documents
 - project-pinned DocGuard configuration and validation scripts
 - CI workflow for DocGuard, lint, test and typecheck
+- migration coverage checklist for absorption of legacy `docs/`
+- expanded root canon content for notes, echoes, timeline navigation, SQL/RLS,
+  Zod contracts, tag color inheritance and implementation checklist
 
 ### Changed
 
 - `001-auth-day-surface` is now treated as the closed baseline of the product
-- `docs/echotes_*` stopped being the sovereign canon of the repo
+- root canon is now explicitly treated as a consolidation target, not a fully
+  closed migration
+- root canon promoted after material absorption of the three legacy `docs/`
+  sources
 
 ### Fixed
 
@@ -24,4 +30,4 @@ versioned releases when they start to exist.
 
 ### Removed
 
-- normative dependence on the legacy canon files in `docs/`
+- the false claim that the canon migration was already complete
