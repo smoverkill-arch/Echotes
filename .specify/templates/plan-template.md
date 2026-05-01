@@ -4,8 +4,8 @@
 **Entrada**: Especificação da feature em `/specs/[###-feature-name]/spec.md`
 
 **Observação**: Este template é preenchido pelo comando `/speckit.plan`. Use a
-constituição do projeto e os documentos canônicos em `/docs` antes de fechar
-qualquer decisão técnica.
+constituição do projeto e os canones vigentes da raiz antes de fechar qualquer
+decisão técnica.
 
 ## Resumo
 
@@ -34,7 +34,7 @@ qualquer decisão técnica.
 
 *BLOQUEIO: deve passar antes da Fase 0 de pesquisa. Revalidar após a Fase 1 de desenho.*
 
-- [ ] As fontes canônicas em `/docs` foram revisadas e citadas quando originam decisões.
+- [ ] Os canones vigentes da raiz foram revisados e citados quando originam decisões.
 - [ ] A navegação centrada no dia e a timeline diária continuam como interação principal.
 - [ ] Os comportamentos de tarefa e nota continuam distintos; nenhuma abstração enfraquece ghost cards ou ecos.
 - [ ] Os invariantes temporais e cenários críticos têm cobertura explícita de verificação.

@@ -23,6 +23,8 @@ versioned releases when they start to exist.
   closed migration
 - root canon promoted after material absorption of the three legacy `docs/`
   sources
+- Spec Kit constitution and templates now treat the root canon as the current
+  authority and `docs/` as historical archive
 
 ### Fixed
 

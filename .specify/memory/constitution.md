@@ -1,23 +1,20 @@
 <!--
 Relatório de sincronização
-Mudança de versão: template -> 1.0.0
+Mudança de versão: 1.0.0 -> 2.0.0
 Princípios modificados:
-- Slot 1 do template -> I. Domínio Canônico Primeiro
-- Slot 2 do template -> II. Integridade do Produto Centrado no Dia
-- Slot 3 do template -> III. Separação entre Tarefas e Notas
-- Slot 4 do template -> IV. Segurança Temporal e Cobertura Crítica
-- Slot 5 do template -> V. Disciplina de Entrega com Expo + Supabase
+- I. Domínio Canônico Primeiro: fonte vigente agora é o canon da raiz; docs/ é acervo histórico
+- Governança: checagem de conformidade passa a citar canon da raiz, não /docs como autoridade
 Seções adicionadas:
-- Guardrails do Produto
-- Fluxo de Entrega
+- Nenhuma
 Seções removidas:
 - Nenhuma
 Templates que exigiram atualização:
 - ✅ .specify/templates/plan-template.md
 - ✅ .specify/templates/spec-template.md
 - ✅ .specify/templates/tasks-template.md
-- ✅ .specify/templates/agent-file-template.md
-- ✅ README.md
+Textos de apoio:
+- ✅ CHANGELOG.md
+- ✅ AGENTS.md, README.md e CURRENT-STATE.md verificados sem patch
 Pendências:
 - Nenhuma
 -->
@@ -27,16 +24,20 @@ Pendências:
 
 ### I. Domínio Canônico Primeiro
 Todo trabalho de produto, design, engenharia e planejamento DEVE partir dos
-documentos canônicos em `/docs`. As decisões fechadas em
-`echotes_domain_decisions_final.md`, `echotes_codex_mvp_technical_spec.md` e
-`echotes_schema_types_zod_starter_pack.md` não podem ser reabertas localmente
-por conveniência de implementação. Qualquer mudança de regra de domínio DEVE
-ser feita como emenda explícita desses documentos antes de alterar código,
-specs ou planos derivados.
+documentos canônicos vigentes na raiz do repositório, depois desta
+constituição. As decisões materialmente absorvidas em `README.md`,
+`ARCHITECTURE.md`, `DATA-MODEL.md`, `SECURITY.md`, `TEST-SPEC.md`,
+`ENVIRONMENT.md`, `REQUIREMENTS.md`, `CURRENT-STATE.md`, `ROADMAP.md`,
+`DEPLOYMENT.md`, `RUNBOOKS.md`, `TROUBLESHOOTING.md`, `KNOWN-GOTCHAS.md`,
+`CHANGELOG.md`, `DRIFT-LOG.md` e `CANON-MIGRATION-COVERAGE.md` não podem ser
+reabertas localmente por conveniência de implementação. `docs/` permanece como
+acervo histórico; contradições entre `docs/` e a raiz DEVEM ser tratadas como
+achado de auditoria documental, não como autoridade automática.
 
 Justificativa: o Echotes depende de um domínio não trivial, com regras
 temporais e conceituais que se degradam rapidamente quando cada camada improvisa
-sua própria interpretação.
+sua própria interpretação. A raiz é o ponto vigente de consolidação do canon,
+enquanto `docs/` preserva proveniência histórica.
 
 ### II. Integridade do Produto Centrado no Dia
 O dia DEVE ser tratado como unidade principal do produto. Cada feature que toca
@@ -103,7 +104,8 @@ divergência operacional entre planejamento e implementação.
 - Toda feature DEVE nascer em branch numerada do Spec Kit e ter seu diretório
   persistido em `.specify/feature.json`.
 - `spec.md` DEVE focar em comportamento e valor ao usuário; `plan.md` DEVE
-  traduzir o corte para implementação técnica sem contradizer os canônicos.
+  traduzir o corte para implementação técnica sem contradizer os canones da
+  raiz.
 - Antes de iniciar implementação, o plano DEVE fechar: contratos essenciais,
   estratégia de dados, variáveis de ambiente, critérios de aceite e cenários de
   verificação.
@@ -122,7 +124,9 @@ impactados e o tipo de incremento de versão:
 
 Toda revisão de spec, plan, tasks ou código DEVE checar conformidade com:
 
-- aderência aos documentos canônicos em `/docs`;
+- aderência à constituição e aos canones vigentes da raiz;
+- preservação de `docs/` como acervo histórico, sem reabrir decisões absorvidas
+  sem decisão explícita;
 - preservação do modelo diário e da separação entre notas e tarefas;
 - cobertura dos cenários críticos exigidos pela mudança;
 - respeito às convenções de `pnpm`, `.env.example` e Supabase público no
@@ -131,4 +135,4 @@ Toda revisão de spec, plan, tasks ou código DEVE checar conformidade com:
 Não há placeholders em aberto nesta versão. Quando um artefato violar esta
 constituição, o trabalho DEVE parar para correção ou emenda explícita.
 
-**Versão**: 1.0.0 | **Ratificada em**: 2026-04-15 | **Última emenda**: 2026-04-15
+**Versão**: 2.0.0 | **Ratificada em**: 2026-04-15 | **Última emenda**: 2026-04-30

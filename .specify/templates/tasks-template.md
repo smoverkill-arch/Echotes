@@ -119,7 +119,7 @@ implementação e verificação independentes de cada fatia.
 
 **Objetivo**: Melhorias que afetam múltiplas histórias do usuário
 
-- [ ] T021 [P] Atualizar documentação em docs/ e README.md
+- [ ] T021 [P] Atualizar o canon da raiz aplicável, CHANGELOG.md e CANON-MIGRATION-COVERAGE.md quando houver absorção de acervo histórico
 - [ ] T022 Revisar cobertura de regressão temporal/autenticação contra a constituição
 - [ ] T023 Validar o quickstart.md
 
