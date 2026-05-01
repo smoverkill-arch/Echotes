@@ -2,6 +2,7 @@ import { taskFormSchema, timeStringSchema } from "../../../src/schemas/task.sche
 import { TIME_KEY_ERROR_MESSAGE } from "../../../src/utils/date";
 
 describe("task time validation", () => {
+  // @req NFR-003
   it.each(["00:00", "09:30", "23:59"])(
     "aceita horarios validos no schema: %s",
     (value) => {
@@ -9,6 +10,8 @@ describe("task time validation", () => {
     },
   );
 
+  // @req FR-012
+  // @req NFR-003
   it.each(["24:00", "29:99", "12:60", "12:75", "7:30", "1234"])(
     "rejeita horarios invalidos no schema: %s",
     (value) => {
@@ -19,6 +22,7 @@ describe("task time validation", () => {
     },
   );
 
+  // @req FR-012
   it("mantem scheduled_time opcional sem aceitar horario impossivel", () => {
     const parsed = taskFormSchema.safeParse({
       title: "Tarefa",

@@ -25,10 +25,14 @@ versioned releases when they start to exist.
   sources
 - Spec Kit constitution and templates now treat the root canon as the current
   authority and `docs/` as historical archive
+- README and canonical docs now use shorter sections and a clearer doc layout
+- TEST-SPEC now describes test suites without fragile file-level references
 
 ### Fixed
 
 - Spec Kit DocGuard integration no longer depends on `docguard-cli@latest`
+- requirement traceability now links canonical IDs to the real test suites
+- documentation contracts now verify DocGuard gates and RLS coverage
 
 ### Removed
 

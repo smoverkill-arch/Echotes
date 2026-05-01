@@ -280,6 +280,11 @@ describe("US2 same-day day surface", () => {
     expect(await screen.findByTestId("note-editor-submit-button")).toBeTruthy();
   });
 
+  // @req FR-007
+  // @req FR-008
+  // @req FR-010
+  // @req FR-022
+  // @req SC-003
   it("permite criar nota e tarefas do mesmo dia e renderiza a timeline correta", async () => {
     await renderReadyDayRoute();
     expect(screen.getByText("18-04-2026")).toBeTruthy();
@@ -405,6 +410,8 @@ describe("US2 same-day day surface", () => {
     expect(await screen.findByText("Vai para 20-04-2026")).toBeTruthy();
   });
 
+  // @req FR-011
+  // @req FR-012
   it("salva horario futuro local e bloqueia horario passado local no mesmo dia", async () => {
     mockSystemDate?.set(new Date(2026, 3, 18, 23, 0, 0, 0));
 

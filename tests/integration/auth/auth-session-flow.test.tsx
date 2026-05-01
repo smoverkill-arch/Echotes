@@ -112,6 +112,8 @@ describe("US1 auth session flow", () => {
     setUnauthenticatedState();
   });
 
+  // @req FR-003
+  // @req SC-002
   it("restaura a sessao local e atualiza o estado autenticado", async () => {
     mockGetSession.mockResolvedValue({
       data: { session: supabaseSession },
@@ -146,6 +148,8 @@ describe("US1 auth session flow", () => {
     });
   });
 
+  // @req FR-004
+  // @req SC-001
   it("nao expoe a rota protegida sem sessao valida", async () => {
     render(<ProtectedDayRoute />);
 
@@ -153,6 +157,8 @@ describe("US1 auth session flow", () => {
     expect(screen.queryByText("Timeline do dia")).toBeNull();
   });
 
+  // @req FR-006
+  // @req SC-002
   it("permite acesso ao shell minimo do dia quando a sessao esta autenticada", async () => {
     setAuthenticatedState();
 
@@ -165,6 +171,7 @@ describe("US1 auth session flow", () => {
     expect(screen.queryByText("/sign-in")).toBeNull();
   });
 
+  // @req FR-005
   it("faz logout real e retorna ao fluxo publico", async () => {
     setAuthenticatedState();
     mockSignOut.mockResolvedValue({ error: null });

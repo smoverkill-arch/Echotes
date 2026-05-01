@@ -11,12 +11,12 @@
   },
   "requiredFiles": {
     "canonical": [
-      "ARCHITECTURE.md",
-      "DATA-MODEL.md",
-      "SECURITY.md",
-      "TEST-SPEC.md",
-      "ENVIRONMENT.md",
-      "REQUIREMENTS.md"
+      "docs-canonical/ARCHITECTURE.md",
+      "docs-canonical/DATA-MODEL.md",
+      "docs-canonical/SECURITY.md",
+      "docs-canonical/TEST-SPEC.md",
+      "docs-canonical/ENVIRONMENT.md",
+      "docs-canonical/REQUIREMENTS.md"
     ]
   },
   "testPatterns": [

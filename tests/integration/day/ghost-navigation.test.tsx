@@ -296,6 +296,8 @@ afterEach(() => {
 });
 
 describe("US3 ghost navigation", () => {
+  // @req FR-024
+  // @req SC-006
   it("renderiza a rota protegida de origem com timeline pronta", async () => {
     await renderReadyDayRoute();
 
@@ -307,6 +309,8 @@ describe("US3 ghost navigation", () => {
     ).toBeTruthy();
   });
 
+  // @req FR-018
+  // @req SC-004
   it("cria ghost card na origem e navega ao item real com breadcrumb", async () => {
     await renderReadyDayRoute();
     expect(screen.getByTestId("timeline-axis-rail")).toBeTruthy();
@@ -342,6 +346,7 @@ describe("US3 ghost navigation", () => {
     expect(screen.getByTestId("task-reader-context-meta")).toBeTruthy();
   });
 
+  // @req FR-018
   it("permite editar o item real e retornar ao contexto original", async () => {
     await renderReadyDayRoute();
     await createProjectedTaskFromOrigin();

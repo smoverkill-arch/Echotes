@@ -24,6 +24,8 @@ const buildProjectedTask = (overrides: Partial<Task> = {}): Task => ({
 });
 
 describe("projected task timeline nodes", () => {
+  // @req FR-015
+  // @req FR-016
   it("gera apenas task_ghost no dia de origem quando source_day e target_day divergem", () => {
     const nodes = deriveTimelineNodes({
       selectedDay: sourceDay,
@@ -41,6 +43,7 @@ describe("projected task timeline nodes", () => {
     });
   });
 
+  // @req FR-017
   it("mantem a tarefa projetada sem horario como item real no dia de destino", () => {
     const nodes = deriveTimelineNodes({
       selectedDay: targetDay,
@@ -58,6 +61,7 @@ describe("projected task timeline nodes", () => {
     });
   });
 
+  // @req FR-017
   it("posiciona a tarefa futura com horario como item real em task_timed no dia de destino", () => {
     const nodes = deriveTimelineNodes({
       selectedDay: targetDay,

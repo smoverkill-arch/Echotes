@@ -84,6 +84,7 @@ describe("task temporal validation regressions", () => {
     jest.useRealTimers();
   });
 
+  // @req FR-011
   it("persiste created_at alinhado com a validacao temporal da criacao", async () => {
     mockSingle.mockResolvedValue({
       data: {
@@ -109,6 +110,7 @@ describe("task temporal validation regressions", () => {
     expect(mockInsert).toHaveBeenCalledWith(
       expect.objectContaining({
         created_at: "2026-04-18T00:00:00.000Z",
+        scheduled_at: buildScheduledAt("2026-04-20", "18:30"),
       }),
     );
   });

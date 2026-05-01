@@ -12,6 +12,8 @@ describe("src/lib/env", () => {
     process.env = originalEnv;
   });
 
+  // @req FR-021
+  // @req NFR-003
   it("gera falha clara quando o ambiente obrigatorio estiver ausente", () => {
     const envModule = jest.requireActual(
       "../../../src/lib/env",
@@ -32,6 +34,8 @@ describe("src/lib/env", () => {
     );
   });
 
+  // @req NFR-001
+  // @req NFR-003
   it("resolve o ambiente quando as variaveis publicas obrigatorias existem", () => {
     process.env.EXPO_PUBLIC_SUPABASE_URL = "https://echotes.supabase.co";
     process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = "anon-public-key";
