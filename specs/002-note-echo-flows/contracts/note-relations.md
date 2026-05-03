@@ -23,6 +23,7 @@ remocao explicita de relacoes diretas.
 | `directEchoCount` | `echoes` | soma apenas relacoes diretas da nota |
 | `relatedNotes` | `echoes` + notas conhecidas | lista notas conectadas sem hierarquia visivel |
 | `echoBadgeVisible` | `directEchoCount` | aparece apenas quando a contagem for maior que zero |
+| `candidatePage` | notas recentes | lote de ate 50 candidatas para `Adicionar eco` |
 
 ## Contrato de Leitura do Dia
 
@@ -56,6 +57,8 @@ remocao explicita de relacoes diretas.
   cada grupo, da mais recente para a mais antiga.
 - A UI trata toda conexao apenas como `Eco`; `kind` nao aparece como subtipo
   visivel de relacao.
+- Quando uma nota conectada nao puder ser carregada, o Reader mantem um item
+  indisponivel para aquela relacao, com acao de recarregar detalhes.
 
 ## Contrato de Navegacao para Nota Conectada
 
@@ -72,6 +75,9 @@ remocao explicita de relacoes diretas.
   - exclui a nota de origem
   - mostra notas do mesmo usuario
   - ordena da mais recente para a mais antiga
+  - carrega lotes de 50 notas recentes
+  - oferece `carregar mais` enquanto houver proximo lote
+  - mostra notas ja conectadas como desabilitadas com `Eco ja existe`
 - Ao confirmar:
   - cria relacao `manual_link`
   - usa a nota aberta como `from_note_id`
@@ -84,6 +90,7 @@ remocao explicita de relacoes diretas.
   - a UX informa `Eco ja existe`
   - a relacao atual e preservada
   - o `kind` original permanece como proveniencia inicial
+- Candidatas desabilitadas por eco existente nao podem ser confirmadas.
 
 ## Contrato de `Remover eco`
 
@@ -92,6 +99,7 @@ remocao explicita de relacoes diretas.
 - A remocao identifica o par semantico independentemente da ordem persistida em
   `from_note_id` e `to_note_id`.
 - Ao confirmar:
+  - solicita confirmacao explicita da pessoa usuaria
   - remove a unica relacao `Eco` do par selecionado
   - preserva ambas as notas e seus demais vinculos
   - atualiza contagem, lista do Reader e estado relevante do dia

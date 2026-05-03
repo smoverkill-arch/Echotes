@@ -20,8 +20,8 @@ com navegacao correta entre dias.
 1. Confirmar que `public.notes` e `public.note_echoes` existem.
 2. Confirmar que RLS continua habilitado em ambas as tabelas.
 3. Confirmar que o indice semantico de `note_echoes` continua presente.
-4. Nao aplicar migration nova para esta feature; o corte reusa o schema do
-   baseline.
+4. Aplicar a migration desta feature para disponibilizar a RPC atomica de
+   `Continuar desta nota`.
 
 ## Configuracao de Ambiente
 
@@ -55,13 +55,16 @@ com navegacao correta entre dias.
 
 1. Abrir uma nota sem o eco desejado.
 2. Usar `Adicionar eco`.
-3. Escolher uma nota candidata da lista.
-4. Confirmar aumento da contagem direta e presenca da nova relacao no Reader.
-5. Repetir a mesma conexao, confirmar que nenhuma duplicata e criada e que a
+3. Confirmar que o seletor mostra ate 50 notas recentes e oferece `carregar
+   mais` quando houver proximo lote.
+4. Confirmar que notas ja conectadas aparecem desabilitadas com `Eco ja existe`.
+5. Escolher uma nota candidata habilitada da lista.
+6. Confirmar aumento da contagem direta e presenca da nova relacao no Reader.
+7. Repetir a mesma conexao, confirmar que nenhuma duplicata e criada e que a
    UX informa `Eco ja existe`.
-6. Remover a relacao criada e confirmar que apenas o eco desaparece, sem apagar
-   nenhuma das notas.
-7. Tentar conectar a nota a ela mesma e confirmar bloqueio com feedback claro.
+8. Remover a relacao criada, confirmar o dialogo de remocao e verificar que
+   apenas o eco desaparece, sem apagar nenhuma das notas.
+9. Tentar conectar a nota a ela mesma e confirmar bloqueio com feedback claro.
 
 ### US3 - Continuar desta nota
 
@@ -73,6 +76,10 @@ com navegacao correta entre dias.
    nova nota.
 5. Salvar outra continuacao para dia futuro e confirmar navegacao ao destino
    com a relacao visivel ao final.
+6. Simular falha da RPC e confirmar que nenhuma nota continuada fica criada sem
+   eco correspondente.
+7. Simular falha de carregamento de uma nota conectada e confirmar item
+   indisponivel com acao de recarregar no Reader.
 
 ## Regressao Tecnica
 
@@ -92,5 +99,6 @@ corepack pnpm run typecheck
 - Tentativas de eco entre a mesma nota devem ser bloqueadas.
 - Tentativas de eco duplicado nao devem criar nova relacao semantica e devem
   informar `Eco ja existe`.
-- Remover eco nao deve apagar nenhuma nota.
+- Remover eco deve exigir confirmacao e nao deve apagar nenhuma nota.
 - `Continuar desta nota` nao deve permitir dia anterior ao da nota de origem.
+- Falha na RPC de `Continuar desta nota` nao deve deixar nota orfa.

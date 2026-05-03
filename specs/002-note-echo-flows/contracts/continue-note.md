@@ -36,8 +36,8 @@ notas e nao um novo tipo de nota.
 
 ## Sequencia de Persistencia
 
-1. Criar a nova nota no `targetDay` com os campos revisados no draft.
-2. Criar um `note_echo` com:
+1. Chamar RPC atomica de continuacao com os campos revisados no draft.
+2. A RPC cria a nova nota no `targetDay` e um `note_echo` com:
    - `kind = continue_note`
    - `from_note_id = sourceNote.id`
    - `to_note_id = newNote.id`
@@ -46,6 +46,16 @@ notas e nao um novo tipo de nota.
 3. Recarregar o estado do dia relevante.
 4. Declarar sucesso para a pessoa usuaria apenas quando nota e relacao tiverem
    sido confirmadas como persistidas.
+
+## Contrato de Atomicidade
+
+- A criacao da nota continuada e do eco correspondente acontece em uma unica
+  transacao.
+- Se a nota de origem nao estiver acessivel ao usuario autenticado, a RPC falha
+  sem criar nota.
+- Se a criacao do eco falhar, a RPC falha a operacao inteira e nao deixa nota
+  continuada orfa.
+- A UI nao apresenta sucesso parcial para `Continuar desta nota`.
 
 ## Resultado Esperado
 

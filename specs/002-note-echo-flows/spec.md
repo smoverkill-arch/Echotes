@@ -12,6 +12,16 @@
 > Esta feature ativa a continuidade conceitual de notas sem transformar a
 > timeline em mapa de relacoes e sem reabrir as regras temporais de tarefas.
 
+## Clarifications
+
+### Session 2026-05-02
+
+- Q: Como a documentacao deve fechar a integridade de `Continuar desta nota` antes de gerar tarefas? -> A: RPC atomica.
+- Q: Qual comportamento a documentacao deve exigir ao remover um eco direto? -> A: Confirmar remocao.
+- Q: Como o Reader deve tratar uma nota conectada que fica indisponivel ou falha ao carregar detalhes? -> A: Item indisponivel.
+- Q: Como o seletor de `Adicionar eco` deve apresentar notas que ja estao conectadas a nota aberta? -> A: Mostrar desabilitada.
+- Q: Qual escopo inicial o seletor de `Adicionar eco` deve carregar neste corte, ja que busca textual fica fora? -> A: Recentes com carregar mais.
+
 ## Cenarios do Usuario e Testes / User Scenarios *(obrigatorio)*
 
 ### Historia do Usuario 1 - Entender a continuidade de uma nota (Prioridade: P1)
@@ -41,6 +51,9 @@ Reader de uma nota e navegar para uma nota conectada.
 4. **Dado** uma nota conectada localizada em outro dia, **Quando** a pessoa a
    abre a partir do Reader, **Entao** o sistema leva ao contexto correto dessa
    nota sem descaracterizar a superficie diaria.
+5. **Dado** uma nota conectada cujos detalhes nao podem ser carregados,
+   **Quando** a pessoa abre o Reader, **Entao** o sistema mantem a superficie
+   aberta e mostra a conexao como item indisponivel com acao de recarregar.
 
 ---
 
@@ -68,10 +81,16 @@ mesma relacao sem apagar nenhuma das notas.
 3. **Dado** uma tentativa de repetir um eco ja existente entre o mesmo par de
    notas, **Quando** a pessoa confirma a acao, **Entao** o sistema evita
    duplicacao, preserva uma unica relacao semantica e informa `Eco ja existe`.
-4. **Dado** um eco direto criado por engano, **Quando** a pessoa escolhe
-   remove-lo a partir do fluxo contextual da nota, **Entao** o sistema apaga
-   apenas a relacao, atualiza a contagem nas duas extremidades relevantes e
-   preserva ambas as notas.
+4. **Dado** uma nota candidata ja conectada a nota aberta, **Quando** a pessoa
+   abre o seletor de `Adicionar eco`, **Entao** essa candidata aparece
+   desabilitada com `Eco ja existe`.
+5. **Dado** um eco direto criado por engano, **Quando** a pessoa escolhe
+   remove-lo a partir do fluxo contextual da nota, **Entao** o sistema solicita
+   confirmacao antes de apagar apenas a relacao, atualiza a contagem nas duas
+   extremidades relevantes e preserva ambas as notas.
+6. **Dado** uma lista grande de notas candidatas, **Quando** a pessoa abre o
+   seletor, **Entao** o sistema carrega primeiro as notas recentes e oferece
+   `carregar mais` para buscar o proximo lote.
 
 ---
 
@@ -100,6 +119,9 @@ briefing inicial e confirmar a criacao da nota conectada.
    comportamento de ghost card.
 4. **Dado** uma nota continuada, **Quando** a pessoa abre a origem ou a nova
    nota, **Entao** o sistema preserva a relacao entre ambas como eco direto.
+5. **Dado** uma falha durante `Continuar desta nota`, **Quando** a persistencia
+   nao consegue criar nota e eco juntos, **Entao** o sistema falha a operacao
+   inteira sem deixar nota orfa sem relacao.
 
 ---
 
@@ -113,6 +135,11 @@ briefing inicial e confirmar a criacao da nota conectada.
   abertura do Reader e a confirmacao da acao?
 - Como o sistema lida com tentativa de eco duplicado para o mesmo par de notas?
 - Como a experiencia se comporta quando a nota conectada pertence a outro dia?
+- Como o Reader apresenta uma nota conectada cujos detalhes falharam ao
+  carregar?
+- Como o seletor evita novas confirmacoes para notas que ja sao ecos diretos?
+- Como o seletor cresce quando ha mais candidatas do que o primeiro lote
+  recente?
 - O que acontece quando a pessoa tenta remover um eco que deixou de existir
   antes da confirmacao da acao?
 - O que acontece quando a pessoa quer uma nota sem relacao alguma e decide nao
@@ -139,7 +166,8 @@ briefing inicial e confirmar a criacao da nota conectada.
 - **FR-008**: O sistema DEVE evitar duplicacao de relacoes entre o mesmo par de
   notas e informar `Eco ja existe` quando a relacao ja estiver presente.
 - **FR-009**: O sistema DEVE permitir remover explicitamente um eco direto a
-  partir do fluxo contextual de nota sem apagar nenhuma das notas envolvidas.
+  partir do fluxo contextual de nota, exigindo confirmacao antes de apagar a
+  relacao e sem apagar nenhuma das notas envolvidas.
 - **FR-010**: O sistema DEVE tratar `manual_link` e `continue_note` apenas como
   proveniencias internas da mesma relacao `Eco`, sem criar subtipos visiveis de
   nota ou hierarquia na UI.
@@ -153,19 +181,28 @@ briefing inicial e confirmar a criacao da nota conectada.
   de uma nova nota conectada a nota de origem.
 - **FR-015**: O sistema DEVE permitir que a nova nota continuada pertença ao
   mesmo dia ou a um dia futuro escolhido pela pessoa usuaria.
-- **FR-016**: O sistema DEVE iniciar a nota continuada com briefing automatico e
+- **FR-016**: O sistema DEVE criar a nota continuada e seu eco correspondente
+  por operacao atomica, sem declarar sucesso se apenas uma das duas escritas
+  for confirmada.
+- **FR-017**: O sistema DEVE iniciar a nota continuada com briefing automatico e
   permitir ajuste imediato desse texto pela pessoa usuaria.
-- **FR-017**: O sistema DEVE preservar a diferenca entre nota e tarefa, de modo
+- **FR-018**: O sistema DEVE preservar a diferenca entre nota e tarefa, de modo
   que notas continuadas nao ganhem ghost card, `source_day` ou `target_day`.
-- **FR-018**: O sistema DEVE manter os detalhes relacionais de nota dentro do
+- **FR-019**: O sistema DEVE manter os detalhes relacionais de nota dentro do
   Reader ou do fluxo contextual, sem poluir o fluxo principal da timeline.
-- **FR-019**: O sistema DEVE falhar com mensagem clara quando a pessoa perder
+- **FR-020**: O sistema DEVE falhar com mensagem clara quando a pessoa perder
   autenticacao ou quando uma nota exigida para a acao nao estiver mais
   disponivel.
-- **FR-020**: O sistema DEVE manter fora deste corte as mencoes inline `@nota`
+- **FR-021**: O sistema DEVE mostrar notas conectadas indisponiveis como itens
+  recuperaveis no Reader, com acao de recarregar, sem derrubar a superficie do
+  dia.
+- **FR-022**: O sistema DEVE apresentar notas ja conectadas no seletor de
+  `Adicionar eco` como candidatas desabilitadas com `Eco ja existe`.
+- **FR-023**: O seletor de `Adicionar eco` DEVE carregar notas candidatas em
+  lotes recentes de 50 itens e oferecer `carregar mais` para recuperar o
+  proximo lote.
+- **FR-024**: O sistema DEVE manter fora deste corte as mencoes inline `@nota`
   e seus chips persistidos.
-- **FR-021**: O sistema DEVE manter fora deste corte visualizacoes em mapa ou
-  rede da familia de notas.
 
 ### Entidades-Chave *(inclua se a feature envolver dados)*
 
@@ -192,12 +229,15 @@ briefing inicial e confirmar a criacao da nota conectada.
   duplicacao entre o mesmo par de notas nao criam conexoes invalidas e retornam
   feedback claro.
 - **SC-003**: Em 100% dos testes deste corte, remover um eco apaga apenas a
-  relacao selecionada e preserva todas as notas envolvidas.
+  relacao selecionada apos confirmacao e preserva todas as notas envolvidas.
 - **SC-004**: Em testes de QA interno, pessoas usuarias conseguem criar um eco
-  manual entre duas notas existentes em menos de 1 minuto sem ajuda externa.
+  manual entre duas notas existentes em menos de 1 minuto sem ajuda externa,
+  com candidatas ja conectadas desabilitadas e listas acima de 50 candidatas
+  capazes de carregar lote adicional.
 - **SC-005**: Em testes de QA interno, pessoas usuarias conseguem continuar uma
   nota para o mesmo dia ou para dia futuro em menos de 2 minutos, mantendo a
-  relacao com a origem visivel ao final do fluxo.
+  relacao com a origem visivel ao final do fluxo e sem deixar nota criada sem
+  eco correspondente em cenarios de falha.
 - **SC-006**: Em 100% dos testes de regressao do corte, a timeline continua
   mostrando apenas a contagem direta de ecos para notas, sem introduzir ghost
   card ou comportamento de tarefa no dominio de notas.
@@ -216,5 +256,9 @@ briefing inicial e confirmar a criacao da nota conectada.
 - Remocao explicita de eco acontece apenas no fluxo contextual da nota; este
   corte nao cobre undo em lote, historico de remocoes ou restauracao de
   relacoes apagadas.
+- A feature aceita uma migration pequena para a RPC atomica de continuacao,
+  mantendo o restante do schema de notas e ecos sem novas tabelas.
+- Busca textual no seletor de `Adicionar eco` permanece fora deste corte; o
+  crescimento inicial acontece por lotes recentes com `carregar mais`.
 - Tarefas, ghost cards, breadcrumb temporal e regras de `scheduled_at`
   permanecem inalterados por esta feature.

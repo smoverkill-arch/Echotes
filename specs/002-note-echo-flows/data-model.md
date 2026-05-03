@@ -4,8 +4,8 @@
 
 Esta feature ativa, na UI do Echotes, o modelo de `note_echoes` que ja existe
 no baseline. Nenhuma tabela nova e esperada. O corte adiciona leitura diaria de
-ecos, contagem direta por nota, criacao manual de relacao e continuacao guiada
-de nota.
+ecos, contagem direta por nota, criacao manual de relacao, remocao contextual e
+continuacao guiada de nota por RPC atomica.
 
 ## Nota
 
@@ -115,6 +115,9 @@ Reader de outra nota.
   de ids relacionados.
 - `kind` pode existir como metadado interno de proveniencia, mas nao altera a
   semantica visivel da relacao para a UI.
+- Se os detalhes da nota relacionada falharem ao carregar ou deixarem de estar
+  acessiveis, o Reader representa a conexao como item indisponivel com acao de
+  recarregar.
 
 ## Draft de Continuacao de Nota
 
@@ -156,12 +159,41 @@ Reader de outra nota.
 - `title`
 - `brief`
 - `created_at`
+- `isAlreadyConnected`
 
 **Regras de elegibilidade**:
 
 - Nao pode ser a mesma nota que originou a acao.
 - Precisa pertencer ao mesmo usuario autenticado.
 - A lista e ordenada da mais recente para a mais antiga.
+- A lista carrega lotes recentes de 50 itens e oferece `carregar mais` para o
+  proximo lote.
+- Notas ja conectadas permanecem visiveis como desabilitadas com `Eco ja existe`.
+
+## RPC de Continuacao Atomica
+
+**Objetivo**: criar a nota de destino e a relacao `continue_note` na mesma
+transacao.
+
+**Entrada planejada**:
+
+- `source_note_id`
+- `target_day`
+- `title`
+- `brief`
+- `content`
+
+**Saida planejada**:
+
+- nota criada em formato compativel com `Note`
+- eco criado ou indicacao transacional de falha
+
+**Regras de persistencia**:
+
+- A funcao valida que a nota de origem pertence ao usuario autenticado.
+- A funcao cria a nova nota e o eco `continue_note` em uma unica transacao.
+- Se qualquer etapa falhar, nenhuma nota continuada deve permanecer criada sem
+  eco correspondente.
 
 ## Estado do Dia com Ecos
 
@@ -186,6 +218,7 @@ do dia.
 
 - `reader_open` -> `picker_open`
 - `picker_open` -> `echo_created`
+- `picker_open` -> `candidate_disabled`
 - `reader_open` -> `echo_removed`
 - `picker_open` -> `cancelled`
 - `echo_created` -> `day_reloaded`
@@ -200,6 +233,7 @@ do dia.
 
 ## Impacto no Schema
 
-- Nenhuma migration nova e planejada para esta feature.
+- Uma migration nova e planejada para a RPC atomica de `Continuar desta nota`.
+- Nenhuma tabela nova e planejada para esta feature.
 - O corte depende do schema e das policies de `note_echoes` ja presentes em
   `supabase/migrations/001_auth_day_surface.sql`.
