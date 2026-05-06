@@ -1,6 +1,9 @@
 import {
+  continueNoteInputSchema,
+  noteEchoCandidatePageSchema,
   noteEchoSchema,
   noteFormSchema,
+  relatedNoteSchema,
 } from "../../../src/schemas/note.schema";
 
 describe("note schema validation", () => {
@@ -39,5 +42,51 @@ describe("note schema validation", () => {
     expect(parsed.error?.issues[0]?.message).toBe(
       "Uma nota nao pode criar eco com ela mesma.",
     );
+  });
+
+  it("valida candidata ja conectada, item indisponivel e input de continuacao", () => {
+    expect(
+      noteEchoCandidatePageSchema.safeParse({
+        items: [
+          {
+            id: "20000000-0000-4000-8000-000000000001",
+            day: "2026-05-01",
+            title: "Candidata",
+            brief: null,
+            created_at: "2026-05-01T09:00:00+00:00",
+            isAlreadyConnected: true,
+          },
+        ],
+        nextCursor: {
+          isSelectedDayGroup: true,
+          day: "2026-05-01",
+          created_at: "2026-05-01T09:00:00+00:00",
+          id: "20000000-0000-4000-8000-000000000001",
+        },
+      }).success,
+    ).toBe(true);
+
+    expect(
+      relatedNoteSchema.safeParse({
+        id: "10000000-0000-4000-8000-000000000002",
+        day: null,
+        title: null,
+        brief: null,
+        created_at: null,
+        kind: "manual_link",
+        echoId: "30000000-0000-4000-8000-000000000001",
+        availability: "transient_unavailable",
+      }).success,
+    ).toBe(true);
+
+    expect(
+      continueNoteInputSchema.safeParse({
+        sourceNoteId: "10000000-0000-4000-8000-000000000001",
+        newNoteDay: "2026-05-02",
+        title: "Continuacao",
+        generatedBrief: "Briefing",
+        content: "",
+      }).success,
+    ).toBe(true);
   });
 });

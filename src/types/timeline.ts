@@ -1,4 +1,4 @@
-import type { Note, NoteEcho } from "./note";
+import type { DirectEchoCount, Note, NoteEcho } from "./note";
 import type { Task } from "./task";
 
 export const TIMELINE_NODE_TYPES = [
@@ -22,12 +22,15 @@ export interface TimelineNode {
   createdAt: string;
   scheduledAt: string | null;
   data: Note | Task;
+  directEchoCount?: number;
 }
 
 export interface DayTimelineInput {
   selectedDay: string;
   tasks: Task[];
   notes: Note[];
+  echoes?: NoteEcho[];
+  directEchoCounts?: DirectEchoCount[];
 }
 
 export interface DayEntries {

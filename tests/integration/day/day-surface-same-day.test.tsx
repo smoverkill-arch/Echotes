@@ -18,6 +18,7 @@ const mockSearchParams: { date?: string | string[] } = {
 
 const mockNotesTable: Record<string, unknown>[] = [];
 const mockTasksTable: Record<string, unknown>[] = [];
+const mockNoteEchoesTable: Record<string, unknown>[] = [];
 
 let mockNoteCounter = 0;
 let mockTaskCounter = 0;
@@ -54,8 +55,95 @@ jest.mock("expo-router", () => {
 });
 
 jest.mock("../../../src/lib/supabase", () => {
-  const buildQuery = (tableName: "notes" | "tasks") => {
+  const { matchesNoteEchoOrFilter } = jest.requireActual(
+    "../../../tests/support/supabase-note-echo-mock",
+  );
+
+  const resolveTable = (tableName: "notes" | "tasks" | "note_echoes") => {
+    if (tableName === "notes") {
+      return mockNotesTable;
+    }
+
+    if (tableName === "tasks") {
+      return mockTasksTable;
+    }
+
+    return mockNoteEchoesTable;
+  };
+
+  const insertMockRow = (
+    tableName: "notes" | "tasks" | "note_echoes",
+    payload: Record<string, unknown>,
+  ) => {
+    const counter =
+      tableName === "notes"
+        ? ++mockNoteCounter
+        : tableName === "tasks"
+          ? ++mockTaskCounter
+          : mockNoteEchoesTable.length + 1;
+    const idPrefix =
+      tableName === "notes"
+        ? "10000000"
+        : tableName === "tasks"
+          ? "20000000"
+          : "30000000";
+    const timestamp =
+      tableName === "notes"
+        ? "2026-04-18T09:30:00+00:00"
+        : tableName === "tasks"
+          ? "2026-04-18T10:00:00+00:00"
+          : "2026-04-18T10:30:00+00:00";
+    const row: Record<string, unknown> = {
+      id: makeUuid(idPrefix, counter),
+      created_at: timestamp,
+      updated_at: timestamp,
+      ...payload,
+    };
+
+    if (tableName === "tasks") {
+      row.completed_at = null;
+      row.scheduled_at = toOffsetIsoValue(row.scheduled_at);
+    }
+
+    resolveTable(tableName).push(row);
+
+    return row;
+  };
+
+  const buildQuery = (tableName: "notes" | "tasks" | "note_echoes") => {
     const filters = new Map<string, unknown>();
+    const negativeFilters = new Map<string, unknown>();
+    let orFilter: string | null = null;
+
+    const applyFilters = (row: Record<string, unknown>) => {
+      const matchesEq = Array.from(filters.entries()).every(
+        ([key, expected]) => row[key] === expected,
+      );
+      const matchesNeq = Array.from(negativeFilters.entries()).every(
+        ([key, expected]) => row[key] !== expected,
+      );
+
+      if (!matchesEq || !matchesNeq) {
+        return false;
+      }
+
+      if (!orFilter || tableName !== "note_echoes") {
+        return true;
+      }
+
+      return matchesNoteEchoOrFilter(orFilter, row);
+    };
+
+    const buildRows = (column: string, options?: { ascending?: boolean }) =>
+      resolveTable(tableName)
+        .filter(applyFilters)
+        .sort((left, right) => {
+          const leftValue = String(left[column] ?? "");
+          const rightValue = String(right[column] ?? "");
+          return options?.ascending === false
+            ? rightValue.localeCompare(leftValue)
+            : leftValue.localeCompare(rightValue);
+        });
 
     return {
       select() {
@@ -65,64 +153,84 @@ jest.mock("../../../src/lib/supabase", () => {
         filters.set(column, value);
         return this;
       },
+      neq(column: string, value: unknown) {
+        negativeFilters.set(column, value);
+        return this;
+      },
+      in(column: string, values: unknown[]) {
+        filters.set(column, values);
+        return this;
+      },
+      or(filter: string) {
+        orFilter = filter;
+        return this;
+      },
       async order(column: string, options?: { ascending?: boolean }) {
-        const source = tableName === "notes" ? mockNotesTable : mockTasksTable;
-        const rows = source
-          .filter((row) =>
-            Array.from(filters.entries()).every(
-              ([key, expected]) => row[key] === expected,
-            ),
-          )
-          .sort((left, right) => {
-            const leftValue = String(left[column] ?? "");
-            const rightValue = String(right[column] ?? "");
-            return options?.ascending === false
-              ? rightValue.localeCompare(leftValue)
-              : leftValue.localeCompare(rightValue);
-          });
-
-        return { data: rows, error: null };
+        return { data: buildRows(column, options), error: null };
+      },
+      async range(from: number, to: number) {
+        return {
+          data: buildRows("created_at", { ascending: false }).slice(from, to + 1),
+          error: null,
+        };
       },
       insert(payload: Record<string, unknown>) {
         return {
           select() {
             return {
               async single() {
-                if (!payload.user_id) {
+                if (tableName !== "note_echoes" && !payload.user_id) {
                   return {
                     data: null,
                     error: { message: `${tableName}.user_id is required` },
                   };
                 }
 
-                const counter =
-                  tableName === "notes" ? ++mockNoteCounter : ++mockTaskCounter;
-                const idPrefix =
-                  tableName === "notes" ? "10000000" : "20000000";
-                const timestamp =
-                  tableName === "notes"
-                    ? "2026-04-18T09:30:00+00:00"
-                    : "2026-04-18T10:00:00+00:00";
-                const row: Record<string, unknown> = {
-                  id: makeUuid(idPrefix, counter),
-                  created_at: timestamp,
-                  updated_at: timestamp,
-                  completed_at: null,
-                  ...payload,
-                };
-                if (tableName === "tasks") {
-                  row.scheduled_at = toOffsetIsoValue(row.scheduled_at);
-                }
-                if (tableName === "notes") {
-                  mockNotesTable.push(row);
-                } else {
-                  mockTasksTable.push(row);
-                }
+                const row = insertMockRow(tableName, payload);
                 return { data: row, error: null };
               },
             };
           },
         };
+      },
+      delete() {
+        const deleteBuilder = {
+          eq(column: string, value: unknown) {
+            filters.set(column, value);
+            return deleteBuilder;
+          },
+          or(filter: string) {
+            orFilter = filter;
+            return deleteBuilder;
+          },
+          async select() {
+            const source = resolveTable(tableName);
+            const deletedRows = source.filter(applyFilters);
+
+            for (const row of deletedRows) {
+              const index = source.indexOf(row);
+
+              if (index >= 0) {
+                source.splice(index, 1);
+              }
+            }
+
+            return { data: deletedRows, error: null };
+          },
+          async single() {
+            const source = resolveTable(tableName);
+            const index = source.findIndex(applyFilters);
+
+            if (index >= 0) {
+              const [row] = source.splice(index, 1);
+              return { data: row, error: null };
+            }
+
+            return { data: null, error: null };
+          },
+        };
+
+        return deleteBuilder;
       },
       update(payload: Record<string, unknown>) {
         return {
@@ -131,8 +239,7 @@ jest.mock("../../../src/lib/supabase", () => {
               select() {
                 return {
                   async single() {
-                    const source =
-                      tableName === "notes" ? mockNotesTable : mockTasksTable;
+                    const source = resolveTable(tableName);
                     const index = source.findIndex((row) => row[column] === value);
                     if (index < 0) {
                       return {
@@ -163,7 +270,34 @@ jest.mock("../../../src/lib/supabase", () => {
 
   return {
     getSupabaseClient: () => ({
-      from: (tableName: "notes" | "tasks") => buildQuery(tableName),
+      from: (tableName: "notes" | "tasks" | "note_echoes") => buildQuery(tableName),
+      rpc: async (name: string, payload: Record<string, unknown>) => {
+        if (name !== "continue_note") {
+          return { data: null, error: { message: `rpc ${name} not mocked` } };
+        }
+
+        const newNote = insertMockRow("notes", {
+          user_id: "f3b86608-11f6-4df4-b902-3bc0b1d5b8bc",
+          day: payload.new_note_day,
+          title: payload.title,
+          content: payload.content ?? null,
+          brief: payload.brief ?? null,
+          tag_id: null,
+          color: null,
+          is_color_overridden: false,
+        });
+        const noteEcho = insertMockRow("note_echoes", {
+          from_note_id: payload.source_note_id,
+          to_note_id: newNote.id,
+          created_by_user_id: "f3b86608-11f6-4df4-b902-3bc0b1d5b8bc",
+          context_note_id: payload.source_note_id,
+          context_day: mockSearchParams.date,
+          kind: "continue_note",
+          metadata: null,
+        });
+
+        return { data: { newNote, noteEcho }, error: null };
+      },
     }),
     getSupabaseConfigurationError: () => null,
     isSupabaseConfigured: true,
@@ -214,6 +348,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockNotesTable.splice(0, mockNotesTable.length);
   mockTasksTable.splice(0, mockTasksTable.length);
+  mockNoteEchoesTable.splice(0, mockNoteEchoesTable.length);
   mockNoteCounter = 0;
   mockTaskCounter = 0;
   mockSearchParams.date = "2026-04-18";

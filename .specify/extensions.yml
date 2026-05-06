@@ -60,7 +60,8 @@ hooks:
     enabled: true
     optional: false
     prompt: Running red team gate check on the current feature spec...
-    description: Red Team Gate (Principle VIII) - blocks /speckit.plan if the spec triggers a red team category and no findings report exists.
+    description: Red Team Gate (Principle VIII) - blocks /speckit.plan if the spec
+      triggers a red team category and no findings report exists.
     condition: null
   before_tasks:
   - extension: git
@@ -212,6 +213,20 @@ hooks:
     optional: true
     prompt: Run DocGuard validation after implementation?
     description: Quality gate â€” ensures docs stay in sync with code
+    condition: null
+  - extension: review
+    command: speckit.review.run
+    enabled: true
+    optional: true
+    prompt: Run PR review on implemented changes?
+    description: Comprehensive review after implementation
+    condition: null
+  - extension: cleanup
+    command: speckit.cleanup.run
+    enabled: true
+    optional: true
+    prompt: Run cleanup to review implementation changes and identify tech debt?
+    description: Post-implementation quality gate
     condition: null
   after_checklist:
   - extension: git
