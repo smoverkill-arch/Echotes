@@ -8,11 +8,12 @@
 
 ## Phase 1: Configuracao
 
-**Objetivo**: Preparar fixtures e contratos de teste compartilhados antes das historias.
+**Objetivo**: Preparar fixtures e mocks de teste compartilhados antes das historias.
 
-- [ ] T001 Criar fixtures compartilhadas de notas e ecos em tests/support/note-echo-fixtures.ts
-- [ ] T002 [P] Adicionar helpers de mock Supabase para tabelas notes/note_echoes e rpc em tests/support/supabase-note-echo-mock.ts
-- [ ] T003 [P] Adicionar cobertura documental da migration 002 e da RPC atomica em tests/unit/docs/documentation-contracts.test.ts
+- [X] T001 Criar fixtures compartilhadas de notas e ecos em tests/support/note-echo-fixtures.ts
+- [X] T002 [P] Adicionar helpers de mock Supabase para tabelas notes/note_echoes e rpc em tests/support/supabase-note-echo-mock.ts
+
+**Nota de status**: T001 e T002 estao concluidas como support files. A verificacao comportamental desses helpers nao fecha aqui; ela permanece distribuida nos testes posteriores que importam as fixtures e exercitam insert, delete e rpc.
 
 ---
 
@@ -31,7 +32,6 @@
 - [ ] T010 Criar API de listagem paginada de candidatas em src/features/notes/api/list-note-candidates.ts
 - [ ] T011 Criar API de criacao manual de eco em src/features/notes/api/create-note-echo.ts
 - [ ] T012 Criar API de remocao de eco em src/features/notes/api/delete-note-echo.ts
-- [ ] T013 Criar API de continuacao atomica via rpc em src/features/notes/api/continue-note.ts
 - [ ] T014 Atualizar mocks de testes de integracao para suportar note_echoes, delete e rpc em tests/integration/day/day-surface-same-day.test.tsx
 
 **Ponto de validacao**: Tipos, schemas, helpers e APIs base existem para que cada historia avance com testes proprios.
@@ -98,20 +98,24 @@
 
 **Teste independente**: Abrir uma nota, acionar `Continuar desta nota`, revisar draft, salvar no mesmo dia e em dia futuro, confirmar Reader da nova nota e ausencia de nota orfa em falha da RPC.
 
+### Pre-requisito tecnico da Historia do Usuario 3
+
+- [ ] T041 [US3] Criar migration da RPC atomica continue_note em supabase/migrations/002_note_echo_flows.sql
+- [ ] T013 [US3] Criar API de continuacao atomica via rpc em src/features/notes/api/continue-note.ts
+
 ### Testes da Historia do Usuario 3
 
 - [ ] T037 [P] [US3] Adicionar testes unitarios de buildContinueNoteBrief em tests/unit/notes/build-continue-note-brief.test.ts
-- [ ] T038 [P] [US3] Adicionar testes unitarios de continueNote rpc sucesso/falha sem nota orfa em tests/unit/notes/continue-note.test.ts
-- [ ] T039 [P] [US3] Adicionar teste de contrato da migration RPC em tests/unit/docs/documentation-contracts.test.ts
-- [ ] T040 [US3] Adicionar teste de integracao para Continuar desta nota no mesmo dia e em dia futuro em tests/integration/day/continue-note-flow.test.tsx
+- [ ] T039 [P] [US3] Adicionar teste de contrato da migration RPC em tests/unit/docs/documentation-contracts.test.ts cobrindo existencia de supabase/migrations/002_note_echo_flows.sql, public.continue_note, security definer, auth.uid(), inserts em public.notes e public.note_echoes, kind = 'continue_note', rollback e ausencia de service_role
+- [ ] T038 [P] [US3] Adicionar testes unitarios de continueNote rpc sucesso/falha sem nota orfa em tests/unit/notes/continue-note.test.ts, com casos separados para mesmo dia e dia futuro cobrindo payload `new_note_day`, persistencia em `notes.day`, `context_day = selectedDay`, rollback e ausencia de `source_day`, `target_day`, `scheduled_at` ou campos de tarefa
+- [ ] T040 [US3] Adicionar teste de integracao para Continuar desta nota no mesmo dia e em dia futuro em tests/integration/day/continue-note-flow.test.tsx, com assercoes separadas para: mesmo dia sem navegacao, dia futuro navegando para `/day/[newNoteDay]`, `routeDay`, payload da RPC, `notes.day`, `context_day` como proveniencia e nao rota, Reader aberto apenas depois de `note.day` conferir, consumo unico de `pendingReaderOpen` e ausencia de campos temporais de tarefa
 
 ### Implementacao da Historia do Usuario 3
 
-- [ ] T041 [US3] Criar migration da RPC atomica continue_note em supabase/migrations/002_note_echo_flows.sql
-- [ ] T042 [US3] Implementar formulario/modal de continuacao com targetDay editavel e generatedBrief em src/components/forms/continue-note-editor.tsx
+- [ ] T042 [US3] Implementar formulario/modal de continuacao com `newNoteDay` editavel e generatedBrief em src/components/forms/continue-note-editor.tsx, evitando vocabulario `targetDay`/`target_day` na UI e no estado de nota
 - [ ] T043 [US3] Integrar acao Continuar desta nota ao NoteReader em src/components/reader/note-reader.tsx
-- [ ] T044 [US3] Integrar fluxo de continuacao, rpc, reload e navegacao ao dia destino em app/day/[date].tsx
-- [ ] T045 [US3] Garantir que notas continuadas nao criam ghost card, source_day ou target_day em src/features/timeline/utils/derive-timeline-nodes.ts
+- [ ] T044 [US3] Integrar fluxo de continuacao, rpc, reload, `pendingReaderOpen` de consumo unico e navegacao ao `newNoteDay` em app/day/[date].tsx, limpando pendencia em sucesso, falha, logout, cancelamento e navegacao manual
+- [ ] T045 [US3] Garantir que notas continuadas nao criam ghost card, `source_day`, `target_day`, `scheduled_at` ou qualquer estado/campo de tarefa em src/features/timeline/utils/derive-timeline-nodes.ts
 
 **Ponto de validacao**: Todas as historias funcionam com persistencia atomica de continuacao e sem estado parcial visivel.
 
@@ -121,8 +125,8 @@
 
 **Objetivo**: Fechar rastreabilidade, documentacao canonica e gates.
 
-- [ ] T046 [P] Atualizar @req dos novos testes para FR-001..FR-024 e SC-001..SC-006 nos arquivos em tests/unit/ e tests/integration/day/
-- [ ] T047 [P] Atualizar README.md, CURRENT-STATE.md, ROADMAP.md, docs-canonical/DATA-MODEL.md, docs-canonical/ARCHITECTURE.md, docs-canonical/REQUIREMENTS.md e docs-canonical/TEST-SPEC.md quando o comportamento da feature estiver implementado
+- [ ] T046 [P] Atualizar @req dos novos testes para tags feature-scoped `@req 002-note-echo-flows:FR-001`..`@req 002-note-echo-flows:FR-024` e `@req 002-note-echo-flows:SC-001`..`@req 002-note-echo-flows:SC-006` nos arquivos novos em tests/unit/ e tests/integration/day/; tags legadas sem feature id, incluindo 001, nao contam para este gate
+- [ ] T047 [P] Atualizar canon vigente da raiz quando o comportamento da feature estiver implementado: README.md, CURRENT-STATE.md, ROADMAP.md, DATA-MODEL.md, ARCHITECTURE.md, REQUIREMENTS.md, TEST-SPEC.md e SECURITY.md quando RLS/RPC for afetado; docs-canonical/* pode ser atualizado apenas como espelho historico/adicional, nunca como autoridade substituta
 - [ ] T048 Atualizar CHANGELOG.md com a feature 002-note-echo-flows
 - [ ] T049 Revisar DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md se houver desalinhamento temporario ou absorcao de acervo historico
 - [ ] T050 Executar corepack pnpm run lint conforme scripts em package.json
@@ -130,6 +134,7 @@
 - [ ] T052 Executar corepack pnpm run typecheck conforme scripts em package.json
 - [ ] T053 Executar corepack pnpm run doc:guard conforme scripts em package.json
 - [ ] T054 Executar corepack pnpm run doc:score conforme scripts em package.json
+- [ ] T055 Registrar bloco de evidencia concreta de fechamento no resumo da PR/entrega: paths de canon da raiz alterados, resultado da revisao de DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md, comandos exatos e outputs de lint/test/typecheck/doc:guard/doc:score, evidencia da migration/RPC aplicada ou contratualmente verificada, e confirmacao de que DocGuard PASS foi necessario mas nao usado como prova unica de alinhamento semantico
 
 ---
 
@@ -151,17 +156,18 @@
 - T026 depende de T025 e T019.
 - T032 depende de T010 e T028.
 - T035 depende de T011, T012 e T031.
-- T041 deve preceder T013, T038 e T044.
+- T041 deve preceder T013, T039, T038 e T044.
+- T039 roda depois de T041 para verificar a migration existente, antes dos testes de API que dependem da RPC.
 - T044 depende de T013, T042 e T043.
 
 ## Oportunidades de Paralelismo
 
-- Fase 1: T002 e T003 podem rodar em paralelo.
+- Fase 1: T002 pode rodar depois de T001.
 - Fase 2: T006, T007 e T008 podem rodar em paralelo depois de T004 e T005.
 - US1: T015, T016, T017 e T018 podem rodar em paralelo antes da implementacao.
 - US2: T028, T029 e T030 podem rodar em paralelo antes da integracao T031.
-- US3: T037, T038 e T039 podem rodar em paralelo depois de T041.
-- Polimento: T046 e T047 podem rodar em paralelo antes dos gates T050..T054.
+- US3: T037 pode rodar antes de T041; T041 precede T013; T039 roda depois de T041; T038 e T040 rodam depois da cobertura da migration quando seus demais pre-requisitos estiverem prontos.
+- Polimento: T046 e T047 podem rodar em paralelo antes dos gates T050..T055.
 
 ## Estrategia de Implementacao
 
@@ -175,13 +181,13 @@
 
 1. Adicionar US2 para criacao/remocao manual de ecos.
 2. Adicionar US3 com RPC atomica.
-3. Fechar polimento, canon, CHANGELOG e gates completos.
+3. Fechar polimento, canon da raiz, CHANGELOG, revisoes de drift/migracao e bloco de evidencia concreta.
 
 ## Resumo
 
 - Total de tarefas: 54
 - US1: 13 tarefas
 - US2: 9 tarefas
-- US3: 9 tarefas
-- Setup/Base/Polimento: 23 tarefas
+- US3: 10 tarefas
+- Setup/Base/Polimento: 22 tarefas
 - MVP sugerido: Fases 1-3, entregando continuidade visivel com Reader e navegacao entre notas conectadas.

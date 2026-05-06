@@ -49,8 +49,8 @@ Reader de uma nota e navegar para uma nota conectada.
    **Entao** o sistema mostra as notas conectadas sem expor hierarquia ou mapa
    completo da familia.
 4. **Dado** uma nota conectada localizada em outro dia, **Quando** a pessoa a
-   abre a partir do Reader, **Entao** o sistema leva ao contexto correto dessa
-   nota sem descaracterizar a superficie diaria.
+   abre a partir do Reader, **Entao** o sistema muda primeiro a rota e o dia
+   selecionado para o dia dessa nota e so entao abre o Reader nesse novo dia.
 5. **Dado** uma nota conectada cujos detalhes nao podem ser carregados,
    **Quando** a pessoa abre o Reader, **Entao** o sistema mantem a superficie
    aberta e mostra a conexao como item indisponivel com acao de recarregar.
@@ -89,8 +89,9 @@ mesma relacao sem apagar nenhuma das notas.
    confirmacao antes de apagar apenas a relacao, atualiza a contagem nas duas
    extremidades relevantes e preserva ambas as notas.
 6. **Dado** uma lista grande de notas candidatas, **Quando** a pessoa abre o
-   seletor, **Entao** o sistema carrega primeiro as notas recentes e oferece
-   `carregar mais` para buscar o proximo lote.
+   seletor, **Entao** o sistema mantem o Reader e o dia selecionado visiveis,
+   mostra o dia de cada candidata, carrega primeiro notas recentes ancoradas no
+   dia atual e oferece `carregar mais` para buscar o proximo lote.
 
 ---
 
@@ -110,7 +111,7 @@ briefing inicial e confirmar a criacao da nota conectada.
 **Cenarios de aceite**:
 
 1. **Dado** uma nota existente, **Quando** a pessoa escolhe `Continuar desta
-   nota`, **Entao** o sistema prepara uma nova nota ja conectada a origem.
+   nota`, **Entao** o sistema prepara uma nova nota ja conectada a nota aberta.
 2. **Dado** uma continuacao em andamento, **Quando** a pessoa revisa a nova
    nota antes de concluir, **Entao** o sistema oferece briefing inicial
    automatico e permite ajuste imediato desse texto.
@@ -131,7 +132,7 @@ briefing inicial e confirmar a criacao da nota conectada.
   superficie autenticada do dia?
 - Como o sistema reage quando a sessao expira enquanto a pessoa tenta adicionar
   um eco ou concluir uma continuacao?
-- O que acontece quando a nota de destino deixa de estar acessivel entre a
+- O que acontece quando a nota candidata ou conectada deixa de estar acessivel entre a
   abertura do Reader e a confirmacao da acao?
 - Como o sistema lida com tentativa de eco duplicado para o mesmo par de notas?
 - Como a experiencia se comporta quando a nota conectada pertence a outro dia?
@@ -170,11 +171,17 @@ briefing inicial e confirmar a criacao da nota conectada.
   relacao e sem apagar nenhuma das notas envolvidas.
 - **FR-010**: O sistema DEVE tratar `manual_link` e `continue_note` apenas como
   proveniencias internas da mesma relacao `Eco`, sem criar subtipos visiveis de
-  nota ou hierarquia na UI.
+  nota ou hierarquia na UI, e a UI do Reader, cards, seletor e confirmacoes
+  DEVE expor somente linguagem de `Eco` e `nota conectada`, sem rotulos de
+  hierarquia, grafo, origem/destino, pai/filho, arvore, cadeia, continuacao ou
+  subtipo.
 - **FR-011**: O sistema DEVE permitir abrir, a partir do Reader, uma nota
   conectada mesmo quando ela pertence a outro dia.
 - **FR-012**: O sistema DEVE preservar o contexto diario da nota aberta ao
-  navegar para uma nota conectada.
+  navegar para uma nota conectada: se a nota pertence a outro dia, a rota e o
+  `selectedDay` DEVEM mudar para `note.day` antes da abertura do Reader, e a
+  nota conectada NUNCA pode ser renderizada dentro da superficie do dia de
+  partida.
 - **FR-013**: O sistema DEVE oferecer a acao `Adicionar eco` como ferramenta
   relacional de nota.
 - **FR-014**: O sistema DEVE oferecer a acao `Continuar desta nota` como criacao
@@ -187,7 +194,9 @@ briefing inicial e confirmar a criacao da nota conectada.
 - **FR-017**: O sistema DEVE iniciar a nota continuada com briefing automatico e
   permitir ajuste imediato desse texto pela pessoa usuaria.
 - **FR-018**: O sistema DEVE preservar a diferenca entre nota e tarefa, de modo
-  que notas continuadas nao ganhem ghost card, `source_day` ou `target_day`.
+  que o dia escolhido para uma nota continuada seja gravado apenas em
+  `notes.day`, sem ghost card, `source_day`, `target_day`, `scheduled_at`,
+  projecao ou estado de tarefa.
 - **FR-019**: O sistema DEVE manter os detalhes relacionais de nota dentro do
   Reader ou do fluxo contextual, sem poluir o fluxo principal da timeline.
 - **FR-020**: O sistema DEVE falhar com mensagem clara quando a pessoa perder
@@ -198,9 +207,10 @@ briefing inicial e confirmar a criacao da nota conectada.
   dia.
 - **FR-022**: O sistema DEVE apresentar notas ja conectadas no seletor de
   `Adicionar eco` como candidatas desabilitadas com `Eco ja existe`.
-- **FR-023**: O seletor de `Adicionar eco` DEVE carregar notas candidatas em
-  lotes recentes de 50 itens e oferecer `carregar mais` para recuperar o
-  proximo lote.
+- **FR-023**: O seletor de `Adicionar eco` DEVE permanecer contextual ao Reader
+  e ao dia selecionado, mostrar o dia de cada candidata, priorizar candidatas
+  do dia atual antes de outras notas recentes, carregar lotes de 50 itens e
+  oferecer `carregar mais` para recuperar o proximo lote.
 - **FR-024**: O sistema DEVE manter fora deste corte as mencoes inline `@nota`
   e seus chips persistidos.
 
@@ -217,6 +227,15 @@ briefing inicial e confirmar a criacao da nota conectada.
   outra nota de origem para prolongar a ideia em novo contexto.
 - **Contexto do dia**: representa o dia em foco da experiencia e ancora a
   abertura, leitura e navegacao entre notas conectadas.
+
+### Vocabulario de UI deste corte
+
+| Tipo | Permitido para labels novos | Proibido para labels novos |
+|------|-----------------------------|----------------------------|
+| Relacao | `Eco`, `Ecos`, `nota conectada`, `notas conectadas` | `grafo`, `rede`, `mapa`, `familia`, `arvore`, `cadeia` |
+| Acao | `Adicionar eco`, `Remover eco`, `Recarregar`, `carregar mais` | `criar subtipo`, `abrir origem`, `abrir destino`, `ver continuacao` |
+| Estado | `Eco ja existe`, `Item indisponivel`, `Nenhuma nota conectada` | `pai`, `filho`, `nota mae`, `nota filha`, `subnota`, `dependencia` |
+| Dia | `Dia da nota`, `Dia selecionado` | `source day`, `target day`, `dia de origem`, `dia de destino` |
 
 ## Criterios de Sucesso / Success Criteria *(obrigatorio)*
 

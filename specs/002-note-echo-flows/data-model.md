@@ -61,10 +61,20 @@ como `Eco`.
 - `from_note_id` e `to_note_id` sempre apontam para notas diferentes.
 - O par semantico entre duas notas deve permanecer unico, independentemente da
   ordem dos ids.
+- Inserts, deletes e leituras de `note_echoes` precisam ser constrained por
+  endpoints acessiveis ao `auth.uid()` atual; ownership enviado pelo cliente nao
+  autoriza nenhuma operacao.
+- `context_note_id` precisa apontar para nota acessivel ao mesmo usuario no
+  momento da escrita, normalmente a propria nota de origem da acao.
 - A UI trata o eco como relacao sem direcao visivel, embora a persistencia use
   `from_note_id` e `to_note_id` de forma deterministica.
 - Tentativas posteriores sobre o mesmo par nao reescrevem `kind`; retornam
   feedback e preservam a relacao existente.
+- Conflito de unicidade no par semantico so pode ser convertido em `Eco ja
+  existe` depois de buscar a relacao existente sob o acesso atual do usuario.
+- Se essa relacao existente nao puder ser lida, o estado da operacao e falha
+  recuperavel de acesso/reload; a UI nao deve presumir sucesso nem criar copia
+  local otimista.
 
 **Convencao deste corte**:
 
@@ -75,6 +85,8 @@ como `Eco`.
 - `context_note_id` recebe a nota de origem da acao.
 - `context_day` registra o dia em que a acao foi disparada a partir da
   superficie aberta.
+- `context_day` e proveniencia/auditoria. Ele nunca define rota, reload de dia,
+  `notes.day` da nota criada nem destino de abertura do Reader.
 
 ## Resumo Direto de Ecos
 
@@ -105,6 +117,7 @@ Reader de outra nota.
 - `brief`
 - `created_at`
 - `kind`
+- `availability`
 
 **Regras de leitura**:
 
@@ -115,9 +128,26 @@ Reader de outra nota.
   de ids relacionados.
 - `kind` pode existir como metadado interno de proveniencia, mas nao altera a
   semantica visivel da relacao para a UI.
-- Se os detalhes da nota relacionada falharem ao carregar ou deixarem de estar
-  acessiveis, o Reader representa a conexao como item indisponivel com acao de
-  recarregar.
+- Se os detalhes da nota relacionada autorizada falharem por carga transitoria,
+  o Reader representa a conexao como item indisponivel com acao de recarregar.
+- `availability = transient_unavailable` representa apenas falha tecnica
+  recuperavel depois de a relacao e seus endpoints terem passado por checagem
+  de acesso atual.
+- Negacao por RLS, ownership, sessao ausente ou sessao expirada nao vira item
+  indisponivel; a relacao e removida da derivacao autorizada e o feedback nao
+  revela se a nota ou a relacao existem.
+- `directCount` e `relatedNotes` nunca contam linhas cuja nota endpoint atual
+  nao tenha sido confirmada como acessivel ao usuario autenticado.
+- A ordenacao de `relatedNotes` usa `activeNote.day` como referencia de mesmo
+  dia. Primeiro entram notas com `day = activeNote.day`, por `created_at desc`
+  e `id desc`; depois entram as demais por `day desc`, `created_at desc` e
+  `id desc`.
+- O cache de detalhe minimo e subordinado a relacao carregada. Falha de detalhe
+  limpa `title`, `brief` e `created_at` stale daquele item, preservando apenas a
+  identidade da relacao ate o proximo reload autoritativo de ecos.
+- `availability = stale_detail` pode existir apenas durante reconciliacao local
+  de reload; nao permite abrir Reader nem remover eco sem nova confirmacao do
+  estado autoritativo.
 
 ## Draft de Continuacao de Nota
 
@@ -127,14 +157,14 @@ Reader de outra nota.
 **Campos**:
 
 - `sourceNoteId`
-- `targetDay`
+- `newNoteDay`
 - `title`
 - `generatedBrief`
 - `content`
 
 **Defaults deste corte**:
 
-- `targetDay` nasce com o dia atualmente em foco na superficie.
+- `newNoteDay` nasce com o dia atualmente em foco na superficie.
 - `title` nasce com o titulo da nota de origem.
 - `content` nasce vazio.
 - `generatedBrief` segue esta ordem:
@@ -144,7 +174,10 @@ Reader de outra nota.
 
 **Regras de validacao**:
 
-- `targetDay` precisa ser igual ou posterior ao `day` da nota de origem.
+- `newNoteDay` precisa ser igual ou posterior ao `day` da nota de origem.
+- `newNoteDay` e o unico valor temporal do draft que vira `notes.day` da nota
+  criada. Ele nao cria `target_day`, `source_day`, `scheduled_at` ou qualquer
+  campo de tarefa.
 - `generatedBrief` precisa existir antes da confirmacao.
 - O usuario pode editar `title` e `generatedBrief` antes de salvar.
 
@@ -165,7 +198,13 @@ Reader de outra nota.
 
 - Nao pode ser a mesma nota que originou a acao.
 - Precisa pertencer ao mesmo usuario autenticado.
-- A lista e ordenada da mais recente para a mais antiga.
+- A elegibilidade do seletor e apenas pre-selecao; `createNoteEcho` precisa
+  revalidar origem, candidata e `context_note_id` no servidor no momento da
+  confirmacao.
+- A lista prioriza candidatas em que `day` corresponde ao dia selecionado e usa
+  ordenacao deterministica: grupo do dia selecionado por `created_at desc`,
+  `id desc`; demais notas por `day desc`, `created_at desc`, `id desc`.
+- A paginacao usa cursor estavel `(isSelectedDayGroup, day, created_at, id)`.
 - A lista carrega lotes recentes de 50 itens e oferece `carregar mais` para o
   proximo lote.
 - Notas ja conectadas permanecem visiveis como desabilitadas com `Eco ja existe`.
@@ -178,22 +217,107 @@ transacao.
 **Entrada planejada**:
 
 - `source_note_id`
-- `target_day`
+- `new_note_day`
 - `title`
 - `brief`
 - `content`
 
 **Saida planejada**:
 
-- nota criada em formato compativel com `Note`
-- eco criado ou indicacao transacional de falha
+- `newNote` criada em formato compativel com `Note`, incluindo `id` e `day`
+- `noteEcho` criado com `kind = continue_note`
+- indicacao transacional de falha quando nenhuma escrita foi persistida
 
 **Regras de persistencia**:
 
-- A funcao valida que a nota de origem pertence ao usuario autenticado.
+- A funcao valida que a nota de origem pertence ao usuario autenticado usando
+  `auth.uid()` server-side.
+- A funcao usa `SECURITY DEFINER` com `search_path` fixo e checks equivalentes
+  a RLS antes de qualquer escrita.
+- O dono da nova nota e o criador do eco sao derivados no servidor; nenhum campo
+  de dono enviado pelo cliente e aceito.
+- Chamada unauthenticated, cross-user ou com nota de origem inacessivel falha
+  sem escrita parcial e sem revelar existencia indevida.
+- Grants da funcao ficam limitados ao role autenticado necessario; cliente e
+  migration desta feature nao usam `service_role`.
 - A funcao cria a nova nota e o eco `continue_note` em uma unica transacao.
+- A funcao persiste `new_note_day` somente em `notes.day` da nota criada.
 - Se qualquer etapa falhar, nenhuma nota continuada deve permanecer criada sem
   eco correspondente.
+- Depois de sucesso da RPC, falha de reload, navegacao ou abertura do Reader nao
+  desfaz a persistencia. O cliente deve reconciliar por `newNote.id` e
+  `newNote.day`, sem reenviar a RPC cegamente.
+
+## Estado Pendente de Abertura do Reader
+
+**Objetivo**: representar a reabertura cross-day de nota conectada sem permitir
+estado stale indefinido.
+
+**Campos**:
+
+- `noteId`
+- `noteDay`
+- `requestId`
+- `sessionUserId`
+- `actionOrigin`
+
+**Regras de consumo**:
+
+- `noteDay` e o dia esperado da nota a abrir; em continuacao de nota ele e igual
+  a `newNoteDay`.
+- `actionOrigin` aceita `connected_note_tap` e `continue_note_created`.
+- O estado e consumido uma unica vez quando `routeDay === noteDay`,
+  `note.id === noteId`, `note.day === noteDay` e
+  `session.userId === sessionUserId`.
+- O estado e limpo em sucesso, reload falho, nota ausente, mismatch de rota/dia,
+  logout, troca de usuario, navegacao manual, cancelamento explicito ou novo
+  request concorrente.
+- Enquanto pendente, ele nao autoriza abrir Reader em outro dia nem em outra
+  sessao.
+
+## Estado de Recuperacao de Continuacao
+
+**Objetivo**: representar commit persistido de `Continuar desta nota` quando a
+etapa posterior de reload/navegacao/Reader falha.
+
+**Campos**:
+
+- `newNoteId`
+- `newNoteDay`
+- `sourceNoteId`
+- `contextDay`
+- `requestId`
+- `sessionUserId`
+
+**Regras de reconciliacao**:
+
+- O estado nasce apenas depois de a RPC retornar sucesso persistido.
+- A recuperacao recarrega `newNoteDay`, busca `newNoteId` e confirma relacao
+  direta com `sourceNoteId`.
+- Nova submissao do mesmo draft permanece bloqueada enquanto esse estado existir.
+- Logout, troca de usuario ou perda de acesso a `newNoteId` limpam o estado e
+  mostram feedback recuperavel sem criar nova nota.
+
+## Resultados de Mutacao de Eco Manual
+
+**Objetivo**: fechar idempotencia persistente para criar e remover ecos.
+
+**Resultados de `createNoteEcho`**:
+
+- `created`: insert confirmado, relacao lida e estado reconciliado.
+- `already_exists`: conflito unico reconciliado por fetch acessivel da relacao
+  existente, preservando o `kind` original.
+- `not_accessible`: endpoint ou relacao existente nao acessivel; nenhum sucesso
+  de UX e declarado.
+- `retryable_failure`: falha tecnica antes de reconciliar estado autoritativo.
+
+**Resultados de `deleteNoteEcho`**:
+
+- `deleted`: uma relacao removida e reload autoritativo confirma ausencia do par.
+- `already_removed`: zero linhas ou par ausente reconciliado por reload
+  autoritativo; contagens e lista refletem ausencia.
+- `not_accessible`: relacao ou endpoint inacessivel sob acesso atual.
+- `retryable_failure`: falha tecnica exige reload antes de nova acao destrutiva.
 
 ## Estado do Dia com Ecos
 
@@ -218,17 +342,24 @@ do dia.
 
 - `reader_open` -> `picker_open`
 - `picker_open` -> `echo_created`
+- `picker_open` -> `echo_already_exists_reconciled`
 - `picker_open` -> `candidate_disabled`
 - `reader_open` -> `echo_removed`
+- `reader_open` -> `echo_already_removed_reconciled`
 - `picker_open` -> `cancelled`
 - `echo_created` -> `day_reloaded`
 - `echo_removed` -> `day_reloaded`
+- `echo_removed` -> `reload_required_before_retry`
 
 ### Continuacao de Nota
 
 - `reader_open` -> `continue_draft_prepared`
 - `continue_draft_prepared` -> `continue_draft_edited`
 - `continue_draft_edited` -> `note_created_and_linked`
+- `note_created_and_linked` -> `continue_committed_pending_open`
+- `continue_committed_pending_open` -> `day_reloaded`
+- `continue_committed_pending_open` -> `reader_open`
+- `continue_committed_pending_open` -> `recovery_feedback`
 - `continue_draft_prepared` -> `cancelled`
 
 ## Impacto no Schema
