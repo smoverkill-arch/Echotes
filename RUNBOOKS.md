@@ -6,8 +6,43 @@
 2. create `.env` from `.env.example`
 3. fill `EXPO_PUBLIC_SUPABASE_URL`
 4. fill `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-5. apply `supabase/migrations/001_auth_day_surface.sql`
-6. `corepack pnpm expo start`
+5. start the local Supabase stack with `corepack pnpm run supabase:start`
+6. confirm local migrations with `corepack pnpm run db:migrations`
+7. `corepack pnpm expo start`
+
+## Run Supabase Locally with Docker
+
+1. start Docker Desktop
+2. run `corepack pnpm run supabase:start`
+3. open Supabase Studio at `http://127.0.0.1:54323`
+4. use the local API URL `http://127.0.0.1:54321` when testing against the
+   local stack
+5. run `corepack pnpm run supabase:stop` when the local stack is no longer
+   needed
+
+The local database is rebuilt from versioned files in `supabase/migrations/`.
+Current local migrations are:
+
+- `001_auth_day_surface.sql`
+- `002_note_echo_owner_default.sql`
+- `003_harden_note_echo_surface.sql`
+
+## Apply Supabase Migrations Remotely
+
+1. authenticate locally with the Supabase CLI
+2. link the project with `corepack pnpm exec supabase link --project-ref <ref>`
+3. export the database password variable requested by the Supabase CLI in the
+   current shell when remote Postgres access is required
+4. inspect pending remote changes with `corepack pnpm run db:remote:dry-run`
+5. apply with `corepack pnpm run db:remote:push` only when the dry run is
+   expected
+
+If a migration will be applied manually in the Supabase web console, use the
+exact SQL from `supabase/migrations/`, then record that version in Supabase CLI
+history with `corepack pnpm exec supabase migration repair <version> --status applied`.
+Afterward, verify with `corepack pnpm run db:migrations` and run
+`corepack pnpm run db:remote:dry-run`; the dry run should not propose the
+manually applied migration again.
 
 ## Validate the Repository Before Merge
 
@@ -44,4 +79,4 @@ If the app reports invalid environment configuration:
 1. verify `.env` exists
 2. verify the two public Supabase variables are filled
 3. re-open the shell so the environment is reloaded if needed
-4. confirm the migration has already been applied in Supabase
+4. confirm migrations with `corepack pnpm run db:migrations`

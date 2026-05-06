@@ -33,16 +33,29 @@ export type RelatedNoteAvailability =
   | "transient_unavailable"
   | "stale_detail";
 
-export interface RelatedNote {
+export interface AvailableRelatedNote {
   id: string;
-  day: string | null;
-  title: string | null;
+  day: string;
+  title: string;
   brief: string | null;
-  created_at: string | null;
+  created_at: string;
   kind: NoteEchoKind;
   echoId: string;
-  availability: RelatedNoteAvailability;
+  availability: "available";
 }
+
+export interface UnavailableRelatedNote {
+  id: string;
+  day: null;
+  title: null;
+  brief: null;
+  created_at: null;
+  kind: NoteEchoKind;
+  echoId: string;
+  availability: Exclude<RelatedNoteAvailability, "available">;
+}
+
+export type RelatedNote = AvailableRelatedNote | UnavailableRelatedNote;
 
 export interface NoteEchoCandidate {
   id: string;

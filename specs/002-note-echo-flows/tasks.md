@@ -151,6 +151,22 @@
 - [X] TD003 Fix the note echo delete mock in tests/integration/day/day-surface-same-day.test.tsx so OR pair filters match exact semantic pairs and preserve adjacent relations such as A-B and A-C
 - [X] TD004 Add Phase 2 Base coverage for new schemas, relation utilities, generated brief utility, read APIs, create idempotency, delete reconciliation, invalid payloads and unavailable related notes
 - [X] TD005 Wire tests/integration/day/day-surface-same-day.test.tsx to the shared tests/support/supabase-note-echo-mock.ts helper, or explicitly reclassify T014 as not closed
+- [X] TD006 Remove client-derived owner fields from manual echo creation in src/features/notes/api/create-note-echo.ts, or move the write behind a server-derived owner path compatible with the active Supabase schema/RLS, and add a test proving no `created_by_user_id` or user id is sent by the client while the real persistence contract remains valid
+- [X] TD007 Restrict duplicate detection in src/features/notes/api/create-note-echo.ts to structured Supabase/Postgres unique violation signals such as `code = 23505`, and add a regression test for a non-23505 error whose message contains `unique` or `duplicate`
+- [X] TD008 Add shared Supabase error classification for note echo APIs, including read query catch paths and mutation reconciliation reload failures, so auth, JWT, RLS and permission errors return `not_accessible` or session feedback while network, timeout and 5xx errors remain `retryable_failure`, with tests for 401/403-like responses
+- [X] TD009 Update listRelatedNoteDetails and relation utilities so a successful details query that omits a related note id is not labeled `transient_unavailable` unless prior endpoint authorization evidence exists; update permissive tests accordingly
+- [X] TD010 Extend read preflight tests in tests/unit/notes/note-echo-api.test.ts to cover listNoteCandidates without session and config-error paths for listNoteEchoes and listNoteCandidates
+- [X] TD011 Add a behavioral adjacent-relation regression test proving delete of A-B preserves A-C through the shared note echo mock and exact semantic pair matching, not only by asserting the OR filter string
+- [X] TD012 Add read-query auth/RLS regression tests in tests/unit/notes/note-echo-api.test.ts for listNoteEchoes, listRelatedNoteDetails and listNoteCandidates when Supabase returns 401, 403, JWT, RLS or permission errors after preflight succeeds
+- [X] TD013 Transform the shared note echo mock in tests/support/supabase-note-echo-mock.ts into stateful delete/list coverage for note_echoes, applying exact semantic pair matching over real mock rows, and update tests/unit/notes/note-echo-api.test.ts so deleteNoteEcho(A-B) proves A-C survives without enqueuing the post-delete result manually
+- [X] TD014 Add a forward Supabase migration for existing projects in supabase/migrations/002_note_echo_owner_default.sql so note_echoes.created_by_user_id receives default auth.uid() without manual SQL in the Supabase console
+- [X] TD015 Make listNoteCandidates paginate at the Supabase query boundary with range-limited selected-day and other-day groups instead of loading all accessible notes in memory
+- [X] TD016 Make tests/support/supabase-note-echo-mock.ts apply neq, order, range and cursor OR filters over stateful rows so candidate and delete tests exercise real mock behavior
+- [X] TD017 Wire tests/integration/day/day-surface-same-day.test.tsx to createSupabaseNoteEchoMock instead of maintaining a parallel Supabase query builder
+- [X] TD018 Update RUNBOOKS.md and feature quickstart so migration 003 and manual-console migration repair are explicit operational steps
+- [X] TD019 Strengthen read API result types so ok=false always carries a SupabaseNoteEchoFailure status
+- [X] TD020 Add invalid_input handling and coverage for malformed create/delete echo payloads before Supabase calls
+- [X] TD021 Preserve messages from plain-object Supabase errors and cover them in note echo API tests
 
 ---
 

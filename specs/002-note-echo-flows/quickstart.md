@@ -9,18 +9,21 @@ com navegacao correta entre dias.
 ## Pre-requisitos
 
 1. `pnpm` instalado no ambiente.
-2. Projeto Supabase existente com a migration
-   `supabase/migrations/001_auth_day_surface.sql` ja aplicada.
+2. Projeto Supabase existente com as migrations versionadas de
+   `supabase/migrations/` aplicadas ou registradas conforme `RUNBOOKS.md`.
 3. Credenciais publicas do Supabase configuradas localmente.
 4. Pelo menos duas notas existentes para o mesmo usuario; para validar
    navegacao entre dias, pelo menos uma delas deve pertencer a outro dia.
 
 ## Preparacao do Banco
 
-1. Confirmar que `public.notes` e `public.note_echoes` existem.
-2. Confirmar que RLS continua habilitado em ambas as tabelas.
-3. Confirmar que o indice semantico de `note_echoes` continua presente.
-4. Aplicar a migration desta feature para disponibilizar a RPC atomica de
+1. Confirmar que `001_auth_day_surface.sql`,
+   `002_note_echo_owner_default.sql` e `003_harden_note_echo_surface.sql`
+   aparecem em `corepack pnpm run db:migrations`.
+2. Confirmar que `public.notes` e `public.note_echoes` existem.
+3. Confirmar que RLS continua habilitado em ambas as tabelas.
+4. Confirmar que o indice semantico de `note_echoes` continua presente.
+5. Aplicar a futura migration de US3 quando T041 criar a RPC atomica de
    `Continuar desta nota`.
 
 ## Configuracao de Ambiente
@@ -70,7 +73,7 @@ com navegacao correta entre dias.
 
 1. Abrir uma nota existente.
 2. Usar `Continuar desta nota`.
-3. Confirmar que o draft abre com `title` inicial, `targetDay` editavel e
+3. Confirmar que o draft abre com `title` inicial, `newNoteDay` editavel e
    `brief` automatico preenchido.
 4. Salvar uma continuacao para o mesmo dia e confirmar abertura do Reader da
    nova nota.

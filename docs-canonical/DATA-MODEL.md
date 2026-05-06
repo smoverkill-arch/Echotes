@@ -84,6 +84,9 @@ Regras principais:
 
 - `from_note_id` e `to_note_id` sempre apontam para notas diferentes.
 - o par de notas preserva unicidade semantica.
+- `created_by_user_id` e derivado no banco por `default auth.uid()` em inserts
+  autenticados; o cliente nao envia user id nem `created_by_user_id` para criar
+  eco manual.
 
 ## Relationships
 
@@ -118,6 +121,8 @@ A migration base preserva:
 
 O SQL executavel vive em `supabase/migrations/001_auth_day_surface.sql`.
 Esse arquivo e a fonte operacional para o banco.
+Hardening incremental de grants, policies, funcao auxiliar e GraphQL vive em
+`supabase/migrations/003_harden_note_echo_surface.sql`.
 Este canon descreve o contrato que novas migrations devem manter.
 
 ## Indexes
@@ -236,11 +241,14 @@ Helpers canonicos usados pelo repo:
 O schema atual nasce de:
 
 - `supabase/migrations/001_auth_day_surface.sql`.
+- `supabase/migrations/002_note_echo_owner_default.sql`.
+- `supabase/migrations/003_harden_note_echo_surface.sql`.
 
 Novas migrations devem preservar:
 
 - separacao entre tarefas e notas.
 - ownership via RLS.
+- superficie de cliente limitada a sessoes autenticadas e grants minimos.
 - ghost card como representacao derivada.
 - `note_echoes` como relacao dedicada.
 
@@ -275,4 +283,6 @@ Checklist canonico ativo:
 ## Revision History
 
 - 2026-05-01 - Texto simplificado e secoes reorganizadas para leitura rapida.
+- 2026-05-06 - Contrato de hardening Supabase documentado para grants,
+  policies, funcao auxiliar e GraphQL.
 - 2026-04-26 - Modelo ampliado com estrategia de modelagem, RLS, queries, regras de composicao e diferenciacao temporal por dominio.

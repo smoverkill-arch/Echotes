@@ -49,7 +49,7 @@ describe("note echo relation utilities", () => {
     ]);
   });
 
-  it("ordena relacionadas do mesmo dia antes das demais e preserva indisponivel", () => {
+  it("ordena relacionadas do mesmo dia antes das demais e omite detalhe ausente", () => {
     const activeNote = buildNote({
       id: "10000000-0000-4000-8000-000000000001",
       day: "2026-05-01",
@@ -92,9 +92,7 @@ describe("note echo relation utilities", () => {
     expect(relatedNotes.map((note) => note.id)).toEqual([
       sameDayNote.id,
       futureNote.id,
-      missingNoteEcho.to_note_id,
     ]);
-    expect(relatedNotes[2].availability).toBe("transient_unavailable");
     expect(getRelatedNoteId(echoes[1], activeNote.id)).toBe(sameDayNote.id);
   });
 });

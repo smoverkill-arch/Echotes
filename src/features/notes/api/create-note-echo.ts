@@ -2,19 +2,21 @@ import {
   createNoteEchoInputSchema,
   persistedNoteEchoSchema,
 } from "../../../schemas/note.schema";
-import { useAuthStore } from "../../../stores/auth-store";
 import type { CreateEchoInput, NoteEcho } from "../../../types/note";
 import { listNoteEchoes } from "./list-note-echoes";
 import { isSameSemanticNotePair } from "../utils/note-echo-relations";
+import { getSupabaseClient } from "../../../lib/supabase";
 import {
-  getSupabaseClient,
-  getSupabaseConfigurationError,
-  isSupabaseConfigured,
-} from "../../../lib/supabase";
+  classifySupabaseNoteEchoError,
+  getSupabaseNoteEchoErrorMessage,
+  isUniqueViolation,
+  preflightNoteEchoSupabaseAccess,
+} from "./note-echo-errors";
 
 export type CreateNoteEchoStatus =
   | "created"
   | "already_exists"
+  | "invalid_input"
   | "not_accessible"
   | "retryable_failure";
 
@@ -25,40 +27,17 @@ export interface CreateNoteEchoResult {
   errorMessage: string | null;
 }
 
-const isUniqueViolation = (error: unknown) =>
-  error instanceof Error
-    ? error.message.includes("duplicate") || error.message.includes("unique")
-    : typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "23505";
-
 export const createNoteEcho = async (
   input: CreateEchoInput,
 ): Promise<CreateNoteEchoResult> => {
-  const authStore = useAuthStore.getState();
+  const preflight = preflightNoteEchoSupabaseAccess();
 
-  if (!isSupabaseConfigured) {
-    const message =
-      getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.";
-    authStore.setConfigError(message);
-
+  if (!preflight.ok) {
     return {
       ok: false,
-      status: "retryable_failure",
+      status: preflight.status,
       echo: null,
-      errorMessage: message,
-    };
-  }
-
-  if (!authStore.session?.userId) {
-    authStore.setSessionExpired();
-
-    return {
-      ok: false,
-      status: "not_accessible",
-      echo: null,
-      errorMessage: "Sua sessao expirou. Entre novamente.",
+      errorMessage: preflight.errorMessage,
     };
   }
 
@@ -67,7 +46,7 @@ export const createNoteEcho = async (
   if (!parsedInput.success) {
     return {
       ok: false,
-      status: "retryable_failure",
+      status: "invalid_input",
       echo: null,
       errorMessage:
         parsedInput.error.issues[0]?.message ??
@@ -81,7 +60,6 @@ export const createNoteEcho = async (
       .insert({
         from_note_id: parsedInput.data.from_note_id,
         to_note_id: parsedInput.data.to_note_id,
-        created_by_user_id: authStore.session.userId,
         context_note_id:
           parsedInput.data.context_note_id ?? parsedInput.data.from_note_id,
         context_day: parsedInput.data.context_day,
@@ -111,7 +89,7 @@ export const createNoteEcho = async (
       if (!echoesResult.ok) {
         return {
           ok: false,
-          status: "retryable_failure",
+          status: echoesResult.status,
           echo: null,
           errorMessage: echoesResult.errorMessage,
         };
@@ -151,12 +129,12 @@ export const createNoteEcho = async (
   } catch (error) {
     return {
       ok: false,
-      status: "retryable_failure",
+      status: classifySupabaseNoteEchoError(error),
       echo: null,
-      errorMessage:
-        error instanceof Error
-          ? `Nao foi possivel criar eco. ${error.message}`
-          : "Nao foi possivel criar eco.",
+      errorMessage: getSupabaseNoteEchoErrorMessage(
+        "Nao foi possivel criar eco.",
+        error,
+      ),
     };
   }
 };

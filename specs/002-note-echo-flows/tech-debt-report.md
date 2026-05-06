@@ -9,8 +9,8 @@
 | Severity | Count | Immediate Action Required |
 |----------|-------|---------------------------|
 | Critical | 0 | None |
-| Large | 0 | ISSUE-001 resolved by implementation |
-| Medium | 0 | TD001-TD005 completed in `tasks.md` |
+| Large | 0 | None; TD006 was remediated with a forward Supabase migration in TD014, TD008 was remediated in the targeted Tech Debt pass and TD015 now performs query-boundary pagination |
+| Medium | 0 | None; TD011, TD013, TD016 and TD017 were remediated with stateful shared mock coverage |
 | Small | 0 | None |
 
 ## Large Issues Requiring Analysis
@@ -72,6 +72,72 @@ Use Option 1 unless implementation pressure requires formal scope reduction. The
 
 If Option 1 is not implemented before US1/T015+, mark T010 as partially complete and add an explicit task before US2 candidate-picker work.
 
+## Medium Issues Recorded Before Correction
+
+**Source**: `/speckit.review.run "code errors tests"` after the first tech debt remediation pass.
+**Recorded**: 2026-05-06
+**Status**: Completed in the targeted Tech Debt pass. Follow-up audit reopened
+TD006, TD008 and TD011; the final remediation closed TD006, TD008, TD011 and
+TD013 before US1/T015+.
+
+| Task | Review Finding | Location | Required Action |
+|------|----------------|----------|-----------------|
+| TD006 | P1 Owner field still comes from client state | `src/features/notes/api/create-note-echo.ts` | Stop sending client-derived owner fields or move manual echo creation behind a server-derived owner path; test that the payload has no `created_by_user_id` or user id. |
+| TD007 | P1 Broad duplicate classification | `src/features/notes/api/create-note-echo.ts` | Accept only structured unique violation signals such as `code = 23505`; test that textual `unique`/`duplicate` technical errors remain retryable. |
+| TD008 | P1 Access errors become retryable | `src/features/notes/api/create-note-echo.ts`, `delete-note-echo.ts`, `list-note-candidates.ts`, `list-note-echoes.ts` | Add shared error classification so auth/JWT/RLS/permission errors are not treated as retryable transport failures. |
+| TD009 | P1 Missing related note is treated as transient | `src/features/notes/api/list-note-echoes.ts` | Do not label omitted rows from a successful details query as `transient_unavailable` without prior endpoint authorization evidence; update tests that currently allow this. |
+| TD010 | P2 Read preflight tests are incomplete | `tests/unit/notes/note-echo-api.test.ts` | Add tests for `listNoteCandidates` without session and config-error paths for read APIs. |
+| TD011 | P2 Adjacent relation behavior is not proven | `tests/unit/notes/note-echo-api.test.ts` | Add behavioral A-B/A-C test through the shared mock proving adjacent relations are preserved. |
+
+These tasks intentionally record the review findings before correction. Later
+`/speckit.review.run "code errors tests"` passes found that TD006, TD008 and
+TD011 were not fully closed. The final targeted pass closed TD006, TD008, TD011
+and TD013.
+
+## Latest Review Findings Recorded Before Correction
+
+**Source**: `/speckit.review.run "code errors tests"` after TD006-TD011 remediation.
+**Recorded**: 2026-05-06
+**Status**: Completed after this audit. TD006, TD008, TD011 and TD013 were
+closed in the targeted Tech Debt pass; TD012 remains closed.
+
+| Task | Review Finding | Location | Required Action |
+|------|----------------|----------|-----------------|
+| TD006 / TD014 | P1 Manual insert became incompatible with existing remote databases | `src/features/notes/api/create-note-echo.ts`, `supabase/migrations/001_auth_day_surface.sql`, `supabase/migrations/002_note_echo_owner_default.sql` | Completed: client no longer sends owner fields, baseline 001 documents server-derived ownership for fresh databases, and forward migration 002 applies `default auth.uid()` to existing projects while RLS still checks `created_by_user_id = auth.uid()`. |
+| TD008 | P1 Read APIs still lose auth/RLS classification | `src/features/notes/api/list-note-echoes.ts`, `src/features/notes/api/list-note-candidates.ts` | Completed: read APIs use shared note echo error classification for 401, 403, JWT, RLS and permission failures. |
+| TD008 | P1 Reconciliation failures are always retryable | `src/features/notes/api/create-note-echo.ts`, `src/features/notes/api/delete-note-echo.ts` | Completed: duplicate-create and delete reconciliation now propagate classified reload statuses. |
+| TD012 | P2 Read-query auth/RLS tests are missing | `tests/unit/notes/note-echo-api.test.ts` | Completed: tests enqueue 401, 403, JWT, RLS and permission errors from read queries after preflight succeeds. |
+| TD011 | P2 Adjacent relation test only checks the OR string | `tests/unit/notes/note-echo-api.test.ts`, `tests/support/supabase-note-echo-mock.ts` | Completed through TD013: shared mock now maintains real `note_echoes` rows and proves A-C survives deleting A-B. |
+
+## Latest Worker Review Findings
+
+**Source**: Worker reviewer executing `/speckit.review.run "code errors tests"` for implemented TD011 and TD012 only.
+**Recorded**: 2026-05-06
+**Status**: TD012 closed; TD011 and TD013 closed in the final targeted Tech
+Debt pass.
+
+| Task | Review Finding | Location | Required Action |
+|------|----------------|----------|-----------------|
+| TD011 | P2 Adjacent A-C preservation is still preprogrammed by the queued mock response instead of proven through a stateful shared mock delete/list operation | `tests/unit/notes/note-echo-api.test.ts`, `tests/support/supabase-note-echo-mock.ts` | Completed: the shared mock now applies exact semantic pair matching over stored rows and the regression no longer enqueues the post-delete result manually. |
+| TD012 | No finding | `tests/unit/notes/note-echo-api.test.ts` | Keep closed: coverage includes 401, 403, JWT, RLS and permission errors for listNoteEchoes, listRelatedNoteDetails and listNoteCandidates after preflight succeeds. |
+
+## Latest Branch Review Findings Recorded Before Correction
+
+**Source**: `/speckit.review.run` scoped to this branch after Supabase local and
+remote migration setup.
+**Recorded**: 2026-05-06
+**Status**: Completed before US1/T015+.
+
+| Task | Review Finding | Location | Required Action |
+|------|----------------|----------|-----------------|
+| TD015 | P1 T010 still paginated in memory after reading all accessible notes | `src/features/notes/api/list-note-candidates.ts` | Completed: candidate loading now uses selected-day and other-day groups with `range(0, pageSize)` and cursor filters before mapping rows. |
+| TD016 | P2 shared Supabase mock ignored `neq` in stateful paths | `tests/support/supabase-note-echo-mock.ts` | Completed: the mock now applies `eq`, `neq`, `in`, cursor `or`, ordering and range over stored rows. |
+| TD017 | P2 integration duplicated Supabase mock behavior | `tests/integration/day/day-surface-same-day.test.tsx` | Completed: same-day integration now uses `createSupabaseNoteEchoMock` with deterministic insert/RPC handlers. |
+| TD018 | P2 runbook omitted hardening migration and manual migration history repair | `RUNBOOKS.md`, `specs/002-note-echo-flows/quickstart.md` | Completed: operational docs list migration 003 and require `supabase migration repair` after manual console application. |
+| TD019 | P2 read failure status remained optional in types | `src/features/notes/api/list-note-echoes.ts`, `src/features/notes/api/list-note-candidates.ts` | Completed: read results are discriminated unions and failures require `SupabaseNoteEchoFailure`. |
+| TD020 | P2 invalid payload coverage was incomplete | `src/features/notes/api/create-note-echo.ts`, `src/features/notes/api/delete-note-echo.ts`, `tests/unit/schemas/note.schema.test.ts` | Completed: malformed create/delete inputs return `invalid_input` before Supabase and schemas cover required persisted fields. |
+| TD021 | P2 plain-object Supabase errors could lose their message text | `src/features/notes/api/note-echo-errors.ts`, `tests/unit/notes/note-echo-api.test.ts` | Completed: error message extraction now handles Error instances and Supabase-style plain objects. |
+
 ## Cross-References
 
 - **Specification**: `specs/002-note-echo-flows/spec.md`
@@ -81,7 +147,8 @@ If Option 1 is not implemented before US1/T015+, mark T010 as partially complete
 
 ## Next Steps
 
-1. Re-run `/speckit.review.run` for Phase 2 Base after remediation.
+1. Re-run `/speckit.review.run "code errors tests"` after remediation if a fresh
+   audit pass is required before US1/T015+.
 2. Re-run `/speckit.cleanup` to verify no remaining medium or large issues.
 3. Use the stable cursor coverage in `tests/unit/notes/note-echo-api.test.ts`
    as the regression guard before US2 candidate-picker work.

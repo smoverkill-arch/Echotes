@@ -52,7 +52,7 @@ create table if not exists public.note_echoes (
   id uuid primary key default gen_random_uuid(),
   from_note_id uuid not null references public.notes(id) on delete cascade,
   to_note_id uuid not null references public.notes(id) on delete cascade,
-  created_by_user_id uuid not null references auth.users(id) on delete cascade,
+  created_by_user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   created_at timestamptz not null default now(),
   context_note_id uuid references public.notes(id) on delete set null,
   context_day date,

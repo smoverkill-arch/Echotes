@@ -6,6 +6,7 @@ import { useAuthStore } from "../../../src/stores/auth-store";
 import { useUIStore } from "../../../src/stores/ui-store";
 import type { AuthenticatedSession } from "../../../src/types/auth";
 import { installMockSystemDate } from "../../support/mock-system-date";
+import { createSupabaseNoteEchoMock } from "../../support/supabase-note-echo-mock";
 
 const mockRouter = {
   replace: jest.fn(),
@@ -16,9 +17,7 @@ const mockSearchParams: { date?: string | string[] } = {
   date: "2026-04-18",
 };
 
-const mockNotesTable: Record<string, unknown>[] = [];
-const mockTasksTable: Record<string, unknown>[] = [];
-const mockNoteEchoesTable: Record<string, unknown>[] = [];
+const mockSupabase = createSupabaseNoteEchoMock();
 
 let mockNoteCounter = 0;
 let mockTaskCounter = 0;
@@ -42,6 +41,56 @@ const toOffsetIsoValue = (value: unknown) => {
   return `${value}+00:00`;
 };
 
+const buildMockRow = (
+  tableName: "notes" | "tasks" | "note_echoes",
+  payload: Record<string, unknown>,
+) => {
+  const counter =
+    tableName === "notes"
+      ? ++mockNoteCounter
+      : tableName === "tasks"
+        ? ++mockTaskCounter
+        : mockSupabase.getTableRows("note_echoes").length + 1;
+  const idPrefix =
+    tableName === "notes"
+      ? "10000000"
+      : tableName === "tasks"
+        ? "20000000"
+        : "30000000";
+  const timestamp =
+    tableName === "notes"
+      ? "2026-04-18T09:30:00+00:00"
+      : tableName === "tasks"
+        ? "2026-04-18T10:00:00+00:00"
+        : "2026-04-18T10:30:00+00:00";
+  const row: Record<string, unknown> = {
+    id: makeUuid(idPrefix, counter),
+    created_at: timestamp,
+    updated_at: timestamp,
+    ...payload,
+  };
+
+  if (tableName === "tasks") {
+    row.completed_at = null;
+    row.scheduled_at = toOffsetIsoValue(row.scheduled_at);
+  }
+
+  return row;
+};
+
+const appendMockRow = (
+  tableName: "notes" | "tasks" | "note_echoes",
+  payload: Record<string, unknown>,
+) => {
+  const row = buildMockRow(tableName, payload);
+  mockSupabase.setTableRows(tableName, [
+    ...mockSupabase.getTableRows(tableName),
+    row,
+  ]);
+
+  return row;
+};
+
 jest.mock("expo-router", () => {
   const React = jest.requireActual("react");
   const { Text } = jest.requireActual("react-native");
@@ -54,255 +103,11 @@ jest.mock("expo-router", () => {
   };
 });
 
-jest.mock("../../../src/lib/supabase", () => {
-  const { matchesNoteEchoOrFilter } = jest.requireActual(
-    "../../../tests/support/supabase-note-echo-mock",
-  );
-
-  const resolveTable = (tableName: "notes" | "tasks" | "note_echoes") => {
-    if (tableName === "notes") {
-      return mockNotesTable;
-    }
-
-    if (tableName === "tasks") {
-      return mockTasksTable;
-    }
-
-    return mockNoteEchoesTable;
-  };
-
-  const insertMockRow = (
-    tableName: "notes" | "tasks" | "note_echoes",
-    payload: Record<string, unknown>,
-  ) => {
-    const counter =
-      tableName === "notes"
-        ? ++mockNoteCounter
-        : tableName === "tasks"
-          ? ++mockTaskCounter
-          : mockNoteEchoesTable.length + 1;
-    const idPrefix =
-      tableName === "notes"
-        ? "10000000"
-        : tableName === "tasks"
-          ? "20000000"
-          : "30000000";
-    const timestamp =
-      tableName === "notes"
-        ? "2026-04-18T09:30:00+00:00"
-        : tableName === "tasks"
-          ? "2026-04-18T10:00:00+00:00"
-          : "2026-04-18T10:30:00+00:00";
-    const row: Record<string, unknown> = {
-      id: makeUuid(idPrefix, counter),
-      created_at: timestamp,
-      updated_at: timestamp,
-      ...payload,
-    };
-
-    if (tableName === "tasks") {
-      row.completed_at = null;
-      row.scheduled_at = toOffsetIsoValue(row.scheduled_at);
-    }
-
-    resolveTable(tableName).push(row);
-
-    return row;
-  };
-
-  const buildQuery = (tableName: "notes" | "tasks" | "note_echoes") => {
-    const filters = new Map<string, unknown>();
-    const negativeFilters = new Map<string, unknown>();
-    let orFilter: string | null = null;
-
-    const applyFilters = (row: Record<string, unknown>) => {
-      const matchesEq = Array.from(filters.entries()).every(
-        ([key, expected]) => row[key] === expected,
-      );
-      const matchesNeq = Array.from(negativeFilters.entries()).every(
-        ([key, expected]) => row[key] !== expected,
-      );
-
-      if (!matchesEq || !matchesNeq) {
-        return false;
-      }
-
-      if (!orFilter || tableName !== "note_echoes") {
-        return true;
-      }
-
-      return matchesNoteEchoOrFilter(orFilter, row);
-    };
-
-    const buildRows = (column: string, options?: { ascending?: boolean }) =>
-      resolveTable(tableName)
-        .filter(applyFilters)
-        .sort((left, right) => {
-          const leftValue = String(left[column] ?? "");
-          const rightValue = String(right[column] ?? "");
-          return options?.ascending === false
-            ? rightValue.localeCompare(leftValue)
-            : leftValue.localeCompare(rightValue);
-        });
-
-    return {
-      select() {
-        return this;
-      },
-      eq(column: string, value: unknown) {
-        filters.set(column, value);
-        return this;
-      },
-      neq(column: string, value: unknown) {
-        negativeFilters.set(column, value);
-        return this;
-      },
-      in(column: string, values: unknown[]) {
-        filters.set(column, values);
-        return this;
-      },
-      or(filter: string) {
-        orFilter = filter;
-        return this;
-      },
-      async order(column: string, options?: { ascending?: boolean }) {
-        return { data: buildRows(column, options), error: null };
-      },
-      async range(from: number, to: number) {
-        return {
-          data: buildRows("created_at", { ascending: false }).slice(from, to + 1),
-          error: null,
-        };
-      },
-      insert(payload: Record<string, unknown>) {
-        return {
-          select() {
-            return {
-              async single() {
-                if (tableName !== "note_echoes" && !payload.user_id) {
-                  return {
-                    data: null,
-                    error: { message: `${tableName}.user_id is required` },
-                  };
-                }
-
-                const row = insertMockRow(tableName, payload);
-                return { data: row, error: null };
-              },
-            };
-          },
-        };
-      },
-      delete() {
-        const deleteBuilder = {
-          eq(column: string, value: unknown) {
-            filters.set(column, value);
-            return deleteBuilder;
-          },
-          or(filter: string) {
-            orFilter = filter;
-            return deleteBuilder;
-          },
-          async select() {
-            const source = resolveTable(tableName);
-            const deletedRows = source.filter(applyFilters);
-
-            for (const row of deletedRows) {
-              const index = source.indexOf(row);
-
-              if (index >= 0) {
-                source.splice(index, 1);
-              }
-            }
-
-            return { data: deletedRows, error: null };
-          },
-          async single() {
-            const source = resolveTable(tableName);
-            const index = source.findIndex(applyFilters);
-
-            if (index >= 0) {
-              const [row] = source.splice(index, 1);
-              return { data: row, error: null };
-            }
-
-            return { data: null, error: null };
-          },
-        };
-
-        return deleteBuilder;
-      },
-      update(payload: Record<string, unknown>) {
-        return {
-          eq(column: string, value: unknown) {
-            return {
-              select() {
-                return {
-                  async single() {
-                    const source = resolveTable(tableName);
-                    const index = source.findIndex((row) => row[column] === value);
-                    if (index < 0) {
-                      return {
-                        data: null,
-                        error: { message: `${tableName} not found` },
-                      };
-                    }
-                    source[index] = {
-                      ...source[index],
-                      ...payload,
-                      updated_at: "2026-04-18T11:00:00+00:00",
-                    };
-                    if (tableName === "tasks") {
-                      source[index].scheduled_at = toOffsetIsoValue(
-                        source[index].scheduled_at,
-                      );
-                    }
-                    return { data: source[index], error: null };
-                  },
-                };
-              },
-            };
-          },
-        };
-      },
-    };
-  };
-
-  return {
-    getSupabaseClient: () => ({
-      from: (tableName: "notes" | "tasks" | "note_echoes") => buildQuery(tableName),
-      rpc: async (name: string, payload: Record<string, unknown>) => {
-        if (name !== "continue_note") {
-          return { data: null, error: { message: `rpc ${name} not mocked` } };
-        }
-
-        const newNote = insertMockRow("notes", {
-          user_id: "f3b86608-11f6-4df4-b902-3bc0b1d5b8bc",
-          day: payload.new_note_day,
-          title: payload.title,
-          content: payload.content ?? null,
-          brief: payload.brief ?? null,
-          tag_id: null,
-          color: null,
-          is_color_overridden: false,
-        });
-        const noteEcho = insertMockRow("note_echoes", {
-          from_note_id: payload.source_note_id,
-          to_note_id: newNote.id,
-          created_by_user_id: "f3b86608-11f6-4df4-b902-3bc0b1d5b8bc",
-          context_note_id: payload.source_note_id,
-          context_day: mockSearchParams.date,
-          kind: "continue_note",
-          metadata: null,
-        });
-
-        return { data: { newNote, noteEcho }, error: null };
-      },
-    }),
-    getSupabaseConfigurationError: () => null,
-    isSupabaseConfigured: true,
-  };
-});
+jest.mock("../../../src/lib/supabase", () => ({
+  getSupabaseClient: () => mockSupabase.client,
+  getSupabaseConfigurationError: () => null,
+  isSupabaseConfigured: true,
+}));
 
 jest.mock("../../../src/features/auth/api/sign-out", () => ({
   signOut: jest.fn(async () => ({
@@ -346,9 +151,47 @@ const renderReadyDayRoute = async () => {
 beforeEach(() => {
   mockSystemDate = installMockSystemDate("2026-04-18T00:00:00Z");
   jest.clearAllMocks();
-  mockNotesTable.splice(0, mockNotesTable.length);
-  mockTasksTable.splice(0, mockTasksTable.length);
-  mockNoteEchoesTable.splice(0, mockNoteEchoesTable.length);
+  mockSupabase.reset();
+  mockSupabase.setTableRows("notes", []);
+  mockSupabase.setTableRows("tasks", []);
+  mockSupabase.setTableRows("note_echoes", []);
+  mockSupabase.setInsertHandler("notes", (payload) =>
+    buildMockRow("notes", payload),
+  );
+  mockSupabase.setInsertHandler("tasks", (payload) =>
+    buildMockRow("tasks", payload),
+  );
+  mockSupabase.setInsertHandler("note_echoes", (payload) =>
+    buildMockRow("note_echoes", payload),
+  );
+  mockSupabase.setRpcHandler("continue_note", (payload) => {
+    if (typeof payload !== "object" || payload === null) {
+      return mockSupabase.plainError("payload invalido");
+    }
+
+    const rpcPayload = payload as Record<string, unknown>;
+    const newNote = appendMockRow("notes", {
+      user_id: authenticatedSession.userId,
+      day: rpcPayload.new_note_day,
+      title: rpcPayload.title,
+      content: rpcPayload.content ?? null,
+      brief: rpcPayload.brief ?? null,
+      tag_id: null,
+      color: null,
+      is_color_overridden: false,
+    });
+    const noteEcho = appendMockRow("note_echoes", {
+      from_note_id: rpcPayload.source_note_id,
+      to_note_id: newNote.id,
+      created_by_user_id: authenticatedSession.userId,
+      context_note_id: rpcPayload.source_note_id,
+      context_day: mockSearchParams.date,
+      kind: "continue_note",
+      metadata: null,
+    });
+
+    return mockSupabase.ok({ newNote, noteEcho });
+  });
   mockNoteCounter = 0;
   mockTaskCounter = 0;
   mockSearchParams.date = "2026-04-18";
@@ -541,7 +384,9 @@ describe("US2 same-day day surface", () => {
       fireEvent.press(screen.getByTestId("task-editor-submit-button"));
     });
 
-    expect(mockTasksTable[0]?.target_day).toBe("2026-04-20");
+    expect(mockSupabase.getTableRows("tasks")[0]?.target_day).toBe(
+      "2026-04-20",
+    );
     expect(await screen.findByText("Vai para 20-04-2026")).toBeTruthy();
   });
 
@@ -572,7 +417,7 @@ describe("US2 same-day day surface", () => {
         screen.getByTestId("task-card-timed-20000000-0000-4000-8000-000000000001"),
       ).toBeTruthy();
     });
-    expect(mockTasksTable[0]?.scheduled_at).toBe(
+    expect(mockSupabase.getTableRows("tasks")[0]?.scheduled_at).toBe(
       `${new Date(2026, 3, 18, 23, 59, 0, 0).toISOString().slice(0, 19)}+00:00`,
     );
 
@@ -636,9 +481,13 @@ describe("US2 same-day day surface", () => {
     await waitFor(() => {
       expect(screen.getByTestId("task-card-timed-20000000-0000-4000-8000-000000000001")).toBeTruthy();
     });
-    expect(mockNotesTable[0]?.created_at).toBe("2026-04-18T09:30:00+00:00");
-    expect(mockTasksTable[0]?.created_at).toBe("2026-04-18T00:00:00.000Z");
-    expect(mockTasksTable[0]?.scheduled_at).toBe(
+    expect(mockSupabase.getTableRows("notes")[0]?.created_at).toBe(
+      "2026-04-18T09:30:00+00:00",
+    );
+    expect(mockSupabase.getTableRows("tasks")[0]?.created_at).toBe(
+      "2026-04-18T00:00:00.000Z",
+    );
+    expect(mockSupabase.getTableRows("tasks")[0]?.scheduled_at).toBe(
       `${new Date(2026, 3, 18, 20, 15, 0, 0).toISOString().slice(0, 19)}+00:00`,
     );
   });

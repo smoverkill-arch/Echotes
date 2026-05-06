@@ -3,50 +3,79 @@ import {
   relatedNoteSchema,
 } from "../../../schemas/note.schema";
 import type { Note, NoteEcho, RelatedNote } from "../../../types/note";
-import { useAuthStore } from "../../../stores/auth-store";
 import {
   getRelatedNoteId,
   sortRelatedNotes,
 } from "../utils/note-echo-relations";
+import { getSupabaseClient } from "../../../lib/supabase";
 import {
-  getSupabaseClient,
-  getSupabaseConfigurationError,
-  isSupabaseConfigured,
-} from "../../../lib/supabase";
+  classifySupabaseNoteEchoError,
+  getSupabaseNoteEchoErrorMessage,
+  preflightNoteEchoSupabaseAccess,
+  type SupabaseNoteEchoFailure,
+} from "./note-echo-errors";
 
-export interface ListNoteEchoesResult {
-  ok: boolean;
-  echoes: NoteEcho[];
-  errorMessage: string | null;
-}
-
-export interface ListRelatedNoteDetailsResult {
-  ok: boolean;
-  relatedNotes: RelatedNote[];
-  errorMessage: string | null;
-}
-
-const preflightNoteEchoRead = () => {
-  const authStore = useAuthStore.getState();
-
-  if (!isSupabaseConfigured) {
-    const message =
-      getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.";
-    authStore.setConfigError(message);
-
-    return { ok: false as const, errorMessage: message };
-  }
-
-  if (!authStore.session?.userId) {
-    authStore.setSessionExpired();
-
-    return {
-      ok: false as const,
-      errorMessage: "Sua sessao expirou. Entre novamente.",
+export type ListNoteEchoesResult =
+  | {
+      ok: true;
+      echoes: NoteEcho[];
+      errorMessage: null;
+      status?: never;
+    }
+  | {
+      ok: false;
+      echoes: [];
+      errorMessage: string;
+      status: SupabaseNoteEchoFailure;
     };
+
+export type ListRelatedNoteDetailsResult =
+  | {
+      ok: true;
+      relatedNotes: RelatedNote[];
+      errorMessage: null;
+      status?: never;
+    }
+  | {
+      ok: false;
+      relatedNotes: [];
+      errorMessage: string;
+      status: SupabaseNoteEchoFailure;
+    };
+
+interface RelatedNoteDetail {
+  id: string;
+  day: string;
+  title: string;
+  brief: string | null;
+  created_at: string;
+}
+
+interface RelatedNoteRow {
+  id?: unknown;
+  day?: unknown;
+  title?: unknown;
+  brief?: unknown;
+  created_at?: unknown;
+}
+
+const toRelatedNoteDetail = (row: RelatedNoteRow): RelatedNoteDetail | null => {
+  if (
+    typeof row.id !== "string" ||
+    typeof row.day !== "string" ||
+    typeof row.title !== "string" ||
+    typeof row.created_at !== "string"
+  ) {
+    return null;
   }
 
-  return { ok: true as const };
+  return {
+    id: row.id,
+    day: row.day,
+    title: row.title,
+    brief: typeof row.brief === "string" ? row.brief : null,
+    created_at: row.created_at,
+  };
 };
 
 export const listNoteEchoes = async (
@@ -58,10 +87,15 @@ export const listNoteEchoes = async (
     return { ok: true, echoes: [], errorMessage: null };
   }
 
-  const preflight = preflightNoteEchoRead();
+  const preflight = preflightNoteEchoSupabaseAccess();
 
   if (!preflight.ok) {
-    return { ok: false, echoes: [], errorMessage: preflight.errorMessage };
+    return {
+      ok: false,
+      echoes: [],
+      errorMessage: preflight.errorMessage,
+      status: preflight.status,
+    };
   }
 
   try {
@@ -90,10 +124,11 @@ export const listNoteEchoes = async (
     return {
       ok: false,
       echoes: [],
-      errorMessage:
-        error instanceof Error
-          ? `Nao foi possivel carregar ecos. ${error.message}`
-          : "Nao foi possivel carregar ecos.",
+      errorMessage: getSupabaseNoteEchoErrorMessage(
+        "Nao foi possivel carregar ecos.",
+        error,
+      ),
+      status: classifySupabaseNoteEchoError(error),
     };
   }
 };
@@ -114,13 +149,14 @@ export const listRelatedNoteDetails = async (
     return { ok: true, relatedNotes: [], errorMessage: null };
   }
 
-  const preflight = preflightNoteEchoRead();
+  const preflight = preflightNoteEchoSupabaseAccess();
 
   if (!preflight.ok) {
     return {
       ok: false,
       relatedNotes: [],
       errorMessage: preflight.errorMessage,
+      status: preflight.status,
     };
   }
 
@@ -135,21 +171,14 @@ export const listRelatedNoteDetails = async (
     }
 
     const noteDetails = new Map(
-      (data ?? []).map((row) => [
-        String(row.id),
-        {
-          id: String(row.id),
-          day: typeof row.day === "string" ? row.day : null,
-          title: typeof row.title === "string" ? row.title : null,
-          brief: typeof row.brief === "string" ? row.brief : null,
-          created_at:
-            typeof row.created_at === "string" ? row.created_at : null,
-        },
-      ]),
+      (data ?? [])
+        .map((row) => toRelatedNoteDetail(row))
+        .filter((detail): detail is RelatedNoteDetail => detail !== null)
+        .map((detail) => [detail.id, detail]),
     );
 
     const relatedNotes = echoes
-      .map((echo) => {
+      .map((echo): RelatedNote | null => {
         const relatedNoteId = getRelatedNoteId(echo, activeNote.id);
 
         if (!relatedNoteId) {
@@ -158,15 +187,19 @@ export const listRelatedNoteDetails = async (
 
         const detail = noteDetails.get(relatedNoteId);
 
+        if (!detail) {
+          return null;
+        }
+
         return {
           id: relatedNoteId,
-          day: detail?.day ?? null,
-          title: detail?.title ?? null,
-          brief: detail?.brief ?? null,
-          created_at: detail?.created_at ?? null,
+          day: detail.day,
+          title: detail.title,
+          brief: detail.brief,
+          created_at: detail.created_at,
           kind: echo.kind,
           echoId: echo.id,
-          availability: detail ? "available" : "transient_unavailable",
+          availability: "available" as const,
         };
       })
       .filter((note): note is RelatedNote => note !== null);
@@ -191,10 +224,11 @@ export const listRelatedNoteDetails = async (
     return {
       ok: false,
       relatedNotes: [],
-      errorMessage:
-        error instanceof Error
-          ? `Nao foi possivel carregar notas conectadas. ${error.message}`
-          : "Nao foi possivel carregar notas conectadas.",
+      errorMessage: getSupabaseNoteEchoErrorMessage(
+        "Nao foi possivel carregar notas conectadas.",
+        error,
+      ),
+      status: classifySupabaseNoteEchoError(error),
     };
   }
 };

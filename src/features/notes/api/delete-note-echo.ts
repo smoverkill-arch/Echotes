@@ -1,17 +1,18 @@
 import { deleteNoteEchoInputSchema } from "../../../schemas/note.schema";
-import { useAuthStore } from "../../../stores/auth-store";
 import type { DeleteEchoInput } from "../../../types/note";
 import { listNoteEchoes } from "./list-note-echoes";
 import { isSameSemanticNotePair } from "../utils/note-echo-relations";
+import { getSupabaseClient } from "../../../lib/supabase";
 import {
-  getSupabaseClient,
-  getSupabaseConfigurationError,
-  isSupabaseConfigured,
-} from "../../../lib/supabase";
+  classifySupabaseNoteEchoError,
+  getSupabaseNoteEchoErrorMessage,
+  preflightNoteEchoSupabaseAccess,
+} from "./note-echo-errors";
 
 export type DeleteNoteEchoStatus =
   | "deleted"
   | "already_removed"
+  | "invalid_input"
   | "not_accessible"
   | "retryable_failure";
 
@@ -24,23 +25,13 @@ export interface DeleteNoteEchoResult {
 export const deleteNoteEcho = async (
   input: DeleteEchoInput,
 ): Promise<DeleteNoteEchoResult> => {
-  const authStore = useAuthStore.getState();
+  const preflight = preflightNoteEchoSupabaseAccess();
 
-  if (!isSupabaseConfigured) {
-    const message =
-      getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.";
-    authStore.setConfigError(message);
-
-    return { ok: false, status: "retryable_failure", errorMessage: message };
-  }
-
-  if (!authStore.session?.userId) {
-    authStore.setSessionExpired();
-
+  if (!preflight.ok) {
     return {
       ok: false,
-      status: "not_accessible",
-      errorMessage: "Sua sessao expirou. Entre novamente.",
+      status: preflight.status,
+      errorMessage: preflight.errorMessage,
     };
   }
 
@@ -49,7 +40,7 @@ export const deleteNoteEcho = async (
   if (!parsedInput.success) {
     return {
       ok: false,
-      status: "retryable_failure",
+      status: "invalid_input",
       errorMessage:
         parsedInput.error.issues[0]?.message ??
         "Informe os dados do eco corretamente.",
@@ -75,7 +66,7 @@ export const deleteNoteEcho = async (
     if (!echoesResult.ok) {
       return {
         ok: false,
-        status: "retryable_failure",
+        status: echoesResult.status,
         errorMessage: echoesResult.errorMessage,
       };
     }
@@ -105,11 +96,11 @@ export const deleteNoteEcho = async (
   } catch (error) {
     return {
       ok: false,
-      status: "retryable_failure",
-      errorMessage:
-        error instanceof Error
-          ? `Nao foi possivel remover eco. ${error.message}`
-          : "Nao foi possivel remover eco.",
+      status: classifySupabaseNoteEchoError(error),
+      errorMessage: getSupabaseNoteEchoErrorMessage(
+        "Nao foi possivel remover eco.",
+        error,
+      ),
     };
   }
 };

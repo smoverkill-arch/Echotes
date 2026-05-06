@@ -1,8 +1,11 @@
 import {
   continueNoteInputSchema,
+  createNoteEchoInputSchema,
+  deleteNoteEchoInputSchema,
   noteEchoCandidatePageSchema,
   noteEchoSchema,
   noteFormSchema,
+  persistedNoteEchoSchema,
   relatedNoteSchema,
 } from "../../../src/schemas/note.schema";
 
@@ -25,6 +28,31 @@ describe("note schema validation", () => {
       day: "2026-04-18",
       brief: "Resumo curto",
     });
+  });
+
+  it("rejeita payloads invalidos de eco manual antes do Supabase", () => {
+    const selfLinkPayload = {
+      from_note_id: "10000000-0000-4000-8000-000000000001",
+      to_note_id: "10000000-0000-4000-8000-000000000001",
+      kind: "manual_link",
+    };
+
+    expect(createNoteEchoInputSchema.safeParse(selfLinkPayload).success).toBe(
+      false,
+    );
+    expect(
+      deleteNoteEchoInputSchema.safeParse({
+        noteIdA: "10000000-0000-4000-8000-000000000001",
+        noteIdB: "10000000-0000-4000-8000-000000000001",
+      }).success,
+    ).toBe(false);
+    expect(
+      persistedNoteEchoSchema.safeParse({
+        from_note_id: "10000000-0000-4000-8000-000000000001",
+        to_note_id: "10000000-0000-4000-8000-000000000002",
+        kind: "manual_link",
+      }).success,
+    ).toBe(false);
   });
 
   // @req NFR-003
@@ -80,6 +108,19 @@ describe("note schema validation", () => {
     ).toBe(true);
 
     expect(
+      relatedNoteSchema.safeParse({
+        id: "10000000-0000-4000-8000-000000000002",
+        day: null,
+        title: null,
+        brief: null,
+        created_at: null,
+        kind: "manual_link",
+        echoId: "30000000-0000-4000-8000-000000000001",
+        availability: "available",
+      }).success,
+    ).toBe(false);
+
+    expect(
       continueNoteInputSchema.safeParse({
         sourceNoteId: "10000000-0000-4000-8000-000000000001",
         newNoteDay: "2026-05-02",
@@ -88,5 +129,15 @@ describe("note schema validation", () => {
         content: "",
       }).success,
     ).toBe(true);
+
+    expect(
+      continueNoteInputSchema.safeParse({
+        sourceNoteId: "10000000-0000-4000-8000-000000000001",
+        newNoteDay: "2026-05-02",
+        title: "Continuacao",
+        generatedBrief: "",
+        content: "",
+      }).success,
+    ).toBe(false);
   });
 });

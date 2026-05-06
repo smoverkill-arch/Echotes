@@ -117,15 +117,19 @@ export const buildRelatedNotes = (
 
     const note = notesById.get(relatedNoteId);
 
+    if (!note) {
+      continue;
+    }
+
     relatedNotes.push({
       id: relatedNoteId,
-      day: note?.day ?? null,
-      title: note?.title ?? null,
-      brief: note?.brief ?? null,
-      created_at: note?.created_at ?? null,
+      day: note.day,
+      title: note.title,
+      brief: note.brief,
+      created_at: note.created_at,
       kind: echo.kind,
       echoId: echo.id,
-      availability: note ? "available" : "transient_unavailable",
+      availability: "available",
     });
   }
 

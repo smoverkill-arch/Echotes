@@ -33,6 +33,14 @@ versioned releases when they start to exist.
 - Spec Kit DocGuard integration no longer depends on `docguard-cli@latest`
 - requirement traceability now links canonical IDs to the real test suites
 - documentation contracts now verify DocGuard gates and RLS coverage
+- note echo manual creation now relies on server-derived ownership instead of
+  sending `created_by_user_id` from the client
+- a forward Supabase migration now applies the `note_echoes.created_by_user_id`
+  `default auth.uid()` contract to existing remote projects
+- Supabase database hardening now revokes domain-table access from `anon`,
+  limits `authenticated` grants, targets RLS policies to authenticated sessions,
+  fixes the trigger function search path and disables GraphQL execution for
+  client roles until GraphQL becomes an explicit product interface
 
 ### Removed
 

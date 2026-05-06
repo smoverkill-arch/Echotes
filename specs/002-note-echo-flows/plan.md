@@ -31,7 +31,7 @@ persistida por RPC atomica para impedir nota criada sem eco correspondente.
 **Plataforma-alvo**: iOS e Android via workflow gerenciado do Expo
 **Tipo de projeto**: App mobile
 **Metas de performance**: a superficie do dia continua utilizavel em ate 2 segundos em abertura quente; a contagem de ecos deve aparecer junto com a carga normal do dia; abrir uma nota conectada em outro dia deve concluir a transicao e reexibir o Reader em ate 1 segundo apos o carregamento do dia de destino
-**Restricoes**: sem `service_role` no cliente; preservar separacao task/note; manter ghost card exclusivo de tarefa; mostrar apenas contagem direta na timeline; preservar a estrategia atual de navegacao sem breadcrumb novo; manter mencoes inline `@nota` fora do corte; permitir apenas uma migration pequena para RPC atomica de continuacao, sem novas tabelas
+**Restricoes**: sem `service_role` no cliente; preservar separacao task/note; manter ghost card exclusivo de tarefa; mostrar apenas contagem direta na timeline; preservar a estrategia atual de navegacao sem breadcrumb novo; manter mencoes inline `@nota` fora do corte; permitir apenas migrations pequenas e versionadas para compatibilidade, hardening e RPC atomica de continuacao, sem novas tabelas
 **Escala/Escopo**: experiencia autenticada de um usuario com historico pessoal de notas ao longo de varios dias, cobrindo leitura, conexao manual e continuacao de ideia
 
 ## Checagem da Constituicao
@@ -142,8 +142,9 @@ enquanto as regras de eco e continuacao permanecem no dominio de notas em
   correto.
 - O layout `note -> direita` permanece responsabilidade da renderizacao; a
   feature adiciona badge e relacoes sem alterar `TimelineNode`.
-- Uma migration nova e esperada apenas para a RPC atomica de continuacao; a
-  entrega continua usando `note_echoes` e RLS ja presentes no baseline.
+- A migration de RPC atomica de continuacao permanece esperada em US3/T041; as
+  migrations de compatibilidade de owner e hardening existem para manter bancos
+  ja migrados alinhados ao contrato de RLS sem acao manual invisivel.
 
 ## Cobertura Minima Obrigatoria
 

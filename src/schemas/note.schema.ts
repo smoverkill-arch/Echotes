@@ -83,16 +83,32 @@ export const relatedNoteAvailabilitySchema = z.enum([
   "stale_detail",
 ]);
 
-export const relatedNoteSchema = z.object({
+const relatedAvailableNoteSchema = z.object({
   id: z.string().uuid(),
-  day: dateStringSchema.nullable(),
-  title: z.string().nullable(),
+  day: dateStringSchema,
+  title: z.string(),
   brief: z.string().nullable(),
-  created_at: z.string().datetime({ offset: true }).nullable(),
+  created_at: z.string().datetime({ offset: true }),
   kind: noteEchoKindSchema,
   echoId: z.string().uuid(),
-  availability: relatedNoteAvailabilitySchema,
+  availability: z.literal("available"),
 });
+
+const relatedUnavailableNoteSchema = z.object({
+  id: z.string().uuid(),
+  day: z.null(),
+  title: z.null(),
+  brief: z.null(),
+  created_at: z.null(),
+  kind: noteEchoKindSchema,
+  echoId: z.string().uuid(),
+  availability: z.enum(["transient_unavailable", "stale_detail"]),
+});
+
+export const relatedNoteSchema = z.discriminatedUnion("availability", [
+  relatedAvailableNoteSchema,
+  relatedUnavailableNoteSchema,
+]);
 
 export const noteEchoCandidateCursorSchema = z.object({
   isSelectedDayGroup: z.boolean(),

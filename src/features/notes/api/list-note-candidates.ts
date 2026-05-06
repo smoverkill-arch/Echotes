@@ -9,12 +9,13 @@ import type {
   NoteEchoCandidatePage,
 } from "../../../types/note";
 import { isSameSemanticNotePair } from "../utils/note-echo-relations";
-import { useAuthStore } from "../../../stores/auth-store";
+import { getSupabaseClient } from "../../../lib/supabase";
 import {
-  getSupabaseClient,
-  getSupabaseConfigurationError,
-  isSupabaseConfigured,
-} from "../../../lib/supabase";
+  classifySupabaseNoteEchoError,
+  getSupabaseNoteEchoErrorMessage,
+  preflightNoteEchoSupabaseAccess,
+  type SupabaseNoteEchoFailure,
+} from "./note-echo-errors";
 
 export interface ListNoteCandidatesInput {
   sourceNoteId: string;
@@ -24,58 +25,78 @@ export interface ListNoteCandidatesInput {
   pageSize?: number;
 }
 
-export interface ListNoteCandidatesResult {
-  ok: boolean;
-  page: NoteEchoCandidatePage;
-  errorMessage: string | null;
-}
+export type ListNoteCandidatesResult =
+  | {
+      ok: true;
+      page: NoteEchoCandidatePage;
+      errorMessage: null;
+      status?: never;
+    }
+  | {
+      ok: false;
+      page: { items: []; nextCursor: null };
+      errorMessage: string;
+      status: SupabaseNoteEchoFailure;
+    };
 
 const DEFAULT_PAGE_SIZE = 50;
 
-const compareCandidateOrder = (
-  selectedDay: string,
-  left: NoteEchoCandidate,
-  right: NoteEchoCandidate,
-) => {
-  const leftSelectedDay = left.day === selectedDay;
-  const rightSelectedDay = right.day === selectedDay;
+interface NoteCandidateRow {
+  id?: unknown;
+  day?: unknown;
+  title?: unknown;
+  brief?: unknown;
+  created_at?: unknown;
+}
 
-  if (leftSelectedDay !== rightSelectedDay) {
-    return leftSelectedDay ? -1 : 1;
-  }
+const mapRowToCandidate = (
+  row: NoteCandidateRow,
+  sourceNoteId: string,
+  existingEchoes: NoteEcho[],
+): NoteEchoCandidate => ({
+  id: String(row.id),
+  day: String(row.day),
+  title: String(row.title),
+  brief: typeof row.brief === "string" ? row.brief : null,
+  created_at: String(row.created_at),
+  isAlreadyConnected: existingEchoes.some((echo) =>
+    isSameSemanticNotePair(echo, sourceNoteId, String(row.id)),
+  ),
+});
 
-  if (!leftSelectedDay && left.day !== right.day) {
-    return right.day.localeCompare(left.day);
-  }
+const buildSameDayCursorFilter = (cursor: NoteEchoCandidateCursor) =>
+  `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`;
 
-  const createdCompare = right.created_at.localeCompare(left.created_at);
+const buildOtherDayCursorFilter = (cursor: NoteEchoCandidateCursor) =>
+  [
+    `day.lt.${cursor.day}`,
+    `and(day.eq.${cursor.day},created_at.lt.${cursor.created_at})`,
+    `and(day.eq.${cursor.day},created_at.eq.${cursor.created_at},id.lt.${cursor.id})`,
+  ].join(",");
 
-  if (createdCompare !== 0) {
-    return createdCompare;
-  }
-
-  return right.id.localeCompare(left.id);
-};
-
-const isAfterCursor = (
-  selectedDay: string,
+const toCursor = (
   candidate: NoteEchoCandidate,
-  cursor: NoteEchoCandidateCursor | null | undefined,
+  selectedDay: string,
+): NoteEchoCandidateCursor => ({
+  isSelectedDayGroup: candidate.day === selectedDay,
+  day: candidate.day,
+  created_at: candidate.created_at,
+  id: candidate.id,
+});
+
+const buildCandidatePage = (
+  candidates: NoteEchoCandidate[],
+  selectedDay: string,
+  pageSize: number,
 ) => {
-  if (!cursor) {
-    return true;
-  }
+  const pageItems = candidates.slice(0, pageSize);
+  const lastCandidate =
+    candidates.length > pageSize ? pageItems[pageItems.length - 1] : null;
 
-  const cursorCandidate: NoteEchoCandidate = {
-    id: cursor.id,
-    day: cursor.day,
-    title: "",
-    brief: null,
-    created_at: cursor.created_at,
-    isAlreadyConnected: false,
+  return {
+    items: pageItems,
+    nextCursor: lastCandidate ? toCursor(lastCandidate, selectedDay) : null,
   };
-
-  return compareCandidateOrder(selectedDay, candidate, cursorCandidate) > 0;
 };
 
 export const listNoteCandidates = async ({
@@ -86,56 +107,73 @@ export const listNoteCandidates = async ({
   pageSize = DEFAULT_PAGE_SIZE,
 }: ListNoteCandidatesInput): Promise<ListNoteCandidatesResult> => {
   const safePageSize = Math.max(1, pageSize);
-  const authStore = useAuthStore.getState();
+  const preflight = preflightNoteEchoSupabaseAccess();
 
-  if (!isSupabaseConfigured) {
-    const message =
-      getSupabaseConfigurationError() ?? "Configuracao do Supabase ausente.";
-    authStore.setConfigError(message);
-
+  if (!preflight.ok) {
     return {
       ok: false,
       page: { items: [], nextCursor: null },
-      errorMessage: message,
-    };
-  }
-
-  if (!authStore.session?.userId) {
-    authStore.setSessionExpired();
-
-    return {
-      ok: false,
-      page: { items: [], nextCursor: null },
-      errorMessage: "Sua sessao expirou. Entre novamente.",
+      errorMessage: preflight.errorMessage,
+      status: preflight.status,
     };
   }
 
   try {
-    const { data, error } = await getSupabaseClient()
-      .from("notes")
-      .select("id,day,title,brief,created_at")
-      .neq("id", sourceNoteId)
-      .order("day", { ascending: false })
-      .order("created_at", { ascending: false })
-      .order("id", { ascending: false });
+    const fetchGroup = async (
+      isSelectedDayGroup: boolean,
+      groupCursor: NoteEchoCandidateCursor | null,
+      limit: number,
+    ) => {
+      let query = getSupabaseClient()
+        .from("notes")
+        .select("id,day,title,brief,created_at")
+        .neq("id", sourceNoteId);
 
-    if (error) {
-      throw error;
-    }
+      query = isSelectedDayGroup
+        ? query.eq("day", selectedDay)
+        : query.neq("day", selectedDay);
 
-    const candidates = (data ?? [])
-      .map((row) => ({
-        id: String(row.id),
-        day: String(row.day),
-        title: String(row.title),
-        brief: typeof row.brief === "string" ? row.brief : null,
-        created_at: String(row.created_at),
-        isAlreadyConnected: existingEchoes.some((echo) =>
-          isSameSemanticNotePair(echo, sourceNoteId, String(row.id)),
-        ),
-      }))
-      .sort((left, right) => compareCandidateOrder(selectedDay, left, right))
-      .filter((candidate) => isAfterCursor(selectedDay, candidate, cursor));
+      if (groupCursor?.isSelectedDayGroup === isSelectedDayGroup) {
+        query = query.or(
+          isSelectedDayGroup
+            ? buildSameDayCursorFilter(groupCursor)
+            : buildOtherDayCursorFilter(groupCursor),
+        );
+      }
+
+      if (!isSelectedDayGroup) {
+        query = query.order("day", { ascending: false });
+      }
+
+      const { data, error } = await query
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(0, limit - 1);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []).map((row) =>
+        mapRowToCandidate(row, sourceNoteId, existingEchoes),
+      );
+    };
+
+    const sameDayRows =
+      cursor?.isSelectedDayGroup === false
+        ? []
+        : await fetchGroup(true, cursor, safePageSize + 1);
+    const candidates =
+      sameDayRows.length > safePageSize
+        ? sameDayRows
+        : [
+            ...sameDayRows,
+            ...(await fetchGroup(
+              false,
+              cursor?.isSelectedDayGroup === false ? cursor : null,
+              safePageSize - sameDayRows.length + 1,
+            )),
+          ];
 
     const parsedCandidates = noteEchoCandidateSchema
       .array()
@@ -148,20 +186,11 @@ export const listNoteCandidates = async ({
       );
     }
 
-    const pageItems = parsedCandidates.data.slice(0, safePageSize);
-    const hasNextPage = parsedCandidates.data.length > safePageSize;
-    const lastCandidate = hasNextPage ? pageItems[pageItems.length - 1] : null;
-    const page = {
-      items: pageItems,
-      nextCursor: lastCandidate
-        ? {
-            isSelectedDayGroup: lastCandidate.day === selectedDay,
-            day: lastCandidate.day,
-            created_at: lastCandidate.created_at,
-            id: lastCandidate.id,
-          }
-        : null,
-    };
+    const page = buildCandidatePage(
+      parsedCandidates.data,
+      selectedDay,
+      safePageSize,
+    );
     const parsedPage = noteEchoCandidatePageSchema.safeParse(page);
 
     if (!parsedPage.success) {
@@ -176,10 +205,11 @@ export const listNoteCandidates = async ({
     return {
       ok: false,
       page: { items: [], nextCursor: null },
-      errorMessage:
-        error instanceof Error
-          ? `Nao foi possivel carregar candidatas. ${error.message}`
-          : "Nao foi possivel carregar candidatas.",
+      errorMessage: getSupabaseNoteEchoErrorMessage(
+        "Nao foi possivel carregar candidatas.",
+        error,
+      ),
+      status: classifySupabaseNoteEchoError(error),
     };
   }
 };
