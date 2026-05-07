@@ -31,6 +31,8 @@ versioned releases when they start to exist.
   authority and `docs/` as historical archive
 - README and canonical docs now use shorter sections and a clearer doc layout
 - TEST-SPEC now describes test suites without fragile file-level references
+- DocGuard config now disables the cross-platform `Docs-Diff` file-path
+  heuristic and tracks generated assistant artifacts with `.docguardignore`
 - `DATA-MODEL.md`: updated note_echoes status — CRUD flows implemented in
   `002-note-echo-flows`; revision history reordered chronologically
 - `listRelatedNoteDetails` now degrades gracefully on `not_accessible` errors:

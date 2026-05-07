@@ -88,6 +88,8 @@ O gate local usa estes comandos:
 ## Arquivos Operacionais
 
 - `.docguard.json` define validadores e arquivos obrigatorios.
+- `.docguardignore` exclui artefatos locais gerados pelo DocGuard, como
+  `commands/`, das metricas documentais.
 - `.agents/` guarda skills do projeto.
 - `.agent/` e `commands/` podem surgir por automacao.
 - `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` definem o bootstrap do app.

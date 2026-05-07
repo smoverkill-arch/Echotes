@@ -49,6 +49,7 @@
     "testSpec": true,
     "security": true,
     "environment": true,
-    "freshness": false
+    "freshness": false,
+    "docsDiff": false
   }
 }
