@@ -20,12 +20,19 @@ export type CreateNoteEchoStatus =
   | "not_accessible"
   | "retryable_failure";
 
-export interface CreateNoteEchoResult {
-  ok: boolean;
-  status: CreateNoteEchoStatus;
-  echo: NoteEcho | null;
-  errorMessage: string | null;
-}
+export type CreateNoteEchoResult =
+  | {
+      ok: true;
+      status: "created" | "already_exists";
+      echo: NoteEcho;
+      errorMessage: null;
+    }
+  | {
+      ok: false;
+      status: "invalid_input" | "not_accessible" | "retryable_failure";
+      echo: null;
+      errorMessage: string;
+    };
 
 export const createNoteEcho = async (
   input: CreateEchoInput,
@@ -78,6 +85,22 @@ export const createNoteEcho = async (
         parsedInput.data.from_note_id,
         parsedInput.data.to_note_id,
       ]);
+
+      if (!echoesResult.ok) {
+        // invalid_input during reconciliation means fetched data is malformed —
+        // treat as retryable, not a caller input error.
+        const status =
+          echoesResult.status === "invalid_input"
+            ? "retryable_failure"
+            : echoesResult.status;
+        return {
+          ok: false,
+          status,
+          echo: null,
+          errorMessage: `Eco ja existia antes desta operacao. ${echoesResult.errorMessage}`,
+        };
+      }
+
       const existingEcho = echoesResult.echoes.find((echo) =>
         isSameSemanticNotePair(
           echo,
@@ -85,15 +108,6 @@ export const createNoteEcho = async (
           parsedInput.data.to_note_id,
         ),
       );
-
-      if (!echoesResult.ok) {
-        return {
-          ok: false,
-          status: echoesResult.status,
-          echo: null,
-          errorMessage: echoesResult.errorMessage,
-        };
-      }
 
       if (!existingEcho) {
         return {

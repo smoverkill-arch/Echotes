@@ -38,4 +38,33 @@ describe("buildContinueNoteBrief", () => {
     expect(brief.length).toBeLessThanOrEqual(180);
     expect(brief.endsWith(" ")).toBe(false);
   });
+
+  // TD035: whitespace normalization edge cases
+  it("normaliza tabs consecutivos em brief para espaco unico", () => {
+    const note = buildNote({
+      id: "10000000-0000-4000-8000-000000000001",
+      brief: "palavra\t\tprimeira",
+    });
+
+    expect(buildContinueNoteBrief(note)).toBe("palavra primeira");
+  });
+
+  it("normaliza tres ou mais quebras de linha em brief para espaco unico", () => {
+    const note = buildNote({
+      id: "10000000-0000-4000-8000-000000000001",
+      brief: "a\n\n\nb",
+    });
+
+    expect(buildContinueNoteBrief(note)).toBe("a b");
+  });
+
+  it("brief com apenas whitespace misto cai para content", () => {
+    const note = buildNote({
+      id: "10000000-0000-4000-8000-000000000001",
+      brief: " \n \t ",
+      content: "Conteudo relevante",
+    });
+
+    expect(buildContinueNoteBrief(note)).toBe("Conteudo relevante");
+  });
 });

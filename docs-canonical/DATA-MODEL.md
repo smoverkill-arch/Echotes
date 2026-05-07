@@ -10,7 +10,7 @@ Essa escolha preserva clareza de dominio.
 - eco vive em tabela propria.
 
 `note_echoes` ja existe em schema e modelagem.
-Os fluxos completos de eco ainda pertencem a fases futuras do app.
+Os fluxos CRUD de eco (criar, listar, remover, candidatas) estao implementados na branch `002-note-echo-flows`.
 
 ## Entities
 
@@ -282,7 +282,8 @@ Checklist canonico ativo:
 
 ## Revision History
 
-- 2026-05-01 - Texto simplificado e secoes reorganizadas para leitura rapida.
+- 2026-05-06 - Atualizado status dos fluxos de eco: CRUD implementado em `002-note-echo-flows`.
 - 2026-05-06 - Contrato de hardening Supabase documentado para grants,
   policies, funcao auxiliar e GraphQL.
+- 2026-05-01 - Texto simplificado e secoes reorganizadas para leitura rapida.
 - 2026-04-26 - Modelo ampliado com estrategia de modelagem, RLS, queries, regras de composicao e diferenciacao temporal por dominio.

@@ -76,6 +76,13 @@ export const sortRelatedNotes = (
   relatedNotes: RelatedNote[],
 ): RelatedNote[] =>
   [...relatedNotes].sort((left, right) => {
+    const leftAvailable = left.availability === "available";
+    const rightAvailable = right.availability === "available";
+
+    if (leftAvailable !== rightAvailable) {
+      return leftAvailable ? -1 : 1;
+    }
+
     const leftSameDay = left.day === activeNote.day;
     const rightSameDay = right.day === activeNote.day;
 

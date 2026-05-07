@@ -6,6 +6,7 @@ import {
 
 export type SupabaseNoteEchoFailure =
   | "not_accessible"
+  | "invalid_input"
   | "retryable_failure";
 
 const getErrorField = (error: unknown, field: string) =>
@@ -52,6 +53,14 @@ export const classifySupabaseNoteEchoError = (
     return "not_accessible";
   }
 
+  if (
+    status === 400 ||
+    code === "23503" ||
+    code === "23502"
+  ) {
+    return "invalid_input";
+  }
+
   return "retryable_failure";
 };
 
@@ -71,7 +80,7 @@ export const preflightNoteEchoSupabaseAccess = () => {
 
     return {
       ok: false as const,
-      status: "retryable_failure" as const,
+      status: "not_accessible" as const,
       errorMessage: message,
     };
   }

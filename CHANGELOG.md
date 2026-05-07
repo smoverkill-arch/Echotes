@@ -15,6 +15,10 @@ versioned releases when they start to exist.
 - migration coverage checklist for absorption of legacy `docs/`
 - expanded root canon content for notes, echoes, timeline navigation, SQL/RLS,
   Zod contracts, tag color inheritance and implementation checklist
+- behavioral tests for TD030–TD036: `UnavailableRelatedNote` graceful degradation,
+  semantic-pair delete direction, context field defaults, pagination cursor boundary
+  transition, inverted echo `isAlreadyConnected`, whitespace normalization in brief,
+  and reconciliation schema-validation reclassification
 
 ### Changed
 
@@ -27,6 +31,15 @@ versioned releases when they start to exist.
   authority and `docs/` as historical archive
 - README and canonical docs now use shorter sections and a clearer doc layout
 - TEST-SPEC now describes test suites without fragile file-level references
+- `DATA-MODEL.md`: updated note_echoes status — CRUD flows implemented in
+  `002-note-echo-flows`; revision history reordered chronologically
+- `listRelatedNoteDetails` now degrades gracefully on `not_accessible` errors:
+  returns `ok: true` with `UnavailableRelatedNote` entries instead of `ok: false`
+- `deleteNoteEcho` verification now checks the specific deleted echo by ID when
+  `echoId` is provided, preventing false `retryable_failure` when B→A echo remains
+- `createNoteEcho` reconciliation reclassifies `invalid_input` from
+  `listNoteEchoes` as `retryable_failure` (schema failures on fetched data are
+  not caller input errors)
 
 ### Fixed
 

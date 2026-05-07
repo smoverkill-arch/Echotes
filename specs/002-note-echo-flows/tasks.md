@@ -168,6 +168,36 @@
 - [X] TD020 Add invalid_input handling and coverage for malformed create/delete echo payloads before Supabase calls
 - [X] TD021 Preserve messages from plain-object Supabase errors and cover them in note echo API tests
 
+### Findings — Full speckit-review-run (2026-05-06)
+
+**Priority**: Address before starting US1/T015+
+
+#### Críticos
+
+- [ ] TD022 Fix unsafe `String()` conversions in `mapRowToCandidate` in `src/features/notes/api/list-note-candidates.ts:57-61` — use `typeof` guards to prevent `undefined`/`null` passing Zod UUID and date validation as literal strings
+- [ ] TD023 Add null-guard in `sortRelatedNotes` in `src/features/notes/utils/note-echo-relations.ts:78-102` for `UnavailableRelatedNote.day: null` before any string comparison or `localeCompare` call
+- [ ] TD024 Add `invalid_input` classification path in `classifySupabaseNoteEchoError` in `src/features/notes/api/note-echo-errors.ts:29-56` for FK violation (23503), NOT NULL (23502) and 400 responses
+- [ ] TD025 Fix `preflightNoteEchoSupabaseAccess` in `src/features/notes/api/note-echo-errors.ts:67-76` to return `not_accessible` (not `retryable_failure`) when Supabase config is absent
+- [ ] TD026 Improve reconciliation failure messages in `src/features/notes/api/create-note-echo.ts` and `delete-note-echo.ts` so caller can distinguish "primary operation failed" from "primary operation succeeded but verification failed"
+
+#### Importantes
+
+- [ ] TD027 Fix Zod schema validation throws inside try-blocks in `src/features/notes/api/list-note-echoes.ts:114-122,207-216` and `list-note-candidates.ts:178-201` so they are not caught by generic handler and misclassified as `retryable_failure`
+- [ ] TD028 Add individual error catching for the second `fetchGroup()` call in `src/features/notes/api/list-note-candidates.ts:165-175` to avoid discarding partial same-day results on other-day fetch failure
+- [ ] TD029 Convert `CreateNoteEchoResult` and `DeleteNoteEchoResult` in `src/features/notes/api/create-note-echo.ts:23-28` and `delete-note-echo.ts:19-23` from `ok: boolean` (Pattern B) to `ok: true | false` discriminated union (Pattern A), matching `ListNoteEchoesResult`
+- [ ] TD030 [P] Add test for `transient_unavailable` availability labeling in `tests/unit/notes/note-echo-api.test.ts` — auth failure mid-session after preflight success should produce `UnavailableRelatedNote`, not lose the echo relationship
+- [ ] TD033 [P] Add test for pagination cursor boundary (same-day → other-day group transition) in `tests/unit/notes/note-echo-api.test.ts` covering `nextCursor.isSelectedDayGroup` flip and no duplicates across pages
+
+#### Médios
+
+- [ ] TD031 [P] Add test for semantic pair deletion verification with inverted direction in `tests/unit/notes/note-echo-api.test.ts` — delete A→B when B→A also exists must correctly verify deletion via `isSameSemanticNotePair`
+- [ ] TD032 [P] Add tests for `context_note_id` and `context_day` defaults/overrides in `createNoteEcho` in `tests/unit/notes/note-echo-api.test.ts` — explicit null, omitted, and continue_note kind paths
+- [ ] TD034 [P] Add test for `isAlreadyConnected` with only inverted echo (B→A) in `tests/unit/notes/note-echo-api.test.ts` — candidate from A's perspective must show `isAlreadyConnected=true`
+- [ ] TD035 [P] Add whitespace normalization edge case tests for `buildContinueNoteBrief` in `tests/unit/notes/build-continue-note-brief.test.ts` — tabs, consecutive newlines, all-whitespace brief fallback
+- [ ] TD036 [P] Add test for malformed echo returned from `listNoteEchoes` during 23505 reconciliation in `tests/unit/notes/note-echo-api.test.ts` — schema parse failure must propagate as `retryable_failure`, not crash
+- [ ] TD037 Eliminate nested ternaries in `src/features/notes/api/list-note-candidates.ts:162-176` — extract `hasEnoughSameDayRows`, `otherDaysCursor`, `remainingSlots` as named variables (constitution: "No nested ternaries")
+- [ ] TD038 Update `DATA-MODEL.md:12-13` to reflect that note echo CRUD flows are fully implemented, removing the "future phases" claim (comment rot)
+
 ---
 
 ## Dependencias e Ordem de Execucao

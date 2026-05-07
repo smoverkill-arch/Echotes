@@ -138,6 +138,44 @@ remote migration setup.
 | TD020 | P2 invalid payload coverage was incomplete | `src/features/notes/api/create-note-echo.ts`, `src/features/notes/api/delete-note-echo.ts`, `tests/unit/schemas/note.schema.test.ts` | Completed: malformed create/delete inputs return `invalid_input` before Supabase and schemas cover required persisted fields. |
 | TD021 | P2 plain-object Supabase errors could lose their message text | `src/features/notes/api/note-echo-errors.ts`, `tests/unit/notes/note-echo-api.test.ts` | Completed: error message extraction now handles Error instances and Supabase-style plain objects. |
 
+## Full speckit-review-run Findings — Recorded Before Correction
+
+**Source**: `/speckit-review-run` (6 agentes: code, errors, types, tests, comments, simplify) sobre o diff completo da branch `002-note-echo-flows` vs `main`.
+**Recorded**: 2026-05-06
+**Status**: Aberto — aguardando correção antes de US1/T015+.
+
+### Críticos — devem ser corrigidos antes do merge
+
+| Task | Agente | Arquivo | Linha | Finding |
+|------|--------|---------|-------|---------|
+| TD022 | code | `src/features/notes/api/list-note-candidates.ts` | 57–61 | `String(row.id/day/title/created_at)` converte `undefined` → `"undefined"` que passa validação UUID/date do Zod — injeta IDs e datas corrompidas no sistema. Usar `typeof` guards. |
+| TD023 | code | `src/features/notes/utils/note-echo-relations.ts` | 78–102 | `sortRelatedNotes` acessa `left.day`/`right.day` sem null-guard; o tipo `UnavailableRelatedNote` tem `day: null` — crash em runtime quando construído. |
+| TD024 | errors | `src/features/notes/api/note-echo-errors.ts` | 29–56 | `classifySupabaseNoteEchoError` nunca retorna `invalid_input`; FK violations (23503), NOT NULL (23502) e erros 400 caem em `retryable_failure`. |
+| TD025 | errors | `src/features/notes/api/note-echo-errors.ts` | 67–76 | `preflightNoteEchoSupabaseAccess` retorna `retryable_failure` para config ausente; ausência de config não resolve com retry — deve ser `not_accessible`. |
+| TD026 | errors | `src/features/notes/api/create-note-echo.ts`, `delete-note-echo.ts` | 77–88, 61–72 | Falha em `listNoteEchoes` durante reconciliação não indica se o INSERT/DELETE primário ocorreu — estado ambíguo para o chamador. |
+
+### Importantes — devem ser corrigidos
+
+| Task | Agente | Arquivo | Linha | Finding |
+|------|--------|---------|-------|---------|
+| TD027 | errors | `src/features/notes/api/list-note-echoes.ts`, `list-note-candidates.ts` | 114–122, 207–216, 178–201 | Throws Zod dentro do try-block caem no catch genérico → classificados como `retryable_failure` quando são erros de integridade de dado. |
+| TD028 | errors | `src/features/notes/api/list-note-candidates.ts` | 165–175 | Segunda chamada `fetchGroup()` sem catching individual — resultado parcial do primeiro grupo descartado em falha. |
+| TD029 | types | `src/features/notes/api/create-note-echo.ts`, `delete-note-echo.ts` | 23–28, 19–23 | `CreateNoteEchoResult` e `DeleteNoteEchoResult` usam `ok: boolean` (Pattern B); TypeScript não faz narrowing de `echo: NoteEcho \| null`. Converter para Pattern A (`ok: true \| false`) como os tipos `List*`. |
+| TD030 | tests | `tests/unit/notes/note-echo-api.test.ts` | — | GAP (9/10): `listRelatedNoteDetails` nunca constrói `UnavailableRelatedNote`; auth expiration perde o eco ao invés de marcá-lo como `transient_unavailable`. |
+| TD033 | tests | `tests/unit/notes/note-echo-api.test.ts` | — | GAP (8/10): nenhum teste cobre transição de cursor entre grupo same-day e other-day — boundary crítico do `carregar mais`. |
+| TD032 | tests | `tests/unit/notes/note-echo-api.test.ts` | — | GAP (8/10): `context_note_id` e `context_day` defaults nunca verificados — metadados de rastreabilidade de continuidade podem ser perdidos silenciosamente. |
+
+### Médios — qualidade e cobertura
+
+| Task | Agente | Arquivo | Linha | Finding |
+|------|--------|---------|-------|---------|
+| TD031 | tests | `tests/unit/notes/note-echo-api.test.ts` | — | GAP (8/10): deleção com eco invertido (B→A) não testada — `isSameSemanticNotePair` bidirecional sem cobertura explícita na verificação pós-delete. |
+| TD034 | tests | `tests/unit/notes/note-echo-api.test.ts` | — | GAP (7/10): `isAlreadyConnected` não testado quando apenas eco B→A existe — usuário pode ver candidata como não-conectada e criar duplicata. |
+| TD035 | tests | `tests/unit/notes/build-continue-note-brief.test.ts` | — | GAP (7/10): normalização de whitespace (tabs, `\n\n`, espaços consecutivos, brief all-whitespace) não coberta — saída determinística não garantida. |
+| TD036 | tests | `tests/unit/notes/note-echo-api.test.ts` | — | GAP (7/10): eco malformado retornado pelo `listNoteEchoes` durante reconciliação 23505 não testado — falha de schema deve propagar como `retryable_failure`, não crash. |
+| TD037 | simplify | `src/features/notes/api/list-note-candidates.ts` | 162–176 | Ternários aninhados violam constituição ("No nested ternaries — prefer if/else or early returns"); extrair `hasEnoughSameDayRows`, `otherDaysCursor`, `remainingSlots`. |
+| TD038 | comments | `DATA-MODEL.md` | 12–13 | Comment rot: afirma que fluxos de eco "ainda pertencem a fases futuras" — branch implementa tudo. Enganoso para contribuidores futuros. |
+
 ## Cross-References
 
 - **Specification**: `specs/002-note-echo-flows/spec.md`

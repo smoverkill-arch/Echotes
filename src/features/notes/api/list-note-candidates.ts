@@ -53,16 +53,32 @@ const mapRowToCandidate = (
   row: NoteCandidateRow,
   sourceNoteId: string,
   existingEchoes: NoteEcho[],
-): NoteEchoCandidate => ({
-  id: String(row.id),
-  day: String(row.day),
-  title: String(row.title),
-  brief: typeof row.brief === "string" ? row.brief : null,
-  created_at: String(row.created_at),
-  isAlreadyConnected: existingEchoes.some((echo) =>
-    isSameSemanticNotePair(echo, sourceNoteId, String(row.id)),
-  ),
-});
+): NoteEchoCandidate => {
+  if (
+    typeof row.id !== "string" ||
+    typeof row.day !== "string" ||
+    typeof row.title !== "string" ||
+    typeof row.created_at !== "string"
+  ) {
+    throw new Error("Linha de candidata com campos obrigatorios ausentes.");
+  }
+
+  const id = row.id;
+  const day = row.day;
+  const title = row.title;
+  const created_at = row.created_at;
+
+  return {
+    id,
+    day,
+    title,
+    brief: typeof row.brief === "string" ? row.brief : null,
+    created_at,
+    isAlreadyConnected: existingEchoes.some((echo) =>
+      isSameSemanticNotePair(echo, sourceNoteId, id),
+    ),
+  };
+};
 
 const buildSameDayCursorFilter = (cursor: NoteEchoCandidateCursor) =>
   `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`;
@@ -163,27 +179,39 @@ export const listNoteCandidates = async ({
       cursor?.isSelectedDayGroup === false
         ? []
         : await fetchGroup(true, cursor, safePageSize + 1);
-    const candidates =
-      sameDayRows.length > safePageSize
-        ? sameDayRows
-        : [
-            ...sameDayRows,
-            ...(await fetchGroup(
-              false,
-              cursor?.isSelectedDayGroup === false ? cursor : null,
-              safePageSize - sameDayRows.length + 1,
-            )),
-          ];
+
+    const hasEnoughSameDayRows = sameDayRows.length > safePageSize;
+    const otherDaysCursor =
+      cursor?.isSelectedDayGroup === false ? cursor : null;
+    const remainingSlots = safePageSize - sameDayRows.length + 1;
+
+    let otherDayRows: NoteEchoCandidate[] = [];
+
+    if (!hasEnoughSameDayRows) {
+      try {
+        otherDayRows = await fetchGroup(false, otherDaysCursor, remainingSlots);
+      } catch (otherDayError) {
+        if (sameDayRows.length === 0) {
+          throw otherDayError;
+        }
+      }
+    }
+
+    const candidates = [...sameDayRows, ...otherDayRows];
 
     const parsedCandidates = noteEchoCandidateSchema
       .array()
       .safeParse(candidates.slice(0, safePageSize + 1));
 
     if (!parsedCandidates.success) {
-      throw new Error(
-        parsedCandidates.error.issues[0]?.message ??
+      return {
+        ok: false,
+        page: { items: [], nextCursor: null },
+        errorMessage:
+          parsedCandidates.error.issues[0]?.message ??
           "Falha ao validar candidatas de eco.",
-      );
+        status: "invalid_input",
+      };
     }
 
     const page = buildCandidatePage(
@@ -194,10 +222,14 @@ export const listNoteCandidates = async ({
     const parsedPage = noteEchoCandidatePageSchema.safeParse(page);
 
     if (!parsedPage.success) {
-      throw new Error(
-        parsedPage.error.issues[0]?.message ??
+      return {
+        ok: false,
+        page: { items: [], nextCursor: null },
+        errorMessage:
+          parsedPage.error.issues[0]?.message ??
           "Falha ao validar pagina de candidatas.",
-      );
+        status: "invalid_input",
+      };
     }
 
     return { ok: true, page: parsedPage.data, errorMessage: null };

@@ -114,9 +114,13 @@ export const listNoteEchoes = async (
     const parsedEchoes = persistedNoteEchoSchema.array().safeParse(data ?? []);
 
     if (!parsedEchoes.success) {
-      throw new Error(
-        parsedEchoes.error.issues[0]?.message ?? "Falha ao validar ecos.",
-      );
+      return {
+        ok: false,
+        echoes: [],
+        errorMessage:
+          parsedEchoes.error.issues[0]?.message ?? "Falha ao validar ecos.",
+        status: "invalid_input",
+      };
     }
 
     return { ok: true, echoes: parsedEchoes.data, errorMessage: null };
@@ -209,10 +213,14 @@ export const listRelatedNoteDetails = async (
       .safeParse(sortRelatedNotes(activeNote, relatedNotes));
 
     if (!parsedRelatedNotes.success) {
-      throw new Error(
-        parsedRelatedNotes.error.issues[0]?.message ??
+      return {
+        ok: false,
+        relatedNotes: [],
+        errorMessage:
+          parsedRelatedNotes.error.issues[0]?.message ??
           "Falha ao validar notas conectadas.",
-      );
+        status: "invalid_input",
+      };
     }
 
     return {
@@ -221,6 +229,31 @@ export const listRelatedNoteDetails = async (
       errorMessage: null,
     };
   } catch (error) {
+    const status = classifySupabaseNoteEchoError(error);
+
+    if (status === "not_accessible") {
+      // Graceful degradation: preflight confirmed auth is valid, but the details
+      // query failed transiently — mark all echoes as temporarily unavailable.
+      const unavailableNotes = echoes
+        .map((echo): RelatedNote | null => {
+          const relatedNoteId = getRelatedNoteId(echo, activeNote.id);
+          if (!relatedNoteId) return null;
+          return {
+            id: relatedNoteId,
+            day: null,
+            title: null,
+            brief: null,
+            created_at: null,
+            kind: echo.kind,
+            echoId: echo.id,
+            availability: "transient_unavailable" as const,
+          };
+        })
+        .filter((note): note is RelatedNote => note !== null);
+
+      return { ok: true, relatedNotes: unavailableNotes, errorMessage: null };
+    }
+
     return {
       ok: false,
       relatedNotes: [],
@@ -228,7 +261,7 @@ export const listRelatedNoteDetails = async (
         "Nao foi possivel carregar notas conectadas.",
         error,
       ),
-      status: classifySupabaseNoteEchoError(error),
+      status,
     };
   }
 };

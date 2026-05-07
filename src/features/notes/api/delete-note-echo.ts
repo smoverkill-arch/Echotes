@@ -16,11 +16,17 @@ export type DeleteNoteEchoStatus =
   | "not_accessible"
   | "retryable_failure";
 
-export interface DeleteNoteEchoResult {
-  ok: boolean;
-  status: DeleteNoteEchoStatus;
-  errorMessage: string | null;
-}
+export type DeleteNoteEchoResult =
+  | {
+      ok: true;
+      status: "deleted" | "already_removed";
+      errorMessage: null;
+    }
+  | {
+      ok: false;
+      status: "invalid_input" | "not_accessible" | "retryable_failure";
+      errorMessage: string;
+    };
 
 export const deleteNoteEcho = async (
   input: DeleteEchoInput,
@@ -67,17 +73,19 @@ export const deleteNoteEcho = async (
       return {
         ok: false,
         status: echoesResult.status,
-        errorMessage: echoesResult.errorMessage,
+        errorMessage: `Remocao executada mas verificacao falhou. ${echoesResult.errorMessage}`,
       };
     }
 
-    const stillExists = echoesResult.echoes.some((echo) =>
-      isSameSemanticNotePair(
-        echo,
-        parsedInput.data.noteIdA,
-        parsedInput.data.noteIdB,
-      ),
-    );
+    const stillExists = parsedInput.data.echoId
+      ? echoesResult.echoes.some((echo) => echo.id === parsedInput.data.echoId)
+      : echoesResult.echoes.some((echo) =>
+          isSameSemanticNotePair(
+            echo,
+            parsedInput.data.noteIdA,
+            parsedInput.data.noteIdB,
+          ),
+        );
     const removedRows = Array.isArray(data) ? data.length : 0;
 
     if (stillExists) {
