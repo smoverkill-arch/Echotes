@@ -2,7 +2,7 @@
 
 **Branch**: `002-note-echo-flows` | **Date**: 2026-05-05
 **Mode**: doc-only
-**Total Tasks**: 54 | **Files**: 19 new, 22 modified, 0 deleted
+**Feature Tasks**: 54 | **Tech Debt Tasks**: TD001-TD038
 
 Este blueprint traduz `spec.md`, `plan.md`, `data-model.md`, `contracts/` e
 `tasks.md` em uma ordem de implementacao auditavel antes de rodar
@@ -14,6 +14,8 @@ soberana, ecos exclusivos de notas, ghost card exclusivo de tarefas, sem
 
 - `Continuar desta nota` usa RPC atomica para criar nota e eco na mesma
   transacao, impedindo nota orfa e sucesso parcial -> T013, T038, T041, T044.
+- Phase 1 e Phase 2 Base ja foram implementadas e auditadas ate T014; antes de
+  iniciar US1/T015+, a fila de tech debt deve permanecer como gate explicito.
 - O dia passa a carregar `note_echoes` ligados as notas do recorte e a timeline
   exibe apenas contagem direta, sem grafo nem mapa -> T005, T007, T016, T020,
   T021, T022, T023.
@@ -39,6 +41,7 @@ soberana, ecos exclusivos de notas, ghost card exclusivo de tarefas, sem
 ```text
 Phase 1: T001 -> T002
 Phase 2: T004, T005 -> T006, T007, T008 -> T009 -> T010 -> T011 -> T012 -> T014
+Tech debt gate before US1: TD001..TD038 completed
 US1 tests: T015, T016, T017, T018 -> T019
 US1 implementation: T020 -> T021 -> T022 -> T023 -> T024 -> T025 -> T026 -> T027
 US2 tests: T028, T029, T030 -> T031
@@ -136,7 +139,8 @@ sem expor subtipo visual de `kind`. `ContinueNoteInput` deve incluir `title`,
 
 **Verification**:
 
-`corepack pnpm run typecheck`.
+Concluido. Validado por suites unitarias de schemas/API e `corepack pnpm run
+typecheck` nos passes de Phase 2/tech debt.
 
 ---
 
@@ -161,7 +165,7 @@ adicionar campo `side`. `DayEntries` deve continuar com `tasks`, `notes` e
 
 **Verification**:
 
-`rg -n "side" src/types/timeline.ts` nao deve retornar campo novo.
+Concluido. `TimelineNode.side` nao foi adicionado.
 
 ---
 
@@ -186,8 +190,8 @@ mensagem atual de self-link: `Uma nota nao pode criar eco com ela mesma.`
 
 **Verification**:
 
-Atualizar `tests/unit/schemas/note.schema.test.ts` para validar candidata ja
-conectada, item indisponivel e input de continuacao.
+Concluido. `tests/unit/schemas/note.schema.test.ts` cobre candidata, nota
+relacionada disponivel/indisponivel, payloads invalidos e input de continuacao.
 
 ---
 
@@ -213,7 +217,8 @@ notas do mesmo dia primeiro e depois `created_at` decrescente.
 
 **Verification**:
 
-T015 deve cobrir par invertido, contagem direta e ordenacao.
+Concluido como helper/base. Cobertura adicional de historia permanece em T015,
+que segue aberto.
 
 ---
 
@@ -238,7 +243,8 @@ limitar a 180 caracteres sem cortar palavra quando possivel.
 
 **Verification**:
 
-T037 deve cobrir as tres fontes e normalizacao.
+Concluido como helper/base. Cobertura adicional de US3 permanece em T037, que
+segue aberto.
 
 ---
 
@@ -264,7 +270,8 @@ validar sessao, parsear com Zod e retornar `{ ok, data, errorMessage }`.
 
 **Verification**:
 
-Teste unitario deve simular falha de sessao e retorno invalido.
+Concluido. `tests/unit/notes/note-echo-api.test.ts` cobre preflight,
+classificacao de erros, detalhes relacionados e falhas de leitura.
 
 ---
 
@@ -282,15 +289,18 @@ T006, T007.
 
 **Implementation**:
 
-Criar `listNoteCandidates({ sourceNoteId, page, pageSize = 50 })`. Consultar
-`notes` do usuario, ordenar por `created_at` descendente, excluir a origem,
-usar `range(start, end)` e retornar `hasNextPage` quando vierem 51 registros
-para uma pagina de 50. Marcar `isAlreadyConnected` comparando com ecos diretos
-da nota aberta.
+Implementado como `listNoteCandidates({ sourceNoteId, selectedDay,
+existingEchoes, cursor, pageSize = 50 })`. A query pagina no limite do
+Supabase com `range(0, pageSize)`, separando candidatas do dia selecionado das
+demais e usando cursor composto por grupo, `day`, `created_at` e `id`. A origem
+e excluida por `.neq("id", sourceNoteId)` e `isAlreadyConnected` compara pares
+semanticos diretos, inclusive invertidos.
 
 **Verification**:
 
-T028 cobre primeira pagina, proxima pagina e candidata desabilitada.
+Concluido para Base. `tests/unit/notes/note-echo-api.test.ts` cobre primeira
+pagina, proxima pagina, transicao de grupo, `range`, exclusao da origem e
+candidata ja conectada. T028 permanece aberto como cobertura propria da US2/UI.
 
 ---
 
@@ -308,15 +318,17 @@ T006, T007.
 
 **Implementation**:
 
-Criar `createNoteEcho(input)` com `kind = manual_link`, validacao de self-link,
-insert em `note_echoes`, `created_by_user_id` da sessao, `context_note_id` e
-`context_day`. Se a falha indicar par unico ja existente, retornar
-`{ ok: true, alreadyExists: true, feedback: "Eco ja existe" }` sem reescrever
-`kind`.
+Implementado como `createNoteEcho(input)` com validacao de self-link,
+preflight de Supabase/sessao e insert direto em `note_echoes` sem enviar
+`created_by_user_id` pelo cliente. Ownership vem do banco via default
+`auth.uid()` e migration forward. Duplicidade usa apenas sinal estruturado
+`code = 23505` e reconcilia a relacao existente sem reescrever `kind`.
 
 **Verification**:
 
-T029 cobre self-link, duplicidade invertida e preservacao de `kind`.
+Concluido para Base. `tests/unit/notes/note-echo-api.test.ts` cobre self-link,
+payload sem owner, duplicidade, classificacao de erro e preservacao de `kind`.
+T029 permanece aberto como cobertura propria da US2.
 
 ---
 
@@ -334,14 +346,16 @@ T007.
 
 **Implementation**:
 
-Criar `deleteNoteEchoByPair({ fromNoteId, toNoteId })`. Consultar eco direto
-pelo par semantico, remover apenas a relacao encontrada e retornar estado
-recuperavel se a relacao ja nao existir. A confirmacao visual fica no Reader em
-T034; esta API nao deve apagar notas.
+Implementado como `deleteNoteEcho(input)` com preflight, validacao de par,
+delete restrito ao `echoId` quando informado e ao par semantico selecionado. A
+API reconcilia apos a remocao, preserva notas e trata relacao ja ausente como
+estado recuperavel.
 
 **Verification**:
 
-T030 cobre relacao removida, relacao ausente e nenhum delete em `notes`.
+Concluido para Base. `tests/unit/notes/note-echo-api.test.ts` cobre remocao
+sem apagar notas, par adjacente A-C preservado e erros de acesso. T030 segue
+aberto para cobertura propria da US2.
 
 ---
 
@@ -365,7 +379,9 @@ garantir que a suite same-day continue passando com `notes`, `tasks`,
 
 **Verification**:
 
-`corepack pnpm run test -- day-surface-same-day`.
+Concluido. `tests/integration/day/day-surface-same-day.test.tsx` usa o helper
+compartilhado `createSupabaseNoteEchoMock` em vez de manter query builder
+paralelo.
 
 ---
 
@@ -1403,16 +1419,16 @@ O bloco existe antes de declarar a branch fechada ou merge-ready.
 
 - [X] T001: Criar fixtures compartilhadas de notas e ecos
 - [X] T002: Adicionar helpers de mock Supabase para tabelas notes, note_echoes e rpc
-- [ ] T004: Atualizar tipos de eco, nota relacionada, candidata e estado pendente de nota
-- [ ] T005: Atualizar DayEntries e contratos de timeline sem adicionar side ao TimelineNode
-- [ ] T006: Atualizar schemas Zod de note_echoes, candidatas, notas relacionadas e entrada de continuacao
-- [ ] T007: Criar utilitarios de relacao, contagem direta, par semantico e ordenacao
-- [ ] T008: Criar utilitario deterministico de generatedBrief
-- [ ] T009: Criar APIs base de leitura de ecos e detalhes relacionados
-- [ ] T010: Criar API de listagem paginada de candidatas
-- [ ] T011: Criar API de criacao manual de eco
-- [ ] T012: Criar API de remocao de eco
-- [ ] T014: Atualizar mocks de testes de integracao para suportar note_echoes, delete e rpc
+- [X] T004: Atualizar tipos de eco, nota relacionada, candidata e estado pendente de nota
+- [X] T005: Atualizar DayEntries e contratos de timeline sem adicionar side ao TimelineNode
+- [X] T006: Atualizar schemas Zod de note_echoes, candidatas, notas relacionadas e entrada de continuacao
+- [X] T007: Criar utilitarios de relacao, contagem direta, par semantico e ordenacao
+- [X] T008: Criar utilitario deterministico de generatedBrief
+- [X] T009: Criar APIs base de leitura de ecos e detalhes relacionados
+- [X] T010: Criar API de listagem paginada de candidatas
+- [X] T011: Criar API de criacao manual de eco
+- [X] T012: Criar API de remocao de eco
+- [X] T014: Atualizar mocks de testes de integracao para suportar note_echoes, delete e rpc
 - [ ] T015: Adicionar testes unitarios de contagem direta, par invertido e ordenacao
 - [ ] T016: Adicionar teste de useDayEntries carregando note_echoes ligados as notas do dia
 - [ ] T017: Adicionar teste de NoteCardReal exibindo badge Ecos somente quando directEchoCount maior que zero
@@ -1455,3 +1471,44 @@ O bloco existe antes de declarar a branch fechada ou merge-ready.
 - [ ] T053: Executar corepack pnpm run doc:guard
 - [ ] T054: Executar corepack pnpm run doc:score
 - [ ] T055: Registrar bloco de evidencia concreta de fechamento
+
+## Tech Debt Checklist
+
+- [X] TD001: Constranger delete por echoId ao par semantico selecionado
+- [X] TD002: Adicionar preflight de Supabase e sessao nas APIs de leitura
+- [X] TD003: Corrigir mock de delete para preservar relacoes adjacentes
+- [X] TD004: Ampliar cobertura de Phase 2 Base
+- [X] TD005: Reutilizar mock Supabase compartilhado na integracao same-day
+- [X] TD006: Remover owner derivado do cliente na criacao manual de eco
+- [X] TD007: Restringir duplicidade a `code = 23505`
+- [X] TD008: Classificar erros Supabase de auth, RLS, permissao e retry
+- [X] TD009: Nao rotular detalhe ausente como indisponibilidade transiente sem evidencia
+- [X] TD010: Cobrir preflight de leitura sem sessao/config
+- [X] TD011: Provar A-B removido preservando A-C pelo mock compartilhado
+- [X] TD012: Cobrir erros auth/RLS em queries de leitura
+- [X] TD013: Tornar o mock compartilhado stateful para list/delete
+- [X] TD014: Adicionar migration forward para default `auth.uid()` em `note_echoes`
+- [X] TD015: Paginar candidatas no limite da query Supabase
+- [X] TD016: Aplicar `neq`, `order`, `range` e cursor OR no mock stateful
+- [X] TD017: Remover query builder Supabase paralelo da integracao same-day
+- [X] TD018: Documentar migration 003 e repair de migration manual
+- [X] TD019: Exigir status em falhas das APIs de leitura
+- [X] TD020: Classificar payload invalido como `invalid_input`
+- [X] TD021: Preservar mensagens de erro Supabase em objetos puros
+- [X] TD022: Corrigir conversoes `String()` inseguras em `mapRowToCandidate`
+- [X] TD023: Adicionar null-guard em `sortRelatedNotes`
+- [X] TD024: Classificar FK, NOT NULL e 400 como `invalid_input`
+- [X] TD025: Classificar config Supabase ausente como `not_accessible`
+- [X] TD026: Diferenciar mensagens de falha primaria versus falha de verificacao
+- [X] TD027: Evitar que falhas Zod sejam capturadas e classificadas genericamente
+- [X] TD028: Capturar erro individual do segundo `fetchGroup`
+- [X] TD029: Converter resultados de create/delete para unions discriminadas
+- [X] TD030: Cobrir `transient_unavailable` por auth failure mid-session
+- [X] TD031: Cobrir verificacao de delete com direcao invertida
+- [X] TD032: Cobrir defaults/overrides de `context_note_id` e `context_day`
+- [X] TD033: Cobrir fronteira de cursor entre grupo same-day e other-day
+- [X] TD034: Cobrir `isAlreadyConnected` com eco invertido
+- [X] TD035: Cobrir edge cases de normalizacao de whitespace no generatedBrief
+- [X] TD036: Cobrir eco malformado na reconciliacao 23505
+- [X] TD037: Remover ternarios aninhados em `list-note-candidates.ts`
+- [X] TD038: Atualizar `DATA-MODEL.md` sobre CRUD de note echo
