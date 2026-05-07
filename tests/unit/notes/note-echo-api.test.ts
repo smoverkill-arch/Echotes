@@ -78,14 +78,25 @@ describe("note echo APIs", () => {
     expect(mockSupabase.queryCalls).toEqual([]);
   });
 
-  it("omite detalhes relacionados ausentes em consulta bem-sucedida", async () => {
+  it("preserva eco com stale_detail quando detalhe relacionado nao retorna", async () => {
     const { sourceNote, echo } = buildConnectedPair();
     mockSupabase.enqueueTableResult("notes", mockSupabase.ok([]));
 
     const result = await listRelatedNoteDetails(sourceNote, [echo]);
 
     expect(result.ok).toBe(true);
-    expect(result.relatedNotes).toEqual([]);
+    expect(result.relatedNotes).toEqual([
+      {
+        id: echo.to_note_id,
+        day: null,
+        title: null,
+        brief: null,
+        created_at: null,
+        kind: echo.kind,
+        echoId: echo.id,
+        availability: "stale_detail",
+      },
+    ]);
   });
 
   it("pagina candidatas com cursor estavel e marca Eco ja existe", async () => {

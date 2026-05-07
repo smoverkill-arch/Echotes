@@ -192,7 +192,16 @@ export const listRelatedNoteDetails = async (
         const detail = noteDetails.get(relatedNoteId);
 
         if (!detail) {
-          return null;
+          return {
+            id: relatedNoteId,
+            day: null,
+            title: null,
+            brief: null,
+            created_at: null,
+            kind: echo.kind,
+            echoId: echo.id,
+            availability: "stale_detail" as const,
+          };
         }
 
         return {
