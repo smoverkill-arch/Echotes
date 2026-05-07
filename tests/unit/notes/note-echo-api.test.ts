@@ -543,7 +543,7 @@ describe("note echo APIs", () => {
       expect(detailsResult.ok).toBe(true);
       expect(detailsResult.relatedNotes).toHaveLength(1);
       expect(detailsResult.relatedNotes[0]).toMatchObject({
-        availability: "transient_unavailable",
+        availability: "stale_detail",
         echoId: echo.id,
       });
 
@@ -579,7 +579,7 @@ describe("note echo APIs", () => {
     expect(result.relatedNotes).toHaveLength(1);
     expect(result.relatedNotes[0]).toMatchObject({
       id: echo.to_note_id,
-      availability: "transient_unavailable",
+      availability: "stale_detail",
       day: null,
       title: null,
       brief: null,

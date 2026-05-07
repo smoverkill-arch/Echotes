@@ -241,8 +241,8 @@ export const listRelatedNoteDetails = async (
     const status = classifySupabaseNoteEchoError(error);
 
     if (status === "not_accessible") {
-      // Graceful degradation: preflight confirmed auth is valid, but the details
-      // query failed transiently — mark all echoes as temporarily unavailable.
+      // Graceful degradation: preserve the relation and signal stale/blocked
+      // detail loading (RLS, permission, auth drift) without dropping echoes.
       const unavailableNotes = echoes
         .map((echo): RelatedNote | null => {
           const relatedNoteId = getRelatedNoteId(echo, activeNote.id);
@@ -255,7 +255,7 @@ export const listRelatedNoteDetails = async (
             created_at: null,
             kind: echo.kind,
             echoId: echo.id,
-            availability: "transient_unavailable" as const,
+            availability: "stale_detail" as const,
           };
         })
         .filter((note): note is RelatedNote => note !== null);
