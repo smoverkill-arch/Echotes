@@ -170,6 +170,36 @@ describe("note echo APIs", () => {
     ).toBe(false);
   });
 
+  it("falha a listagem quando a busca de outras datas quebra apos retornar mesmo-dia", async () => {
+    const sourceNote = buildNote({
+      id: "10000000-0000-4000-8000-0000000000aa",
+      day: NOTE_ECHO_SOURCE_DAY,
+      created_at: "2026-05-01T10:00:00+00:00",
+    });
+    const sameDayCandidate = buildNote({
+      id: "20000000-0000-4000-8000-0000000000ab",
+      day: NOTE_ECHO_SOURCE_DAY,
+      created_at: "2026-05-01T09:00:00+00:00",
+    });
+
+    mockSupabase.enqueueTableResult("notes", mockSupabase.ok([sameDayCandidate]));
+    mockSupabase.enqueueTableResult(
+      "notes",
+      mockSupabase.error("connection lost while loading other-day candidates"),
+    );
+
+    const result = await listNoteCandidates({
+      sourceNoteId: sourceNote.id,
+      selectedDay: NOTE_ECHO_SOURCE_DAY,
+      existingEchoes: [],
+      pageSize: 2,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe("retryable_failure");
+    expect(result.page).toEqual({ items: [], nextCursor: null });
+  });
+
   it("reconcilia criacao duplicada preservando kind original", async () => {
     const { sourceNote, targetNote, echo } = buildConnectedPair();
     mockSupabase.enqueueTableResult(
@@ -587,6 +617,42 @@ describe("note echo APIs", () => {
       kind: echo.kind,
       echoId: echo.id,
     });
+  });
+
+  it("mantem ordenacao estavel ao degradar notas conectadas indisponiveis", async () => {
+    const sourceNote = buildNote({
+      id: "10000000-0000-4000-8000-0000000000c1",
+      day: NOTE_ECHO_SOURCE_DAY,
+    });
+    const olderRelatedId = "20000000-0000-4000-8000-0000000000c1";
+    const newerRelatedId = "20000000-0000-4000-8000-0000000000c2";
+    const olderEcho = buildNoteEcho({
+      id: "30000000-0000-4000-8000-0000000000c1",
+      from_note_id: sourceNote.id,
+      to_note_id: olderRelatedId,
+    });
+    const newerEcho = buildNoteEcho({
+      id: "30000000-0000-4000-8000-0000000000c2",
+      from_note_id: sourceNote.id,
+      to_note_id: newerRelatedId,
+    });
+
+    mockSupabase.enqueueTableResult(
+      "notes",
+      mockSupabase.error("permission denied for table notes"),
+    );
+
+    const result = await listRelatedNoteDetails(sourceNote, [olderEcho, newerEcho]);
+
+    expect(result.ok).toBe(true);
+    expect(result.relatedNotes.map((note) => note.id)).toEqual([
+      newerRelatedId,
+      olderRelatedId,
+    ]);
+    expect(result.relatedNotes.map((note) => note.availability)).toEqual([
+      "stale_detail",
+      "stale_detail",
+    ]);
   });
 
   // TD031: delete A→B by echoId preserves B→A and succeeds

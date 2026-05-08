@@ -133,9 +133,10 @@ Reader de outra nota.
 - `availability = transient_unavailable` representa apenas falha tecnica
   recuperavel depois de a relacao e seus endpoints terem passado por checagem
   de acesso atual.
-- Negacao por RLS, ownership, sessao ausente ou sessao expirada nao vira item
-  indisponivel; a relacao e removida da derivacao autorizada e o feedback nao
-  revela se a nota ou a relacao existem.
+- Negacao por RLS, ownership, sessao ausente ou sessao expirada durante carga de
+  detalhe pode degradar a relacao para `availability = stale_detail` sem expor
+  `title`, `brief`, `day` ou `created_at`; o item preserva apenas `id`, `echoId`
+  e `kind` para permitir recarregamento autoritativo.
 - `directCount` e `relatedNotes` nunca contam linhas cuja nota endpoint atual
   nao tenha sido confirmada como acessivel ao usuario autenticado.
 - A ordenacao de `relatedNotes` usa `activeNote.day` como referencia de mesmo
@@ -145,9 +146,9 @@ Reader de outra nota.
 - O cache de detalhe minimo e subordinado a relacao carregada. Falha de detalhe
   limpa `title`, `brief` e `created_at` stale daquele item, preservando apenas a
   identidade da relacao ate o proximo reload autoritativo de ecos.
-- `availability = stale_detail` pode existir apenas durante reconciliacao local
-  de reload; nao permite abrir Reader nem remover eco sem nova confirmacao do
-  estado autoritativo.
+- `availability = stale_detail` sinaliza detalhe indisponivel (endpoint ausente,
+  bloqueado ou ainda nao confirmado) e nao permite abrir Reader nem remover eco
+  sem nova confirmacao do estado autoritativo.
 
 ## Draft de Continuacao de Nota
 

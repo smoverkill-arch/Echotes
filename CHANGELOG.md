@@ -42,6 +42,16 @@ versioned releases when they start to exist.
 - `createNoteEcho` reconciliation reclassifies `invalid_input` from
   `listNoteEchoes` as `retryable_failure` (schema failures on fetched data are
   not caller input errors)
+- `listNoteCandidates` now surfaces failures from the other-day query even when
+  same-day rows were already loaded, avoiding silent pagination truncation
+- `listRelatedNoteDetails` now applies `sortRelatedNotes` in the
+  `not_accessible` graceful-degradation path to keep ordering stable between
+  loaded and unavailable states
+- `specs/002-note-echo-flows/data-model.md` now matches implemented fallback:
+  access-denied detail loads degrade to `stale_detail` with relation identity
+  preserved
+- `specs/002-note-echo-flows/research.md` now uses `newNoteDay` naming for
+  continuation draft day selection
 
 ### Fixed
 
@@ -56,6 +66,8 @@ versioned releases when they start to exist.
   limits `authenticated` grants, targets RLS policies to authenticated sessions,
   fixes the trigger function search path and disables GraphQL execution for
   client roles until GraphQL becomes an explicit product interface
+- canon-guard CI now runs `corepack enable` after `actions/setup-node` so `pnpm`
+  is available from the configured Node toolchain
 
 ### Removed
 

@@ -70,7 +70,7 @@ transformar eco em hierarquia.
 
 **Justificativa**: a spec pede briefing automatico e ajuste imediato antes de
 concluir. O melhor encaixe no app atual e abrir um draft de nota em modo de
-criacao, com `targetDay` editavel, `title` inicial baseado na nota de origem e
+criacao, com `newNoteDay` editavel, `title` inicial baseado na nota de origem e
 `brief` automatico pronto para revisao. So depois da confirmacao a nova nota e
 persistida e o eco `continue_note` e criado. Essa origem nao cria um tipo novo
 de nota; registra apenas a proveniencia inicial da mesma relacao `Eco`.

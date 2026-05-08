@@ -260,7 +260,11 @@ export const listRelatedNoteDetails = async (
         })
         .filter((note): note is RelatedNote => note !== null);
 
-      return { ok: true, relatedNotes: unavailableNotes, errorMessage: null };
+      return {
+        ok: true,
+        relatedNotes: sortRelatedNotes(activeNote, unavailableNotes),
+        errorMessage: null,
+      };
     }
 
     return {

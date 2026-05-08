@@ -188,13 +188,7 @@ export const listNoteCandidates = async ({
     let otherDayRows: NoteEchoCandidate[] = [];
 
     if (!hasEnoughSameDayRows) {
-      try {
-        otherDayRows = await fetchGroup(false, otherDaysCursor, remainingSlots);
-      } catch (otherDayError) {
-        if (sameDayRows.length === 0) {
-          throw otherDayError;
-        }
-      }
+      otherDayRows = await fetchGroup(false, otherDaysCursor, remainingSlots);
     }
 
     const candidates = [...sameDayRows, ...otherDayRows];
