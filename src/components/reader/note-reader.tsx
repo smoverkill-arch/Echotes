@@ -46,14 +46,16 @@ export function NoteReader({
             <View style={styles.echoSection}>
               <View style={styles.echoHeader}>
                 <Text style={styles.echoTitle}>Ecos</Text>
-                <Pressable
-                  accessibilityRole="button"
-                  style={styles.echoActionButton}
-                  testID="note-reader-add-echo-button"
-                  onPress={onAddEcho}
-                >
-                  <Text style={styles.echoActionLabel}>Adicionar eco</Text>
-                </Pressable>
+                {onAddEcho ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    style={styles.echoActionButton}
+                    testID="note-reader-add-echo-button"
+                    onPress={onAddEcho}
+                  >
+                    <Text style={styles.echoActionLabel}>Adicionar eco</Text>
+                  </Pressable>
+                ) : null}
               </View>
 
               {relatedNotes.length === 0 ? (
@@ -110,14 +112,16 @@ export function NoteReader({
           </ScrollView>
 
           <View style={styles.actions}>
-            <Pressable
-              accessibilityRole="button"
-              style={styles.secondaryButton}
-              testID="note-reader-continue-note-button"
-              onPress={onContinueNote}
-            >
-              <Text style={styles.secondaryLabel}>Continuar desta nota</Text>
-            </Pressable>
+            {onContinueNote ? (
+              <Pressable
+                accessibilityRole="button"
+                style={styles.secondaryButton}
+                testID="note-reader-continue-note-button"
+                onPress={onContinueNote}
+              >
+                <Text style={styles.secondaryLabel}>Continuar desta nota</Text>
+              </Pressable>
+            ) : null}
 
             <Pressable
               accessibilityRole="button"

@@ -59,6 +59,35 @@ interface RelatedNoteRow {
   created_at?: unknown;
 }
 
+const buildUnavailableRelatedNotes = (
+  activeNote: Note,
+  echoes: NoteEcho[],
+  availability: Exclude<RelatedNote["availability"], "available">,
+): RelatedNote[] => {
+  const unavailableNotes = echoes
+    .map((echo): RelatedNote | null => {
+      const relatedNoteId = getRelatedNoteId(echo, activeNote.id);
+
+      if (!relatedNoteId) {
+        return null;
+      }
+
+      return {
+        id: relatedNoteId,
+        day: null,
+        title: null,
+        brief: null,
+        created_at: null,
+        kind: echo.kind,
+        echoId: echo.id,
+        availability,
+      };
+    })
+    .filter((note): note is RelatedNote => note !== null);
+
+  return sortRelatedNotes(activeNote, unavailableNotes);
+};
+
 const toRelatedNoteDetail = (row: RelatedNoteRow): RelatedNoteDetail | null => {
   if (
     typeof row.id !== "string" ||
@@ -239,42 +268,13 @@ export const listRelatedNoteDetails = async (
     };
   } catch (error) {
     const status = classifySupabaseNoteEchoError(error);
-
-    if (status === "not_accessible") {
-      // Graceful degradation: preserve the relation and signal stale/blocked
-      // detail loading (RLS, permission, auth drift) without dropping echoes.
-      const unavailableNotes = echoes
-        .map((echo): RelatedNote | null => {
-          const relatedNoteId = getRelatedNoteId(echo, activeNote.id);
-          if (!relatedNoteId) return null;
-          return {
-            id: relatedNoteId,
-            day: null,
-            title: null,
-            brief: null,
-            created_at: null,
-            kind: echo.kind,
-            echoId: echo.id,
-            availability: "stale_detail" as const,
-          };
-        })
-        .filter((note): note is RelatedNote => note !== null);
-
-      return {
-        ok: true,
-        relatedNotes: sortRelatedNotes(activeNote, unavailableNotes),
-        errorMessage: null,
-      };
-    }
+    const availability =
+      status === "not_accessible" ? "stale_detail" : "transient_unavailable";
 
     return {
-      ok: false,
-      relatedNotes: [],
-      errorMessage: getSupabaseNoteEchoErrorMessage(
-        "Nao foi possivel carregar notas conectadas.",
-        error,
-      ),
-      status,
+      ok: true,
+      relatedNotes: buildUnavailableRelatedNotes(activeNote, echoes, availability),
+      errorMessage: null,
     };
   }
 };

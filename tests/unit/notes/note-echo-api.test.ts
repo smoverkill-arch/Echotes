@@ -528,6 +528,30 @@ describe("note echo APIs", () => {
     expect(result.errorMessage).toContain("upstream unavailable");
   });
 
+  it("preserva ecos como indisponiveis quando detalhes falham temporariamente", async () => {
+    const { sourceNote, echo } = buildConnectedPair();
+    mockSupabase.enqueueTableResult(
+      "notes",
+      mockSupabase.error("upstream unavailable", { status: 503 }),
+    );
+
+    const result = await listRelatedNoteDetails(sourceNote, [echo]);
+
+    expect(result.ok).toBe(true);
+    expect(result.relatedNotes).toEqual([
+      {
+        id: echo.to_note_id,
+        day: null,
+        title: null,
+        brief: null,
+        created_at: null,
+        kind: echo.kind,
+        echoId: echo.id,
+        availability: "transient_unavailable",
+      },
+    ]);
+  });
+
   it("preserva mensagem de erro Supabase em objeto puro", async () => {
     const { sourceNote } = buildConnectedPair();
     mockSupabase.enqueueTableResult(

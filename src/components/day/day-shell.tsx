@@ -40,9 +40,9 @@ interface DayShellProps {
   onNavigateToTask: (task: Task) => void;
   onOpenRelatedNote: (relatedNote: RelatedNote) => void;
   onReloadRelatedNote: () => Promise<void> | void;
-  onAddEcho: () => void;
-  onRemoveEcho: (relatedNote: RelatedNote) => void;
-  onContinueNote: () => void;
+  onAddEcho?: () => void;
+  onRemoveEcho?: (relatedNote: RelatedNote) => void;
+  onContinueNote?: () => void;
   onReturnToSource: () => void;
   onCloseReader: () => void;
   onCloseEditor: () => void;

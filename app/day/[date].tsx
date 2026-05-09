@@ -370,15 +370,6 @@ export default function ProtectedDayRoute() {
       onReloadRelatedNote={async () => {
         await loadRelatedNotes();
       }}
-      onAddEcho={() => {
-        // US2 wires the picker and mutation handlers.
-      }}
-      onRemoveEcho={() => {
-        // US2 wires removal confirmation and mutation handlers.
-      }}
-      onContinueNote={() => {
-        // US3 wires the continuation editor and RPC.
-      }}
       onReturnToSource={() => {
         if (!destinationTemporalContext) {
           return;

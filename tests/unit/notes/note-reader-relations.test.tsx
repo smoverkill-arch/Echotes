@@ -33,11 +33,9 @@ const unavailableRelatedNote: RelatedNote = {
 };
 
 describe("NoteReader note echo relations", () => {
-  it("renderiza ecos, item indisponivel e acoes principais", () => {
+  it("renderiza ecos e item indisponivel sem expor acoes de fases futuras", () => {
     const onOpenRelatedNote = jest.fn();
     const onReloadRelatedNote = jest.fn();
-    const onAddEcho = jest.fn();
-    const onContinueNote = jest.fn();
 
     render(
       <NoteReader
@@ -48,14 +46,12 @@ describe("NoteReader note echo relations", () => {
         onEdit={jest.fn()}
         onOpenRelatedNote={onOpenRelatedNote}
         onReloadRelatedNote={onReloadRelatedNote}
-        onAddEcho={onAddEcho}
-        onContinueNote={onContinueNote}
       />,
     );
 
     expect(screen.getByText("Ecos")).toBeTruthy();
-    expect(screen.getByText("Adicionar eco")).toBeTruthy();
-    expect(screen.getByText("Continuar desta nota")).toBeTruthy();
+    expect(screen.queryByText("Adicionar eco")).toBeNull();
+    expect(screen.queryByText("Continuar desta nota")).toBeNull();
     expect(screen.getByText("Nota conectada")).toBeTruthy();
     expect(screen.getByText("Item indisponivel")).toBeTruthy();
     expect(screen.getByText("Recarregar")).toBeTruthy();
@@ -66,11 +62,30 @@ describe("NoteReader note echo relations", () => {
     fireEvent.press(
       screen.getByTestId(`note-reader-reload-related-note-${unavailableRelatedNote.id}`),
     );
-    fireEvent.press(screen.getByTestId("note-reader-add-echo-button"));
-    fireEvent.press(screen.getByTestId("note-reader-continue-note-button"));
 
     expect(onOpenRelatedNote).toHaveBeenCalledWith(availableRelatedNote);
     expect(onReloadRelatedNote).toHaveBeenCalledTimes(1);
+  });
+
+  it("renderiza comandos opcionais apenas quando handlers existem", () => {
+    const onAddEcho = jest.fn();
+    const onContinueNote = jest.fn();
+
+    render(
+      <NoteReader
+        visible
+        note={activeNote}
+        relatedNotes={[]}
+        onClose={jest.fn()}
+        onEdit={jest.fn()}
+        onAddEcho={onAddEcho}
+        onContinueNote={onContinueNote}
+      />,
+    );
+
+    fireEvent.press(screen.getByTestId("note-reader-add-echo-button"));
+    fireEvent.press(screen.getByTestId("note-reader-continue-note-button"));
+
     expect(onAddEcho).toHaveBeenCalledTimes(1);
     expect(onContinueNote).toHaveBeenCalledTimes(1);
   });
