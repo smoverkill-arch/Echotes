@@ -235,6 +235,20 @@ hooks:
     prompt: Run verify to validate implementation against specification?
     description: Post-implementation verification gate
     condition: null
+  - extension: fix-findings
+    command: speckit.fix-findings.run
+    enabled: true
+    optional: true
+    prompt: Run fix-findings to analyze and resolve spec findings automatically?
+    description: Post-implementation automated finding resolution
+    condition: null
+  - extension: learn
+    command: speckit.learn.review
+    enabled: true
+    optional: true
+    prompt: Generate a learning guide from this implementation?
+    description: ''
+    condition: null
   after_checklist:
   - extension: git
     command: speckit.git.commit
