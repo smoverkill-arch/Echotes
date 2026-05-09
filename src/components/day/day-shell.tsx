@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { AuthErrorBanner } from "../auth/auth-error-banner";
-import type { Note } from "../../types/note";
+import type { Note, RelatedNote } from "../../types/note";
 import type { Task } from "../../types/task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { ReaderState, EditorState } from "../../stores/ui-store";
@@ -30,6 +30,7 @@ interface DayShellProps {
   temporalNavigationContext: TemporalNavigationContext | null;
   activeNote: Note | null;
   activeTask: Task | null;
+  relatedNotes: RelatedNote[];
   onSignOut: () => Promise<void> | void;
   onTabChange: (tab: DayTab) => void;
   onCreateNote: () => void;
@@ -37,6 +38,11 @@ interface DayShellProps {
   onOpenReader: (kind: TimelineItemKind, id: string) => void;
   onOpenEditor: (kind: TimelineItemKind, id: string) => void;
   onNavigateToTask: (task: Task) => void;
+  onOpenRelatedNote: (relatedNote: RelatedNote) => void;
+  onReloadRelatedNote: () => Promise<void> | void;
+  onAddEcho: () => void;
+  onRemoveEcho: (relatedNote: RelatedNote) => void;
+  onContinueNote: () => void;
   onReturnToSource: () => void;
   onCloseReader: () => void;
   onCloseEditor: () => void;
@@ -58,6 +64,7 @@ export function DayShell({
   temporalNavigationContext,
   activeNote,
   activeTask,
+  relatedNotes,
   onSignOut,
   onTabChange,
   onCreateNote,
@@ -65,6 +72,11 @@ export function DayShell({
   onOpenReader,
   onOpenEditor,
   onNavigateToTask,
+  onOpenRelatedNote,
+  onReloadRelatedNote,
+  onAddEcho,
+  onRemoveEcho,
+  onContinueNote,
   onReturnToSource,
   onCloseReader,
   onCloseEditor,
@@ -106,12 +118,18 @@ export function DayShell({
       <NoteReader
         visible={readerState.isOpen && readerState.kind === "note"}
         note={activeNote}
+        relatedNotes={relatedNotes}
         onClose={onCloseReader}
         onEdit={() => {
           if (activeNote) {
             onOpenEditor("note", activeNote.id);
           }
         }}
+        onOpenRelatedNote={onOpenRelatedNote}
+        onReloadRelatedNote={onReloadRelatedNote}
+        onAddEcho={onAddEcho}
+        onRemoveEcho={onRemoveEcho}
+        onContinueNote={onContinueNote}
       />
 
       <TaskReader

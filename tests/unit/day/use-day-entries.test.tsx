@@ -55,8 +55,8 @@ const buildNote = (day: string, suffix: string) => ({
 });
 
 const resolveQuery = (
-  table: "notes" | "tasks",
-  column: "day" | "source_day" | "target_day",
+  table: "notes" | "tasks" | "note_echoes",
+  column: "day" | "source_day" | "target_day" | "or",
   day: string,
   result: QueryResult,
 ) => {
@@ -69,8 +69,20 @@ const resolveQuery = (
   deferred.resolve(result);
 };
 
+const resolveQueryWhenRegistered = async (
+  table: "notes" | "tasks" | "note_echoes",
+  column: "day" | "source_day" | "target_day" | "or",
+  day: string,
+  result: QueryResult,
+) => {
+  await waitFor(() => {
+    expect(pendingQueries.has(`${table}:${column}:${day}`)).toBe(true);
+  });
+  resolveQuery(table, column, day, result);
+};
+
 function HookProbe({ selectedDay }: { selectedDay: string }) {
-  const { notes, isLoading, errorMessage } = useDayEntries(selectedDay);
+  const { notes, echoes, isLoading, errorMessage } = useDayEntries(selectedDay);
 
   return (
     <View>
@@ -80,6 +92,7 @@ function HookProbe({ selectedDay }: { selectedDay: string }) {
       <Text testID="note-titles">
         {notes.map((note) => note.title).join(" | ") || "none"}
       </Text>
+      <Text testID="echo-count">{echoes.length}</Text>
     </View>
   );
 }
@@ -89,7 +102,7 @@ describe("useDayEntries stale response protection", () => {
     jest.clearAllMocks();
     pendingQueries.clear();
 
-    mockFrom.mockImplementation((tableName: "notes" | "tasks") => ({
+    mockFrom.mockImplementation((tableName: "notes" | "tasks" | "note_echoes") => ({
       select() {
         return this;
       },
@@ -97,6 +110,16 @@ describe("useDayEntries stale response protection", () => {
         return {
           order() {
             const key = `${tableName}:${column}:${value}`;
+            const deferred = createDeferred();
+            pendingQueries.set(key, deferred);
+            return deferred.promise;
+          },
+        };
+      },
+      or(value: string) {
+        return {
+          order() {
+            const key = `${tableName}:or:${value}`;
             const deferred = createDeferred();
             pendingQueries.set(key, deferred);
             return deferred.promise;
@@ -132,6 +155,15 @@ describe("useDayEntries stale response protection", () => {
       data: [],
       error: null,
     });
+    await resolveQueryWhenRegistered(
+      "note_echoes",
+      "or",
+      "from_note_id.in.(10000000-0000-4000-8000-000000000002),to_note_id.in.(10000000-0000-4000-8000-000000000002)",
+      {
+        data: [],
+        error: null,
+      },
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("loading-state").props.children).toBe("ready");
@@ -150,10 +182,66 @@ describe("useDayEntries stale response protection", () => {
       data: [],
       error: null,
     });
+    await resolveQueryWhenRegistered(
+      "note_echoes",
+      "or",
+      "from_note_id.in.(10000000-0000-4000-8000-000000000001),to_note_id.in.(10000000-0000-4000-8000-000000000001)",
+      {
+        data: [],
+        error: null,
+      },
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("note-titles").props.children).toBe("Nota 2");
     });
     expect(screen.queryByText("Nota 1")).toBeNull();
+  });
+
+  it("carrega note_echoes ligados as notas do dia", async () => {
+    render(<HookProbe selectedDay="2026-04-19" />);
+
+    const note = buildNote("2026-04-19", "2");
+    const connectedNoteId = "10000000-0000-4000-8000-000000000003";
+
+    resolveQuery("notes", "day", "2026-04-19", {
+      data: [note],
+      error: null,
+    });
+    resolveQuery("tasks", "source_day", "2026-04-19", {
+      data: [],
+      error: null,
+    });
+    resolveQuery("tasks", "target_day", "2026-04-19", {
+      data: [],
+      error: null,
+    });
+    await resolveQueryWhenRegistered(
+      "note_echoes",
+      "or",
+      `from_note_id.in.(${note.id}),to_note_id.in.(${note.id})`,
+      {
+        data: [
+          {
+            id: "30000000-0000-4000-8000-000000000001",
+            from_note_id: note.id,
+            to_note_id: connectedNoteId,
+            created_by_user_id: authenticatedSession.userId,
+            created_at: "2026-04-19T10:00:00+00:00",
+            context_note_id: note.id,
+            context_day: "2026-04-19",
+            kind: "manual_link",
+            metadata: null,
+          },
+        ],
+        error: null,
+      },
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading-state").props.children).toBe("ready");
+    });
+
+    expect(screen.getByTestId("echo-count").props.children).toBe(1);
   });
 });

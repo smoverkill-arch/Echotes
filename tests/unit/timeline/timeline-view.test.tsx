@@ -65,6 +65,11 @@ const noteNodeB: TimelineNode = {
   data: noteB,
 };
 
+const noteNodeWithEchoes: TimelineNode = {
+  ...noteNodeA,
+  directEchoCount: 2,
+};
+
 const ghostNode: TimelineNode = {
   id: `${timedTask.id}:task_ghost`,
   type: "task_ghost",
@@ -174,5 +179,13 @@ describe("timeline view pending press handling", () => {
     });
 
     expect(onOpenReader).not.toHaveBeenCalled();
+  });
+
+  it("exibe badge Ecos apenas quando a contagem direta e maior que zero", () => {
+    renderTimelineView([noteNodeWithEchoes, noteNodeB]);
+
+    expect(screen.getByTestId(`note-echo-badge-${noteA.id}`)).toBeTruthy();
+    expect(screen.getByText("Ecos 2")).toBeTruthy();
+    expect(screen.queryByTestId(`note-echo-badge-${noteB.id}`)).toBeNull();
   });
 });

@@ -46,22 +46,22 @@
 
 ### Testes da Historia do Usuario 1
 
-- [ ] T015 [P] [US1] Adicionar testes unitarios de contagem direta, par invertido e ordenacao em tests/unit/notes/note-echo-relations.test.ts
-- [ ] T016 [P] [US1] Adicionar teste de useDayEntries carregando note_echoes ligados as notas do dia em tests/unit/day/use-day-entries.test.tsx
-- [ ] T017 [P] [US1] Adicionar teste de NoteCardReal exibindo badge Ecos somente quando directEchoCount > 0 em tests/unit/timeline/timeline-view.test.tsx
-- [ ] T018 [P] [US1] Adicionar teste de Reader com notas conectadas, item indisponivel e recarregar em tests/unit/notes/note-reader-relations.test.tsx
-- [ ] T019 [US1] Adicionar teste de integracao para abrir nota conectada de outro dia e reabrir Reader no destino em tests/integration/day/note-echo-navigation.test.tsx
+- [X] T015 [P] [US1] Adicionar testes unitarios de contagem direta, par invertido e ordenacao em tests/unit/notes/note-echo-relations.test.ts
+- [X] T016 [P] [US1] Adicionar teste de useDayEntries carregando note_echoes ligados as notas do dia em tests/unit/day/use-day-entries.test.tsx
+- [X] T017 [P] [US1] Adicionar teste de NoteCardReal exibindo badge Ecos somente quando directEchoCount > 0 em tests/unit/timeline/timeline-view.test.tsx
+- [X] T018 [P] [US1] Adicionar teste de Reader com notas conectadas, item indisponivel e recarregar em tests/unit/notes/note-reader-relations.test.tsx
+- [X] T019 [US1] Adicionar teste de integracao para abrir nota conectada de outro dia e reabrir Reader no destino em tests/integration/day/note-echo-navigation.test.tsx
 
 ### Implementacao da Historia do Usuario 1
 
-- [ ] T020 [US1] Atualizar useDayEntries para carregar note_echoes relacionados as notas do dia em src/features/day/hooks/use-day-entries.ts
-- [ ] T021 [US1] Atualizar useDayTimeline para derivar directEchoCount e dados relacionais sem alterar TimelineNode.side em src/features/day/hooks/use-day-timeline.ts
-- [ ] T022 [US1] Atualizar NoteCardReal para receber e renderizar badge Ecos com contagem direta em src/components/cards/note-card-real.tsx
-- [ ] T023 [US1] Atualizar TimelineView para repassar contagem direta para cards de nota em src/components/timeline/timeline-view.tsx
-- [ ] T024 [US1] Atualizar NoteReader para exibir lista de notas conectadas, item indisponivel e acao de recarregar em src/components/reader/note-reader.tsx
-- [ ] T025 [US1] Adicionar estado pendente de abertura de nota conectada em src/stores/navigation-store.ts
-- [ ] T026 [US1] Integrar navegacao cross-day de nota conectada e reabertura do Reader em app/day/[date].tsx
-- [ ] T027 [US1] Atualizar DayShell para passar dados e handlers relacionais ao Reader em src/components/day/day-shell.tsx
+- [X] T020 [US1] Atualizar useDayEntries para carregar note_echoes relacionados as notas do dia em src/features/day/hooks/use-day-entries.ts
+- [X] T021 [US1] Atualizar useDayTimeline para derivar directEchoCount e dados relacionais sem alterar TimelineNode.side em src/features/day/hooks/use-day-timeline.ts
+- [X] T022 [US1] Atualizar NoteCardReal para receber e renderizar badge Ecos com contagem direta em src/components/cards/note-card-real.tsx
+- [X] T023 [US1] Atualizar TimelineView para repassar contagem direta para cards de nota em src/components/timeline/timeline-view.tsx
+- [X] T024 [US1] Atualizar NoteReader para exibir lista de notas conectadas, item indisponivel e acao de recarregar em src/components/reader/note-reader.tsx
+- [X] T025 [US1] Adicionar estado pendente de abertura de nota conectada em src/stores/navigation-store.ts
+- [X] T026 [US1] Integrar navegacao cross-day de nota conectada e reabertura do Reader em app/day/[date].tsx
+- [X] T027 [US1] Atualizar DayShell para passar dados e handlers relacionais ao Reader em src/components/day/day-shell.tsx
 
 **Ponto de validacao**: US1 funciona sozinha com `corepack pnpm run test -- note-echo use-day-entries timeline-view note-echo-navigation`.
 

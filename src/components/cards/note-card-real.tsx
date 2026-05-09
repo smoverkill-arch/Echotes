@@ -4,13 +4,19 @@ import type { Note } from "../../types/note";
 
 interface NoteCardRealProps {
   note: Note;
+  directEchoCount?: number;
 }
 
-export function NoteCardReal({ note }: NoteCardRealProps) {
+export function NoteCardReal({ note, directEchoCount = 0 }: NoteCardRealProps) {
   return (
     <View style={styles.card} testID={`note-card-real-${note.id}`}>
       <Text style={styles.eyebrow}>Nota</Text>
       <Text style={styles.title}>{note.title}</Text>
+      {directEchoCount > 0 ? (
+        <View style={styles.echoBadge} testID={`note-echo-badge-${note.id}`}>
+          <Text style={styles.echoBadgeText}>Ecos {directEchoCount}</Text>
+        </View>
+      ) : null}
       {note.content ? <Text style={styles.body}>{note.content}</Text> : null}
       {note.brief ? <Text style={styles.brief}>{note.brief}</Text> : null}
       <Text style={styles.footer}>Criada no dia em foco</Text>
@@ -38,6 +44,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#0f172a",
+  },
+  echoBadge: {
+    alignSelf: "flex-start",
+    marginTop: 8,
+    borderRadius: 999,
+    backgroundColor: "#dbeafe",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  echoBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#1d4ed8",
   },
   body: {
     marginTop: 8,

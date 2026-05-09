@@ -4,6 +4,7 @@ import {
   countDirectEchoes,
   getRelatedNoteId,
   isSameSemanticNotePair,
+  sortRelatedNotes,
 } from "../../../src/features/notes/utils/note-echo-relations";
 import {
   buildConnectedPair,
@@ -46,6 +47,20 @@ describe("note echo relation utilities", () => {
       { noteId: sourceNote.id, directCount: 2 },
       { noteId: targetNote.id, directCount: 1 },
       { noteId: thirdNote.id, directCount: 1 },
+    ]);
+  });
+
+  it("mantem a mesma contagem direta para manual_link e continue_note", () => {
+    const { sourceNote, targetNote, echo } = buildConnectedPair();
+    const manualEcho = buildNoteEcho({
+      id: "30000000-0000-4000-8000-000000000004",
+      from_note_id: targetNote.id,
+      to_note_id: sourceNote.id,
+      kind: "manual_link",
+    });
+
+    expect(countDirectEchoes([echo, manualEcho], [sourceNote.id])).toEqual([
+      { noteId: sourceNote.id, directCount: 2 },
     ]);
   });
 
@@ -94,5 +109,39 @@ describe("note echo relation utilities", () => {
       futureNote.id,
     ]);
     expect(getRelatedNoteId(echoes[1], activeNote.id)).toBe(sameDayNote.id);
+  });
+
+  it("ordena itens indisponiveis depois das notas disponiveis", () => {
+    const activeNote = buildNote({
+      id: "10000000-0000-4000-8000-000000000001",
+      day: "2026-05-01",
+    });
+    const availableRelatedNote = {
+      id: "10000000-0000-4000-8000-000000000002",
+      day: "2026-05-01",
+      title: "Relacionada",
+      brief: null,
+      created_at: "2026-05-01T11:00:00+00:00",
+      kind: "manual_link" as const,
+      echoId: "30000000-0000-4000-8000-000000000001",
+      availability: "available" as const,
+    };
+    const unavailableRelatedNote = {
+      id: "10000000-0000-4000-8000-000000000003",
+      day: null,
+      title: null,
+      brief: null,
+      created_at: null,
+      kind: "continue_note" as const,
+      echoId: "30000000-0000-4000-8000-000000000002",
+      availability: "stale_detail" as const,
+    };
+
+    expect(
+      sortRelatedNotes(activeNote, [
+        unavailableRelatedNote,
+        availableRelatedNote,
+      ]).map((note) => note.id),
+    ).toEqual([availableRelatedNote.id, unavailableRelatedNote.id]);
   });
 });

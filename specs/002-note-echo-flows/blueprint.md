@@ -1429,19 +1429,19 @@ O bloco existe antes de declarar a branch fechada ou merge-ready.
 - [X] T011: Criar API de criacao manual de eco
 - [X] T012: Criar API de remocao de eco
 - [X] T014: Atualizar mocks de testes de integracao para suportar note_echoes, delete e rpc
-- [ ] T015: Adicionar testes unitarios de contagem direta, par invertido e ordenacao
-- [ ] T016: Adicionar teste de useDayEntries carregando note_echoes ligados as notas do dia
-- [ ] T017: Adicionar teste de NoteCardReal exibindo badge Ecos somente quando directEchoCount maior que zero
-- [ ] T018: Adicionar teste de Reader com notas conectadas, item indisponivel e recarregar
-- [ ] T019: Adicionar teste de integracao para abrir nota conectada de outro dia e reabrir Reader no destino
-- [ ] T020: Atualizar useDayEntries para carregar note_echoes relacionados as notas do dia
-- [ ] T021: Atualizar useDayTimeline para derivar directEchoCount e dados relacionais sem alterar TimelineNode.side
-- [ ] T022: Atualizar NoteCardReal para receber e renderizar badge Ecos com contagem direta
-- [ ] T023: Atualizar TimelineView para repassar contagem direta para cards de nota
-- [ ] T024: Atualizar NoteReader para exibir lista de notas conectadas, item indisponivel e acao de recarregar
-- [ ] T025: Adicionar estado pendente de abertura de nota conectada em navigation-store
-- [ ] T026: Integrar navegacao cross-day de nota conectada e reabertura do Reader
-- [ ] T027: Atualizar DayShell para passar dados e handlers relacionais ao Reader
+- [X] T015: Adicionar testes unitarios de contagem direta, par invertido e ordenacao
+- [X] T016: Adicionar teste de useDayEntries carregando note_echoes ligados as notas do dia
+- [X] T017: Adicionar teste de NoteCardReal exibindo badge Ecos somente quando directEchoCount maior que zero
+- [X] T018: Adicionar teste de Reader com notas conectadas, item indisponivel e recarregar
+- [X] T019: Adicionar teste de integracao para abrir nota conectada de outro dia e reabrir Reader no destino
+- [X] T020: Atualizar useDayEntries para carregar note_echoes relacionados as notas do dia
+- [X] T021: Atualizar useDayTimeline para derivar directEchoCount e dados relacionais sem alterar TimelineNode.side
+- [X] T022: Atualizar NoteCardReal para receber e renderizar badge Ecos com contagem direta
+- [X] T023: Atualizar TimelineView para repassar contagem direta para cards de nota
+- [X] T024: Atualizar NoteReader para exibir lista de notas conectadas, item indisponivel e acao de recarregar
+- [X] T025: Adicionar estado pendente de abertura de nota conectada em navigation-store
+- [X] T026: Integrar navegacao cross-day de nota conectada e reabertura do Reader
+- [X] T027: Atualizar DayShell para passar dados e handlers relacionais ao Reader
 - [ ] T028: Adicionar testes unitarios de listagem paginada e candidatas desabilitadas
 - [ ] T029: Adicionar testes unitarios de createNoteEcho para self-link, duplicidade invertida e kind original
 - [ ] T030: Adicionar testes unitarios de deleteNoteEcho para confirmacao e remocao sem apagar notas

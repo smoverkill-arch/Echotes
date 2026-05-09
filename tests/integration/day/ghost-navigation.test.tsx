@@ -34,6 +34,7 @@ const mockSearchParams: { date?: string | string[] } = {
 
 const mockNotesTable: Record<string, unknown>[] = [];
 const mockTasksTable: Record<string, unknown>[] = [];
+const mockNoteEchoesTable: Record<string, unknown>[] = [];
 
 let mockTaskCounter = 0;
 
@@ -69,8 +70,14 @@ jest.mock("expo-router", () => {
 });
 
 jest.mock("../../../src/lib/supabase", () => {
-  const buildQuery = (tableName: "notes" | "tasks") => {
+  const extractUuidValues = (filter: string) =>
+    Array.from(filter.matchAll(/[0-9a-f]{8}-[0-9a-f-]{27}/gi)).map(
+      ([value]) => value,
+    );
+
+  const buildQuery = (tableName: "notes" | "tasks" | "note_echoes") => {
     const filters = new Map<string, unknown>();
+    let orFilter: string | null = null;
 
     return {
       select() {
@@ -80,14 +87,37 @@ jest.mock("../../../src/lib/supabase", () => {
         filters.set(column, value);
         return this;
       },
+      or(filter: string) {
+        orFilter = filter;
+        return this;
+      },
       async order(column: string, options?: { ascending?: boolean }) {
-        const source = tableName === "notes" ? mockNotesTable : mockTasksTable;
+        const source =
+          tableName === "notes"
+            ? mockNotesTable
+            : tableName === "tasks"
+              ? mockTasksTable
+              : mockNoteEchoesTable;
+        const relatedNoteIds =
+          tableName === "note_echoes" && orFilter
+            ? new Set(extractUuidValues(orFilter))
+            : null;
         const rows = source
           .filter((row) =>
             Array.from(filters.entries()).every(
               ([key, expected]) => row[key] === expected,
             ),
           )
+          .filter((row) => {
+            if (!relatedNoteIds) {
+              return true;
+            }
+
+            return (
+              relatedNoteIds.has(String(row.source_note_id)) ||
+              relatedNoteIds.has(String(row.target_note_id))
+            );
+          })
           .sort((left, right) => {
             const leftValue = String(left[column] ?? "");
             const rightValue = String(right[column] ?? "");
@@ -176,7 +206,8 @@ jest.mock("../../../src/lib/supabase", () => {
 
   return {
     getSupabaseClient: () => ({
-      from: (tableName: "notes" | "tasks") => buildQuery(tableName),
+      from: (tableName: "notes" | "tasks" | "note_echoes") =>
+        buildQuery(tableName),
     }),
     getSupabaseConfigurationError: () => null,
     isSupabaseConfigured: true,
@@ -253,6 +284,7 @@ beforeEach(() => {
   mockSearchParams.date = "2026-04-18";
   mockNotesTable.splice(0, mockNotesTable.length);
   mockTasksTable.splice(0, mockTasksTable.length);
+  mockNoteEchoesTable.splice(0, mockNoteEchoesTable.length);
   mockTaskCounter = 0;
   mockNotesTable.push({
     id: "30000000-0000-4000-8000-000000000001",

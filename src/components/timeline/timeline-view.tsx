@@ -148,7 +148,12 @@ export function TimelineView({
 
   const renderNodeCard = (node: TimelineNode) => {
     if (node.type === "note") {
-      return <NoteCardReal note={node.data as Note} />;
+      return (
+        <NoteCardReal
+          note={node.data as Note}
+          directEchoCount={node.directEchoCount}
+        />
+      );
     }
 
     if (node.type === "task_untimed") {

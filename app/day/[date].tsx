@@ -1,15 +1,18 @@
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { AuthErrorBanner } from "../../src/components/auth/auth-error-banner";
 import { DayShell } from "../../src/components/day/day-shell";
 import { signOut } from "../../src/features/auth/api/sign-out";
 import { useAuthSession } from "../../src/features/auth/hooks/use-auth-session";
+import { listRelatedNoteDetails } from "../../src/features/notes/api/list-note-echoes";
+import { getRelatedNoteId } from "../../src/features/notes/utils/note-echo-relations";
 import { useCalendarStore } from "../../src/stores/calendar-store";
 import { useDayTimeline } from "../../src/features/day/hooks/use-day-timeline";
 import { useNavigationStore } from "../../src/stores/navigation-store";
 import { useUIStore } from "../../src/stores/ui-store";
+import type { RelatedNote } from "../../src/types/note";
 import { parseDayKey } from "../../src/utils/date";
 
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -66,12 +69,37 @@ export default function ProtectedDayRoute() {
   const clearTemporalNavigationContext = useNavigationStore(
     (state) => state.clearTemporalNavigationContext,
   );
+  const pendingReaderOpen = useNavigationStore((state) => state.pendingReaderOpen);
+  const setPendingReaderOpen = useNavigationStore(
+    (state) => state.setPendingReaderOpen,
+  );
+  const consumePendingReaderOpen = useNavigationStore(
+    (state) => state.consumePendingReaderOpen,
+  );
+  const clearPendingReaderOpen = useNavigationStore(
+    (state) => state.clearPendingReaderOpen,
+  );
+  const [relatedNotes, setRelatedNotes] = useState<RelatedNote[]>([]);
+  const relatedNotesCountRef = useRef(0);
+  const replaceRelatedNotes = useCallback((nextRelatedNotes: RelatedNote[]) => {
+    relatedNotesCountRef.current = nextRelatedNotes.length;
+    setRelatedNotes(nextRelatedNotes);
+  }, []);
+  const clearRelatedNotes = useCallback(() => {
+    if (relatedNotesCountRef.current === 0) {
+      return;
+    }
+
+    relatedNotesCountRef.current = 0;
+    setRelatedNotes([]);
+  }, []);
   const isSigningOut = authStatus === "signing_out";
 
   const { resolved: resolvedDate, needsRedirect: dateParamNeedsRedirect } =
     resolveDateParam(params.date, selectedDate);
   const {
     notes,
+    echoes,
     taskLookup,
     timelineNodes,
     isLoading: isTimelineLoading,
@@ -97,10 +125,47 @@ export default function ProtectedDayRoute() {
     temporalNavigationContext?.destinationDate === resolvedDate
       ? temporalNavigationContext
       : null;
+  const notesById = useMemo(
+    () => new Map(notes.map((note) => [note.id, note])),
+    [notes],
+  );
+  const activeNoteEchoes = useMemo(() => {
+    if (!activeNote) {
+      return [];
+    }
+
+    return echoes.filter((echo) => getRelatedNoteId(echo, activeNote.id));
+  }, [activeNote, echoes]);
+  const loadRelatedNotes = useCallback(async () => {
+    if (!activeNote || !readerState.isOpen || readerState.kind !== "note") {
+      clearRelatedNotes();
+      return;
+    }
+
+    const result = await listRelatedNoteDetails(activeNote, activeNoteEchoes);
+
+    if (result.ok) {
+      replaceRelatedNotes(result.relatedNotes);
+      return;
+    }
+
+    clearRelatedNotes();
+  }, [
+    activeNote,
+    activeNoteEchoes,
+    clearRelatedNotes,
+    readerState.isOpen,
+    readerState.kind,
+    replaceRelatedNotes,
+  ]);
 
   useEffect(() => {
     setSelectedDate(resolvedDate);
   }, [resolvedDate, setSelectedDate]);
+
+  useEffect(() => {
+    void loadRelatedNotes();
+  }, [loadRelatedNotes]);
 
   useEffect(() => {
     if (!destinationTemporalContext?.pendingOpenTaskId) {
@@ -126,6 +191,51 @@ export default function ProtectedDayRoute() {
     openReader,
     resolvedDate,
     taskLookup,
+    timelineErrorMessage,
+  ]);
+
+  useEffect(() => {
+    if (!pendingReaderOpen) {
+      return;
+    }
+
+    if (pendingReaderOpen.sessionUserId !== session?.userId) {
+      clearPendingReaderOpen();
+      return;
+    }
+
+    if (pendingReaderOpen.noteDay !== resolvedDate) {
+      return;
+    }
+
+    if (isTimelineLoading || timelineErrorMessage) {
+      return;
+    }
+
+    // During cross-day navigation the route can update before day entries finish reloading.
+    if (notes.some((note) => note.day !== resolvedDate)) {
+      return;
+    }
+
+    const noteToOpen = notesById.get(pendingReaderOpen.noteId);
+
+    if (!noteToOpen || noteToOpen.day !== pendingReaderOpen.noteDay) {
+      consumePendingReaderOpen(pendingReaderOpen.requestId);
+      return;
+    }
+
+    openReader("note", pendingReaderOpen.noteId);
+    consumePendingReaderOpen(pendingReaderOpen.requestId);
+  }, [
+    clearPendingReaderOpen,
+    consumePendingReaderOpen,
+    isTimelineLoading,
+    notes,
+    notesById,
+    openReader,
+    pendingReaderOpen,
+    resolvedDate,
+    session?.userId,
     timelineErrorMessage,
   ]);
 
@@ -210,6 +320,7 @@ export default function ProtectedDayRoute() {
       temporalNavigationContext={destinationTemporalContext}
       activeNote={activeNote}
       activeTask={activeTask}
+      relatedNotes={relatedNotes}
       onSignOut={async () => {
         await signOut();
       }}
@@ -234,6 +345,39 @@ export default function ProtectedDayRoute() {
           returnScrollOffset: null,
         });
         router.push(`/day/${task.target_day}`);
+      }}
+      onOpenRelatedNote={(relatedNote) => {
+        if (relatedNote.availability !== "available") {
+          return;
+        }
+
+        if (relatedNote.day === resolvedDate) {
+          openReader("note", relatedNote.id);
+          return;
+        }
+
+        closeReader();
+        closeEditor();
+        setPendingReaderOpen({
+          noteId: relatedNote.id,
+          noteDay: relatedNote.day,
+          requestId: `${relatedNote.id}:${Date.now()}`,
+          sessionUserId: session.userId,
+          actionOrigin: "connected_note_tap",
+        });
+        router.push(`/day/${relatedNote.day}`);
+      }}
+      onReloadRelatedNote={async () => {
+        await loadRelatedNotes();
+      }}
+      onAddEcho={() => {
+        // US2 wires the picker and mutation handlers.
+      }}
+      onRemoveEcho={() => {
+        // US2 wires removal confirmation and mutation handlers.
+      }}
+      onContinueNote={() => {
+        // US3 wires the continuation editor and RPC.
       }}
       onReturnToSource={() => {
         if (!destinationTemporalContext) {
