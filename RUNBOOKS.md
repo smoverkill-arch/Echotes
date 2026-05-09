@@ -14,11 +14,18 @@
 
 1. start Docker Desktop
 2. run `corepack pnpm run supabase:start`
-3. open Supabase Studio at `http://127.0.0.1:54323`
-4. use the local API URL `http://127.0.0.1:54321` when testing against the
+3. open Supabase Studio at `http://127.0.0.1:55423`
+4. use the local API URL `http://127.0.0.1:55421` when testing against the
    local stack
-5. run `corepack pnpm run supabase:stop` when the local stack is no longer
+5. run `corepack pnpm run supabase:doctor` to inspect ports, containers and
+   restart policies
+6. run `corepack pnpm run supabase:stop` when the local stack is no longer
    needed
+
+The local Postgres port is `55422`, with shadow DB on `55420`. The wrapper used
+by `supabase:start` applies `docker update --restart=no` to Echotes Supabase
+containers after the Supabase CLI starts them. Docker Desktop should not start
+the Echotes stack automatically after this policy is applied.
 
 The local database is rebuilt from versioned files in `supabase/migrations/`.
 Current local migrations are:
@@ -80,3 +87,17 @@ If the app reports invalid environment configuration:
 2. verify the two public Supabase variables are filled
 3. re-open the shell so the environment is reloaded if needed
 4. confirm migrations with `corepack pnpm run db:migrations`
+
+## Recover from Supabase Local Autostart or Port Conflicts
+
+If Docker Desktop starts Echotes containers without an explicit command:
+
+1. run `corepack pnpm run supabase:doctor`
+2. confirm each Echotes Supabase container reports `restart=no`
+3. run `corepack pnpm run supabase:stop`
+4. reopen Docker Desktop and confirm the Echotes stack stays stopped
+
+If Supabase fails to bind a local port, keep the dedicated range in
+`supabase/config.toml`: `55420..55429`. Do not move the Echotes stack back to
+the default `54320..54329` range unless the Windows/Docker port reservation has
+been verified clear.

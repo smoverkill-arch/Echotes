@@ -52,12 +52,31 @@ GraphQL so volta quando virar interface explicita do produto.
 - local Docker: `corepack pnpm run supabase:start`
 - local reset from migrations: `corepack pnpm run db:local:reset`
 - migration status: `corepack pnpm run db:migrations`
+- local diagnostics: `corepack pnpm run supabase:doctor`
 - remote dry run: `corepack pnpm run db:remote:dry-run`
 - remote apply by CLI: `corepack pnpm run db:remote:push`
 - remote CLI operations usam a senha de banco pedida pelo Supabase CLI
 
 Quando aplicar migration pelo console web do Supabase, use o SQL versionado.
 Depois valide com `corepack pnpm run db:migrations`.
+
+## Local Supabase Ports
+
+O Supabase local do Echotes usa uma faixa dedicada para evitar conflito com
+portas padrao bloqueadas pelo Windows, Docker Desktop ou outros projetos:
+
+- API: `55421`
+- DB: `55422`
+- shadow DB: `55420`
+- Studio: `55423`
+- Inbucket: `55424`
+- Analytics: `55427`
+- pooler, quando habilitado: `55429`
+
+`corepack pnpm run supabase:start` chama a Supabase CLI e depois aplica
+`docker update --restart=no` aos containers do projeto. O Docker Desktop nao
+deve religar a stack do Echotes automaticamente; a stack local deve subir
+apenas por comando explicito.
 
 ## Operational Notes
 
@@ -66,9 +85,15 @@ Depois valide com `corepack pnpm run db:migrations`.
   configuracao
 - as migrations versionadas definem schema, indexes, triggers, RLS e defaults
   operacionais do banco
+- `corepack pnpm run supabase:stop` para a stack local preservando os volumes
+  `supabase_db_Echotes` e `supabase_storage_Echotes`
+- `corepack pnpm run supabase:doctor` mostra disponibilidade das portas,
+  containers encontrados e politicas de restart
 
 ## Revision History
 
+- 2026-05-09 - Supabase local isolado na faixa `55420..55429` e wrapper
+  operacional registrado para impedir restart automatico da stack do Echotes.
 - 2026-05-06 - Supabase CLI/Docker e workflow remoto registrados para
   migrations versionadas.
 - 2026-04-25 - Canon consolidado para a raiz apos o fechamento de

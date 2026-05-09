@@ -20,6 +20,23 @@
 - inspect whether `notes` and `tasks` queries are failing due to RLS or missing
   tables
 
+## Supabase local starts when Docker Desktop opens
+
+- run `corepack pnpm run supabase:doctor`
+- verify Echotes Supabase containers show `restart=no`
+- run `corepack pnpm run supabase:stop`
+- keep volumes `supabase_db_Echotes` and `supabase_storage_Echotes` unless a
+  full local data reset is intentional
+
+## Supabase local cannot bind `54322`
+
+- keep the Echotes local stack on the dedicated range `55420..55429`
+- use local Postgres at `127.0.0.1:55422`
+- use local API at `http://127.0.0.1:55421`
+- use Studio at `http://127.0.0.1:55423`
+- run `corepack pnpm run supabase:doctor` to confirm port availability before
+  starting the stack again
+
 ## A projected task does not return to the source context
 
 - confirm the navigation context was set before pushing the destination day

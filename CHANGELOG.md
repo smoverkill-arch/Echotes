@@ -11,6 +11,8 @@ versioned releases when they start to exist.
 
 - root canon for Echotes with operational CDD documents
 - project-pinned DocGuard configuration and validation scripts
+- `supabase:doctor` and a local Supabase wrapper that reports ports,
+  containers and restart policies
 - CI workflow for DocGuard, lint, test and typecheck
 - migration coverage checklist for absorption of legacy `docs/`
 - expanded root canon content for notes, echoes, timeline navigation, SQL/RLS,
@@ -66,8 +68,10 @@ versioned releases when they start to exist.
   limits `authenticated` grants, targets RLS policies to authenticated sessions,
   fixes the trigger function search path and disables GraphQL execution for
   client roles until GraphQL becomes an explicit product interface
-- canon-guard CI now runs `corepack enable` after `actions/setup-node` so `pnpm`
-  is available from the configured Node toolchain
+- canon-guard CI now runs `corepack enable` before the `pnpm` cache setup so
+  the package manager is available to `actions/setup-node`
+- Supabase local development now uses the dedicated `55420..55429` port range
+  and forces Echotes containers to `restart=no` after startup
 
 ### Removed
 
