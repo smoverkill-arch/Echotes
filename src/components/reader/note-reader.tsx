@@ -1,4 +1,12 @@
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import type { Note, RelatedNote } from "../../types/note";
 import { formatDisplayDay } from "../../utils/date";
@@ -12,9 +20,9 @@ interface NoteReaderProps {
   onOpenRelatedNote?: (relatedNote: RelatedNote) => void;
   onReloadRelatedNote?: () => void;
   onAddEcho?: () => void;
-  // US2/T034 wires per-echo removal confirmation; Phase 3 only carries the hook.
   onRemoveEcho?: (relatedNote: RelatedNote) => void;
   onContinueNote?: () => void;
+  echoFeedbackMessage?: string | null;
 }
 
 export function NoteReader({
@@ -26,7 +34,9 @@ export function NoteReader({
   onOpenRelatedNote,
   onReloadRelatedNote,
   onAddEcho,
+  onRemoveEcho,
   onContinueNote,
+  echoFeedbackMessage = null,
 }: NoteReaderProps) {
   if (!visible || !note) {
     return null;
@@ -57,6 +67,9 @@ export function NoteReader({
                   </Pressable>
                 ) : null}
               </View>
+              {echoFeedbackMessage ? (
+                <Text style={styles.echoFeedbackText}>{echoFeedbackMessage}</Text>
+              ) : null}
 
               {relatedNotes.length === 0 ? (
                 <Text style={styles.emptyEchoText}>Nenhuma nota conectada</Text>
@@ -71,21 +84,48 @@ export function NoteReader({
                       testID={`note-reader-related-note-${relatedNote.id}`}
                     >
                       {isAvailable ? (
-                        <Pressable
-                          accessibilityRole="button"
-                          testID={`note-reader-open-related-note-${relatedNote.id}`}
-                          onPress={() => {
-                            onOpenRelatedNote?.(relatedNote);
-                          }}
-                        >
-                          <Text style={styles.relatedTitle}>{relatedNote.title}</Text>
-                          <Text style={styles.relatedMeta}>
-                            Dia da nota: {formatDisplayDay(relatedNote.day)}
-                          </Text>
-                          {relatedNote.brief ? (
-                            <Text style={styles.relatedBrief}>{relatedNote.brief}</Text>
+                        <View>
+                          <Pressable
+                            accessibilityRole="button"
+                            testID={`note-reader-open-related-note-${relatedNote.id}`}
+                            onPress={() => {
+                              onOpenRelatedNote?.(relatedNote);
+                            }}
+                          >
+                            <Text style={styles.relatedTitle}>{relatedNote.title}</Text>
+                            <Text style={styles.relatedMeta}>
+                              Dia da nota: {formatDisplayDay(relatedNote.day)}
+                            </Text>
+                            {relatedNote.brief ? (
+                              <Text style={styles.relatedBrief}>{relatedNote.brief}</Text>
+                            ) : null}
+                          </Pressable>
+                          {onRemoveEcho ? (
+                            <Pressable
+                              accessibilityRole="button"
+                              style={styles.removeEchoButton}
+                              testID={`note-reader-remove-echo-${relatedNote.echoId}`}
+                              onPress={() => {
+                                Alert.alert(
+                                  "Remover eco",
+                                  "Remover esta relacao entre notas?",
+                                  [
+                                    { text: "Cancelar", style: "cancel" },
+                                    {
+                                      text: "Remover eco",
+                                      style: "destructive",
+                                      onPress: () => {
+                                        onRemoveEcho(relatedNote);
+                                      },
+                                    },
+                                  ],
+                                );
+                              }}
+                            >
+                              <Text style={styles.removeEchoLabel}>Remover eco</Text>
+                            </Pressable>
                           ) : null}
-                        </Pressable>
+                        </View>
                       ) : (
                         <View>
                           <Text style={styles.relatedTitle}>Item indisponivel</Text>
@@ -246,6 +286,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     color: "#475569",
+  },
+  echoFeedbackText: {
+    fontSize: 13,
+    color: "#047857",
+  },
+  removeEchoButton: {
+    alignSelf: "flex-start",
+    marginTop: 10,
+    minHeight: 34,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  removeEchoLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#b91c1c",
   },
   reloadButton: {
     alignSelf: "flex-start",

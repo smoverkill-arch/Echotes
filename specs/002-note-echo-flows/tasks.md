@@ -75,18 +75,18 @@
 
 ### Testes da Historia do Usuario 2
 
-- [ ] T028 [P] [US2] Adicionar testes unitarios de listagem paginada e candidatas desabilitadas em tests/unit/notes/list-note-candidates.test.ts
-- [ ] T029 [P] [US2] Adicionar testes unitarios de createNoteEcho para self-link, duplicidade invertida e preservacao de kind original em tests/unit/notes/create-note-echo.test.ts
-- [ ] T030 [P] [US2] Adicionar testes unitarios de deleteNoteEcho para confirmacao e remocao sem apagar notas em tests/unit/notes/delete-note-echo.test.ts
-- [ ] T031 [US2] Adicionar teste de integracao do fluxo Adicionar eco, carregar mais, Eco ja existe e Remover eco em tests/integration/day/note-echo-management.test.tsx
+- [X] T028 [P] [US2] Adicionar testes unitarios de listagem paginada e candidatas desabilitadas em tests/unit/notes/list-note-candidates.test.ts
+- [X] T029 [P] [US2] Adicionar testes unitarios de createNoteEcho para self-link, duplicidade invertida e preservacao de kind original em tests/unit/notes/create-note-echo.test.ts
+- [X] T030 [P] [US2] Adicionar testes unitarios de deleteNoteEcho para confirmacao e remocao sem apagar notas em tests/unit/notes/delete-note-echo.test.ts
+- [X] T031 [US2] Adicionar teste de integracao do fluxo Adicionar eco, carregar mais, Eco ja existe e Remover eco em tests/integration/day/note-echo-management.test.tsx
 
 ### Implementacao da Historia do Usuario 2
 
-- [ ] T032 [US2] Implementar seletor de candidatas com lotes de 50, carregar mais e candidatos desabilitados em src/components/reader/note-echo-picker.tsx
-- [ ] T033 [US2] Integrar acao Adicionar eco ao NoteReader em src/components/reader/note-reader.tsx
-- [ ] T034 [US2] Implementar confirmacao de Remover eco no NoteReader em src/components/reader/note-reader.tsx
-- [ ] T035 [US2] Integrar createNoteEcho, deleteNoteEcho, reload e feedback Eco ja existe em app/day/[date].tsx
-- [ ] T036 [US2] Garantir que remocao de eco atualiza contagem e lista sem apagar notas em src/features/day/hooks/use-day-entries.ts
+- [X] T032 [US2] Implementar seletor de candidatas com lotes de 50, carregar mais e candidatos desabilitados em src/components/reader/note-echo-picker.tsx
+- [X] T033 [US2] Integrar acao Adicionar eco ao NoteReader em src/components/reader/note-reader.tsx
+- [X] T034 [US2] Implementar confirmacao de Remover eco no NoteReader em src/components/reader/note-reader.tsx
+- [X] T035 [US2] Integrar createNoteEcho, deleteNoteEcho, reload e feedback Eco ja existe em app/day/[date].tsx
+- [X] T036 [US2] Garantir que remocao de eco atualiza contagem e lista sem apagar notas em src/features/day/hooks/use-day-entries.ts
 
 **Ponto de validacao**: US1 e US2 funcionam independentemente, sem duplicar pares e sem mudar o dominio de tarefas.
 

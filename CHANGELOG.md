@@ -21,6 +21,9 @@ versioned releases when they start to exist.
   semantic-pair delete direction, context field defaults, pagination cursor boundary
   transition, inverted echo `isAlreadyConnected`, whitespace normalization in brief,
   and reconciliation schema-validation reclassification
+- US2 note echo management in the active `002-note-echo-flows` feature: picker
+  with 50-item candidate pages, disabled existing echoes, manual echo creation,
+  remove confirmation, reload feedback and integration coverage
 
 ### Changed
 

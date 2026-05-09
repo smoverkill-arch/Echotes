@@ -6,13 +6,15 @@ import { AuthErrorBanner } from "../../src/components/auth/auth-error-banner";
 import { DayShell } from "../../src/components/day/day-shell";
 import { signOut } from "../../src/features/auth/api/sign-out";
 import { useAuthSession } from "../../src/features/auth/hooks/use-auth-session";
+import { createNoteEcho } from "../../src/features/notes/api/create-note-echo";
+import { deleteNoteEcho } from "../../src/features/notes/api/delete-note-echo";
 import { listRelatedNoteDetails } from "../../src/features/notes/api/list-note-echoes";
 import { getRelatedNoteId } from "../../src/features/notes/utils/note-echo-relations";
 import { useCalendarStore } from "../../src/stores/calendar-store";
 import { useDayTimeline } from "../../src/features/day/hooks/use-day-timeline";
 import { useNavigationStore } from "../../src/stores/navigation-store";
 import { useUIStore } from "../../src/stores/ui-store";
-import type { RelatedNote } from "../../src/types/note";
+import type { NoteEchoCandidate, RelatedNote } from "../../src/types/note";
 import { parseDayKey } from "../../src/utils/date";
 
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -80,6 +82,10 @@ export default function ProtectedDayRoute() {
     (state) => state.clearPendingReaderOpen,
   );
   const [relatedNotes, setRelatedNotes] = useState<RelatedNote[]>([]);
+  const [isEchoPickerVisible, setIsEchoPickerVisible] = useState(false);
+  const [echoFeedbackMessage, setEchoFeedbackMessage] = useState<string | null>(
+    null,
+  );
   const relatedNotesCountRef = useRef(0);
   const replaceRelatedNotes = useCallback((nextRelatedNotes: RelatedNote[]) => {
     relatedNotesCountRef.current = nextRelatedNotes.length;
@@ -158,10 +164,70 @@ export default function ProtectedDayRoute() {
     readerState.kind,
     replaceRelatedNotes,
   ]);
+  const closeEchoPicker = useCallback(() => {
+    setIsEchoPickerVisible(false);
+  }, []);
+  const handleSelectEchoCandidate = useCallback(
+    async (candidate: NoteEchoCandidate) => {
+      if (!activeNote) {
+        return;
+      }
+
+      const result = await createNoteEcho({
+        from_note_id: activeNote.id,
+        to_note_id: candidate.id,
+        context_note_id: activeNote.id,
+        context_day: resolvedDate,
+        kind: "manual_link",
+        metadata: null,
+      });
+
+      if (!result.ok) {
+        setEchoFeedbackMessage(result.errorMessage);
+        return;
+      }
+
+      setEchoFeedbackMessage(
+        result.status === "already_exists" ? "Eco ja existe" : "Eco adicionado.",
+      );
+      setIsEchoPickerVisible(false);
+      await reload();
+    },
+    [activeNote, reload, resolvedDate],
+  );
+  const handleRemoveEcho = useCallback(
+    async (relatedNote: RelatedNote) => {
+      if (!activeNote || relatedNote.availability !== "available") {
+        return;
+      }
+
+      const result = await deleteNoteEcho({
+        echoId: relatedNote.echoId,
+        noteIdA: activeNote.id,
+        noteIdB: relatedNote.id,
+      });
+
+      if (!result.ok) {
+        setEchoFeedbackMessage(result.errorMessage);
+        return;
+      }
+
+      setEchoFeedbackMessage(
+        result.status === "already_removed" ? "Eco ja removido." : "Eco removido.",
+      );
+      await reload();
+    },
+    [activeNote, reload],
+  );
 
   useEffect(() => {
     setSelectedDate(resolvedDate);
   }, [resolvedDate, setSelectedDate]);
+
+  useEffect(() => {
+    setIsEchoPickerVisible(false);
+    setEchoFeedbackMessage(null);
+  }, [activeNote?.id, resolvedDate]);
 
   useEffect(() => {
     void loadRelatedNotes();
@@ -321,6 +387,9 @@ export default function ProtectedDayRoute() {
       activeNote={activeNote}
       activeTask={activeTask}
       relatedNotes={relatedNotes}
+      activeNoteEchoes={activeNoteEchoes}
+      isEchoPickerVisible={isEchoPickerVisible}
+      echoFeedbackMessage={echoFeedbackMessage}
       onSignOut={async () => {
         await signOut();
       }}
@@ -370,6 +439,13 @@ export default function ProtectedDayRoute() {
       onReloadRelatedNote={async () => {
         await loadRelatedNotes();
       }}
+      onAddEcho={() => {
+        setEchoFeedbackMessage(null);
+        setIsEchoPickerVisible(true);
+      }}
+      onCloseEchoPicker={closeEchoPicker}
+      onSelectEchoCandidate={handleSelectEchoCandidate}
+      onRemoveEcho={handleRemoveEcho}
       onReturnToSource={() => {
         if (!destinationTemporalContext) {
           return;

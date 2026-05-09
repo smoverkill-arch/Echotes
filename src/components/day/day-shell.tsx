@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { AuthErrorBanner } from "../auth/auth-error-banner";
-import type { Note, RelatedNote } from "../../types/note";
+import type { Note, NoteEcho, NoteEchoCandidate, RelatedNote } from "../../types/note";
 import type { Task } from "../../types/task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { ReaderState, EditorState } from "../../stores/ui-store";
@@ -11,6 +11,7 @@ import { BreadcrumbBar } from "./breadcrumb-bar";
 import { DayHeader } from "./day-header";
 import { TaskEditor } from "../forms/task-editor";
 import { NoteEditor } from "../forms/note-editor";
+import { NoteEchoPicker } from "../reader/note-echo-picker";
 import { NoteReader } from "../reader/note-reader";
 import { TaskReader } from "../reader/task-reader";
 import { TimelineView } from "../timeline/timeline-view";
@@ -31,6 +32,9 @@ interface DayShellProps {
   activeNote: Note | null;
   activeTask: Task | null;
   relatedNotes: RelatedNote[];
+  activeNoteEchoes: NoteEcho[];
+  isEchoPickerVisible: boolean;
+  echoFeedbackMessage: string | null;
   onSignOut: () => Promise<void> | void;
   onTabChange: (tab: DayTab) => void;
   onCreateNote: () => void;
@@ -41,6 +45,8 @@ interface DayShellProps {
   onOpenRelatedNote: (relatedNote: RelatedNote) => void;
   onReloadRelatedNote: () => Promise<void> | void;
   onAddEcho?: () => void;
+  onCloseEchoPicker: () => void;
+  onSelectEchoCandidate: (candidate: NoteEchoCandidate) => Promise<void> | void;
   onRemoveEcho?: (relatedNote: RelatedNote) => void;
   onContinueNote?: () => void;
   onReturnToSource: () => void;
@@ -65,6 +71,9 @@ export function DayShell({
   activeNote,
   activeTask,
   relatedNotes,
+  activeNoteEchoes,
+  isEchoPickerVisible,
+  echoFeedbackMessage,
   onSignOut,
   onTabChange,
   onCreateNote,
@@ -75,6 +84,8 @@ export function DayShell({
   onOpenRelatedNote,
   onReloadRelatedNote,
   onAddEcho,
+  onCloseEchoPicker,
+  onSelectEchoCandidate,
   onRemoveEcho,
   onContinueNote,
   onReturnToSource,
@@ -130,6 +141,16 @@ export function DayShell({
         onAddEcho={onAddEcho}
         onRemoveEcho={onRemoveEcho}
         onContinueNote={onContinueNote}
+        echoFeedbackMessage={echoFeedbackMessage}
+      />
+
+      <NoteEchoPicker
+        visible={isEchoPickerVisible}
+        sourceNote={activeNote}
+        selectedDay={date}
+        existingEchoes={activeNoteEchoes}
+        onClose={onCloseEchoPicker}
+        onSelectCandidate={onSelectEchoCandidate}
       />
 
       <TaskReader

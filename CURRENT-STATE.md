@@ -31,14 +31,17 @@ Hoje:
 - validacao de ambiente existe em `src/lib/env.ts`
 - bootstrap do cliente Supabase existe em `src/lib/supabase.ts`
 - migration base existe em `supabase/migrations/001_auth_day_surface.sql`
+- `002-note-echo-flows` tem US1 e US2 implementadas no codigo: leitura de ecos,
+  Reader com notas conectadas, criacao manual, bloqueio de duplicidade,
+  paginacao de candidatas e remocao confirmada
 - testes cobrem auth, same-day, projected flow, timeline e regresses chave
 
 ## Deferred Areas
 
 Ainda nao consolidados como entrega do baseline:
 
-- fluxos completos de ecos de nota
-- `continue_note`
+- fluxos completos de ecos de nota, porque `continue_note` ainda nao esta
+  fechado
 - mencoes inline persistidas com semantica completa
 - deploy e release de producao
 
