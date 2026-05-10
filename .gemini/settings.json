@@ -1,0 +1,17 @@
+{
+  "projectName": "echotes",
+  "methodology": "Canonical-Driven Development (CDD)",
+  "canonicalDocs": [
+    "docs-canonical/ARCHITECTURE.md",
+    "docs-canonical/DATA-MODEL.md",
+    "docs-canonical/SECURITY.md",
+    "docs-canonical/TEST-SPEC.md",
+    "docs-canonical/ENVIRONMENT.md"
+  ],
+  "rules": [
+    "Read canonical docs before suggesting code changes",
+    "Add // DRIFT: comments for deviations",
+    "Update CHANGELOG.md for every change",
+    "Log drift in DRIFT-LOG.md"
+  ]
+}
