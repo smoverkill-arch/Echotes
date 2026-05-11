@@ -42,8 +42,8 @@
 - [X] CHK023 Are data-model requirements for `note_echoes`, `manual_link`, `continue_note`, `context_day`, `notes.day` and absence of task fields defined with enough precision for canon review? [Clarity, Blueprint §T047, Spec §FR-010, Spec §FR-018]
 - [X] CHK024 Are architecture requirements for `useDayEntries`, direct-count derivation, contextual Reader, cross-day navigation and one-shot `pendingReaderOpen` described as product architecture rather than implementation trivia? [Clarity, Blueprint §T047]
 - [X] CHK025 Are requirements for `REQUIREMENTS.md` scoped to delivered behaviors while preserving `@nota` inline as excluded? [Consistency, Spec §FR-024, Blueprint §T047]
-- [ ] CHK026 Are `TEST-SPEC` requirements explicit about both feature-scoped suites and final gates, including `doc:score` as reported maturity rather than merge-blocking proof by itself? [Clarity, Blueprint §T047, Blueprint §T054]
-- [ ] CHK027 Does Phase 6 specify how root canon updates should handle already-present partial canon statements, so the final patch consolidates rather than contradicts them? [Ambiguity, Blueprint §T047]
+- [X] CHK026 Are `TEST-SPEC` requirements explicit about both feature-scoped suites and final gates, including `doc:score` as reported maturity rather than merge-blocking proof by itself? [Clarity, Blueprint §T047, Blueprint §T054]
+- [X] CHK027 Does Phase 6 specify how root canon updates should handle already-present partial canon statements, so the final patch consolidates rather than contradicts them? [Ambiguity, Blueprint §T047]
 - [X] CHK028 Are requirements clear that `docs-canonical/*` contains the executable canons, root docs contain governance/status, and `docs/` remains historical support without becoming current authority? [Consistency, Constitution §I, Blueprint §T047]
 
 ## Security And Data Boundaries
@@ -52,7 +52,7 @@
 - [X] CHK030 Are requirements explicit that `service_role` must remain absent from the client and must not be introduced as a Phase 6 shortcut? [Consistency, Constitution §V, Plan §Restrictions, Blueprint §T047]
 - [X] CHK031 Are RLS/RPC canon requirements tied to the exact user-visible guarantee that failed continuation cannot leave an orphan note? [Traceability, Spec §FR-016, Spec §SC-005, Blueprint §T047]
 - [X] CHK032 Are requirements clear that note continuation uses `notes.day` and `context_day` without importing task vocabulary such as `source_day`, `target_day` or `scheduled_at`? [Consistency, Spec §FR-018, Blueprint §T047]
-- [ ] CHK033 Are rollback and forward-migration requirements for the RPC sufficiently documented as closure evidence rather than implied by test existence? [Gap, Blueprint §T055]
+- [X] CHK033 Are rollback and forward-migration requirements for the RPC sufficiently documented as closure evidence rather than implied by test existence? [Gap, Blueprint §T055]
 
 ## Gate And Evidence Quality
 
@@ -62,16 +62,16 @@
 - [X] CHK037 Does the doc:score requirement demand reporting the real score without converting a low score into a hidden pass? [Clarity, Blueprint §T054]
 - [X] CHK038 Is the final evidence block specified with all required fields: T046 status, canon paths, docs-canonical status, drift/coverage review, command outputs, RPC evidence, DocGuard limitation and Phase 7/baseline non-reopening confirmation? [Completeness, Blueprint §T055]
 - [X] CHK039 Are requirements explicit that DocGuard PASS is necessary but not sufficient evidence of semantic canon alignment? [Consistency, Tasks §T055, Blueprint §T055]
-- [ ] CHK040 Are requirements clear about where the final evidence block must live if there is no PR body yet? [Gap, Blueprint §T055]
+- [X] CHK040 Are requirements clear about where the final evidence block must live if there is no PR body yet? [Gap, Blueprint §T055]
 
 ## Scenario And Edge Coverage
 
-- [ ] CHK041 Are exception scenarios for lost auth, unavailable related notes, duplicate/self-links, failed RPC and reload/navigation races all tied to either traceability tags or canon closure requirements? [Coverage, Spec §FR-007, Spec §FR-008, Spec §FR-020, Spec §FR-021, Spec §SC-005]
+- [X] CHK041 Are exception scenarios for lost auth, unavailable related notes, duplicate/self-links, failed RPC and reload/navigation races all tied to either traceability tags or canon closure requirements? [Coverage, Spec §FR-007, Spec §FR-008, Spec §FR-020, Spec §FR-021, Spec §SC-005]
 - [X] CHK042 Are non-functional requirements for documentation quality, auditability and traceability measurable enough to support closure without relying on reviewer intuition? [Measurability, Tasks §T046..T055]
 - [X] CHK043 Are requirements defined for preserving the note/task boundary during Phase 6 documentation edits, including ghost-card exclusivity for tasks? [Consistency, Constitution §III, Spec §FR-018, Spec §SC-006]
-- [ ] CHK044 Are requirements defined for proving that Phase 6 did not implement Phase 7, did not reopen `001-auth-day-surface`, and did not expand scope into inline mentions? [Boundary, Blueprint §T055, Spec §FR-024]
-- [ ] CHK045 Are assumptions about QA-internal success criteria still appropriate for closure, or does Phase 6 need a documented replacement evidence type because the phase is not performing live QA? [Assumption, Spec §SC-001, Spec §SC-004, Spec §SC-005]
-- [ ] CHK046 Are requirements clear for handling any newly discovered mismatch between implemented behavior, active spec and root canon during Phase 6: patch canon, register drift, or reopen a task? [Gap, Blueprint §T047, Blueprint §T049]
+- [X] CHK044 Are requirements defined for proving that Phase 6 did not implement Phase 7, did not reopen `001-auth-day-surface`, and did not expand scope into inline mentions? [Boundary, Blueprint §T055, Spec §FR-024]
+- [X] CHK045 Are assumptions about QA-internal success criteria still appropriate for closure, or does Phase 6 need a documented replacement evidence type because the phase is not performing live QA? [Assumption, Spec §SC-001, Spec §SC-004, Spec §SC-005]
+- [X] CHK046 Are requirements clear for handling any newly discovered mismatch between implemented behavior, active spec and root canon during Phase 6: patch canon, register drift, or reopen a task? [Gap, Blueprint §T047, Blueprint §T049]
 
 ## Notes
 

@@ -2327,6 +2327,46 @@ Cobertura obrigatoria dos criterios de sucesso:
 | `SC-005` | `build-continue-note-brief.test.ts`, `documentation-contracts.test.ts`, `continue-note.test.ts` e `continue-note-flow.test.tsx` devem cobrir mesmo dia, dia futuro, relacao visivel ao final e falha sem nota orfa. Como o tempo de 2 minutos depende de QA humano, Phase 6 deve registrar a evidencia automatizada como proxy e explicitar se QA cronometrado foi executado ou nao. |
 | `SC-006` | `timeline-view.test.tsx`, `continue-note-flow.test.tsx` e `derive-timeline-nodes-regression.test.ts` devem cobrir contagem direta na timeline e ausencia de ghost card, `source_day`, `target_day`, `scheduled_at` ou comportamento de tarefa para notas. |
 
+Evidencia para criterios QA-internos:
+
+`SC-001`, `SC-004` e `SC-005` contem metas de tempo dependentes de QA humano.
+Phase 6 nao executa QA cronometrado por si so. Para fechamento, cada criterio
+deve ser registrado com um destes estados no bloco de evidencia final:
+
+| Estado | Quando usar | Evidencia exigida |
+|--------|-------------|-------------------|
+| `QA cronometrado executado` | Quando houve sessao manual ou interna medindo o fluxo descrito no SC. | Registrar data, ambiente, criterio medido, resultado observado e se passou no limite de tempo. |
+| `Proxy automatizado aceito para Phase 6` | Quando nao houve QA cronometrado, mas os testes feature-scoped cobrem os pre-requisitos funcionais do SC. | Registrar suites/tags usadas como proxy e declarar explicitamente que o tempo humano nao foi medido nesta fase. |
+| `Nao fechado` | Quando nao houve QA cronometrado e a evidencia automatizada minima tambem esta incompleta. | Manter T046/T055 aberto, listar a lacuna e apontar a suite ou sessao QA necessaria. |
+
+Mapeamento minimo:
+
+| Criterio | Proxy automatizado minimo | Lacuna que deve ser declarada se nao houver QA cronometrado |
+|----------|---------------------------|-------------------------------------------------------------|
+| `SC-001` | `use-day-entries.test.tsx`, `timeline-view.test.tsx` e `note-reader-relations.test.tsx` com tags feature-scoped provando contagem direta visivel e Reader contextual. | Tempo de identificacao em menos de 30 segundos nao foi medido com pessoa usuaria. |
+| `SC-004` | `list-note-candidates.test.ts` e `note-echo-management.test.tsx` com tags feature-scoped provando candidata desabilitada, lote acima de 50, `carregar mais` e criacao manual. | Tempo de criacao em menos de 1 minuto sem ajuda externa nao foi medido com pessoa usuaria. |
+| `SC-005` | `build-continue-note-brief.test.ts`, `documentation-contracts.test.ts`, `continue-note.test.ts` e `continue-note-flow.test.tsx` com tags feature-scoped provando mesmo dia, dia futuro, relacao final visivel e falha sem nota orfa. | Tempo de continuacao em menos de 2 minutos nao foi medido com pessoa usuaria. |
+
+Nao e permitido declarar `SC-001`, `SC-004` ou `SC-005` como plenamente
+provados por testes automatizados quando o componente de tempo humano nao foi
+medido. Nesse caso, o fechamento deve usar o estado `Proxy automatizado aceito
+para Phase 6` e registrar a limitacao no `phase-6-evidence.md`.
+
+Cenarios de excecao obrigatorios para rastreabilidade:
+
+| Cenario | Anchors | Evidencia minima feature-scoped | Canon de fechamento |
+|---------|---------|---------------------------------|---------------------|
+| Perda de autenticacao ou sessao expirada durante leitura, criacao, remocao ou continuacao | FR-020, SC-002, SC-005 | `create-note-echo.test.ts`, `delete-note-echo.test.ts`, `continue-note.test.ts` e, se aplicavel, `note-echo-api.test.ts` devem conter tags `@req 002-note-echo-flows:FR-020` junto das tags de historia/SC correspondentes. | `docs-canonical/REQUIREMENTS.md` deve declarar feedback claro para perda de autenticacao; `docs-canonical/SECURITY.md` deve manter o limite de acesso por sessao/RLS. |
+| Nota conectada ou candidata indisponivel entre abertura do Reader e acao da pessoa usuaria | FR-020, FR-021 | `note-reader-relations.test.tsx` deve cobrir item indisponivel recuperavel com `Recarregar`; APIs de leitura em `note-echo-api.test.ts` devem cobrir indisponibilidade sem derrubar a superficie. | `docs-canonical/REQUIREMENTS.md` e `docs-canonical/ARCHITECTURE.md` devem registrar que o Reader preserva a superficie e trata indisponibilidade como estado recuperavel. |
+| Auto-relacao e duplicidade direta/invertida | FR-007, FR-008, SC-002 | `note-echo-relations.test.ts` e `create-note-echo.test.ts` devem cobrir self-link, par duplicado direto/invertido, ausencia de relacao invalida e feedback `Eco ja existe`. | `docs-canonical/REQUIREMENTS.md` e `docs-canonical/DATA-MODEL.md` devem preservar eco como par semantico unico sem hierarquia. |
+| Falha da RPC `continue_note` ou escrita parcial | FR-016, FR-020, SC-005 | `documentation-contracts.test.ts` e `continue-note.test.ts` devem cobrir transacao atomica, rollback e ausencia de nota orfa; `continue-note-flow.test.tsx` deve cobrir feedback/estado final quando o fluxo falha. | `docs-canonical/SECURITY.md` e `docs-canonical/DATA-MODEL.md` devem documentar `public.continue_note`, rollback e garantia de nao deixar nota sem eco. |
+| Race de reload, navegacao cross-day e consumo de `pendingReaderOpen` | FR-011, FR-012, FR-018, SC-006 | `note-echo-navigation.test.tsx` e `continue-note-flow.test.tsx` devem cobrir troca para `note.day` antes de abrir Reader, consumo unico de pendencia, cancelamento/limpeza em falha ou navegacao manual e ausencia de campos de tarefa. | `docs-canonical/ARCHITECTURE.md` deve documentar navegacao cross-day, Reader contextual e `pendingReaderOpen` one-shot; `docs-canonical/DATA-MODEL.md` deve manter `notes.day`/`context_day` sem `source_day`, `target_day` ou `scheduled_at`. |
+
+Ausencia de qualquer cenario desta matriz bloqueia T046/T047: se houver teste
+sem tag, corrigir a tag; se houver comportamento sem canon, atualizar o canon
+executavel; se a evidencia ainda nao existir, deixar a task aberta e registrar
+a lacuna no bloco de fechamento.
+
 Se `FR-024` ou `SC-006` estiverem cobertos apenas por
 `tests/integration/day/ghost-navigation.test.tsx`, manter a suite como
 regressao de baseline e adicionar cobertura feature-scoped em
@@ -2388,7 +2428,7 @@ Conteudo esperado por arquivo:
 | `docs-canonical/DATA-MODEL.md` | Documentar `note_echoes`, proveniencias internas `manual_link` e `continue_note`, `context_day` como proveniencia da acao, `notes.day` como unico dia de destino da nota continuada e ausencia de campos de tarefa. |
 | `docs-canonical/ARCHITECTURE.md` | Descrever carregamento relacional em `useDayEntries`, derivacao de contagem direta, Reader contextual, navegacao cross-day e consumo unico de `pendingReaderOpen` apos a nota existir no dia carregado. |
 | `docs-canonical/REQUIREMENTS.md` | Registrar os requisitos entregues de ecos diretos, gerenciamento manual, continuacao atomica e a exclusao de mencoes inline. |
-| `docs-canonical/TEST-SPEC.md` | Listar as suites feature-scoped e os gates `lint`, `test`, `typecheck`, `doc:guard` e `doc:score`. |
+| `docs-canonical/TEST-SPEC.md` | Listar as suites feature-scoped de T046, os gates finais `lint`, `test`, `typecheck` e `doc:guard`, e `doc:score` como maturidade/report obrigatorio, sem trata-lo como prova unica de alinhamento nem como gate semantico por si so. |
 | `docs-canonical/SECURITY.md` | Registrar trust boundary da RPC `public.continue_note`: `SECURITY DEFINER` com checks por `auth.uid()`, `search_path` fixo, grant minimo para usuario autenticado, falha unauthenticated/cross-user sem escrita parcial e ausencia de `service_role` no cliente. |
 
 Se um documento de raiz resumir uma decisao tambem descrita em
@@ -2396,6 +2436,22 @@ Se um documento de raiz resumir uma decisao tambem descrita em
 contradize-lo ou substitui-lo. `docs/` nao deve ser alterado nesta Phase 6
 salvo decisao explicita de auditoria documental, que deve ser registrada em
 `CANON-MIGRATION-COVERAGE.md`.
+
+Antes de editar qualquer canon executavel ou doc de governanca/status da raiz,
+buscar declaracoes parciais ja presentes e consolidar no trecho existente
+quando possivel. Nao duplicar secoes, nao contradizer texto parcial anterior e
+atualizar linguagem obsoleta como "futuro" apenas quando a feature estiver
+realmente entregue. Se a contradicao nao puder ser resolvida diretamente,
+tratar como mismatch pela regra de T047/T049 abaixo.
+
+Tratamento obrigatorio para mismatch descoberto durante a Phase 6:
+
+| Mismatch | Acao de fechamento |
+|----------|--------------------|
+| Canon incompleto com comportamento correto e evidenciado | Corrigir o canon executavel em `docs-canonical/*` ou o doc de governanca/status da raiz aplicavel. |
+| Comportamento e canon temporariamente desalinhados | Registrar desvio em `DRIFT-LOG.md` com motivo, evidencia e condicao de encerramento. |
+| Comportamento incompleto ou evidencia ausente | Manter ou reabrir a task correspondente e registrar a lacuna em `specs/002-note-echo-flows/phase-6-evidence.md`. |
+| Contradicao com `docs/` historico | Tratar como achado documental sem autoridade automatica; atualizar `CANON-MIGRATION-COVERAGE.md` apenas se houver absorcao ou reinterpretacao historica. |
 
 **Verification**:
 
@@ -2464,6 +2520,9 @@ Abrir os dois arquivos e decidir com evidencia:
   entre codigo executavel e canon vigente.
 - `CANON-MIGRATION-COVERAGE.md`: alterar somente se T047 absorver ou
   reinterpretar conteudo historico vindo de `docs/`.
+- Se T047 revelar mismatch entre comportamento, canon vigente e acervo
+  historico, aplicar a matriz de tratamento de mismatch definida em T047 antes
+  de considerar T049 fechado.
 
 Se nenhum patch for necessario, nao fabricar entrada. Registrar no bloco final
 que os arquivos foram revisados e permaneceram sem mudanca.
@@ -2619,7 +2678,7 @@ Exit code e score real reportados em T055.
 
 ### T055: Registrar bloco de evidencia concreta de fechamento
 
-**File**: resumo da PR/entrega (write outside source tree or PR body)
+**File**: `specs/002-note-echo-flows/phase-6-evidence.md` (new/modify)
 
 **Requirements**:
 
@@ -2631,20 +2690,29 @@ T047, T048, T049, T050, T051, T052, T053, T054.
 
 **Implementation**:
 
-Registrar no resumo da PR ou entrega, fora dos arquivos de codigo, um bloco com
-estes itens:
+Registrar em `specs/002-note-echo-flows/phase-6-evidence.md` um bloco com estes
+itens. Esse arquivo e a fonte obrigatoria para resumo de PR/entrega quando
+houver PR; se nao houver PR, ele continua sendo o local obrigatorio do
+fechamento.
 
 - status de T046, incluindo suites com tags `@req 002-note-echo-flows:*`;
 - paths de canones executaveis alterados em `docs-canonical/*`;
 - paths de docs de governanca/status da raiz alterados em T047;
 - resultado da revisao de `DRIFT-LOG.md` e `CANON-MIGRATION-COVERAGE.md`;
+- estado de evidencia para `SC-001`, `SC-004` e `SC-005`: QA cronometrado
+  executado, proxy automatizado aceito para Phase 6 ou nao fechado, com a
+  limitacao correspondente;
 - comandos exatos de T050 a T054, exit code, contagem de testes e score;
-- evidencia de que `public.continue_note` cria nota e eco em transacao atomica
-  e que falhas nao deixam nota orfa;
+- evidencia contratual da RPC `public.continue_note`, citando a migration da
+  RPC e a migration forward de owner/default quando aplicavel;
+- evidencia de rollback/ausencia de nota orfa, declarando se a RPC/migration foi
+  aplicada em banco local ou verificada apenas por contrato/teste;
 - confirmacao de que DocGuard PASS foi necessario, mas nao usado como prova
   unica de alinhamento semantico;
 - confirmacao explicita de que Phase 6 nao implementou Phase 7 nem reabriu
-  `001-auth-day-surface`.
+  `001-auth-day-surface`;
+- confirmacao explicita de que mencoes inline `@nota` e chips persistidos
+  continuam fora deste corte.
 
 **Verification**:
 
