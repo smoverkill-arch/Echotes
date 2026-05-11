@@ -119,7 +119,7 @@ implementação e verificação independentes de cada fatia.
 
 **Objetivo**: Melhorias que afetam múltiplas histórias do usuário
 
-- [ ] T021 [P] Atualizar o canon da raiz aplicável, CHANGELOG.md e CANON-MIGRATION-COVERAGE.md quando houver absorção de acervo histórico
+- [ ] T021 [P] Atualizar os canones executáveis em `docs-canonical/`, docs de governança/status da raiz, CHANGELOG.md e CANON-MIGRATION-COVERAGE.md quando houver absorção de acervo histórico
 - [ ] T022 Revisar cobertura de regressão temporal/autenticação contra a constituição
 - [ ] T023 Validar o quickstart.md
 

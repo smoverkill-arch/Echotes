@@ -38,9 +38,9 @@ beforeEach(() => {
 });
 
 describe("continueNote", () => {
-  // @req FR-014
-  // @req FR-016
-  // @req SC-005
+  // @req 002-note-echo-flows:FR-014
+  // @req 002-note-echo-flows:FR-016
+  // @req 002-note-echo-flows:SC-005
   it("chama RPC atomica com new_note_day e mantem context_day no servidor", async () => {
     const sourceNoteId = "10000000-0000-4000-8000-000000000001";
     const newNote = buildNote({
@@ -96,7 +96,7 @@ describe("continueNote", () => {
     );
   });
 
-  // @req SC-005
+  // @req 002-note-echo-flows:SC-005
   it("falha sem declarar sucesso parcial quando a RPC falha", async () => {
     mockSupabase.enqueueRpcResult(
       "continue_note",
@@ -120,7 +120,7 @@ describe("continueNote", () => {
     expect(mockSupabase.queryCalls).toEqual([]);
   });
 
-  // @req FR-015
+  // @req 002-note-echo-flows:FR-015
   it("rejeita payload invalido antes de chamar Supabase", async () => {
     const result = await continueNote({
       sourceNoteId: "10000000-0000-4000-8000-000000000001",

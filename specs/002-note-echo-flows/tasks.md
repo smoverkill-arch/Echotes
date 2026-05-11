@@ -125,8 +125,8 @@
 
 **Objetivo**: Fechar rastreabilidade, documentacao canonica e gates.
 
-- [ ] T046 [P] Atualizar @req dos novos testes para tags feature-scoped `@req 002-note-echo-flows:FR-001`..`@req 002-note-echo-flows:FR-024` e `@req 002-note-echo-flows:SC-001`..`@req 002-note-echo-flows:SC-006` nos arquivos novos em tests/unit/ e tests/integration/day/; tags legadas sem feature id, incluindo 001, nao contam para este gate
-- [ ] T047 [P] Atualizar canon vigente da raiz quando o comportamento da feature estiver implementado: README.md, CURRENT-STATE.md, ROADMAP.md, DATA-MODEL.md, ARCHITECTURE.md, REQUIREMENTS.md, TEST-SPEC.md e SECURITY.md quando RLS/RPC for afetado; docs-canonical/* pode ser atualizado apenas como espelho historico/adicional, nunca como autoridade substituta
+- [ ] T046 [P] Atualizar @req em todos os testes criados ou modificados pela feature 002 para tags feature-scoped `@req 002-note-echo-flows:FR-001`..`@req 002-note-echo-flows:FR-024` e `@req 002-note-echo-flows:SC-001`..`@req 002-note-echo-flows:SC-006`; tags legadas sem feature id podem permanecer apenas em suites baseline-only que nao provam a feature 002
+- [ ] T047 [P] Atualizar os canones executaveis quando o comportamento da feature estiver implementado: docs-canonical/REQUIREMENTS.md, docs-canonical/ARCHITECTURE.md, docs-canonical/DATA-MODEL.md, docs-canonical/TEST-SPEC.md e docs-canonical/SECURITY.md quando RLS/RPC for afetado; atualizar tambem docs de governanca/status da raiz aplicaveis como README.md, CURRENT-STATE.md, ROADMAP.md, CHANGELOG.md e DRIFT-LOG.md
 - [ ] T048 Atualizar CHANGELOG.md com a feature 002-note-echo-flows
 - [ ] T049 Revisar DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md se houver desalinhamento temporario ou absorcao de acervo historico
 - [ ] T050 Executar corepack pnpm run lint conforme scripts em package.json
@@ -134,7 +134,7 @@
 - [ ] T052 Executar corepack pnpm run typecheck conforme scripts em package.json
 - [ ] T053 Executar corepack pnpm run doc:guard conforme scripts em package.json
 - [ ] T054 Executar corepack pnpm run doc:score conforme scripts em package.json
-- [ ] T055 Registrar bloco de evidencia concreta de fechamento no resumo da PR/entrega: paths de canon da raiz alterados, resultado da revisao de DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md, comandos exatos e outputs de lint/test/typecheck/doc:guard/doc:score, evidencia da migration/RPC aplicada ou contratualmente verificada, e confirmacao de que DocGuard PASS foi necessario mas nao usado como prova unica de alinhamento semantico
+- [ ] T055 Registrar bloco de evidencia concreta de fechamento em specs/002-note-echo-flows/phase-6-evidence.md e usar esse arquivo como base do resumo da PR/entrega: paths de canones executaveis e docs de raiz alterados, resultado da revisao de DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md, comandos exatos e outputs de lint/test/typecheck/doc:guard/doc:score, evidencia da migration/RPC aplicada ou contratualmente verificada, decisao explicita sobre evidencia de performance ou nao-gateamento das metas de performance, e confirmacao de que DocGuard PASS foi necessario mas nao usado como prova unica de alinhamento semantico
 
 ---
 
@@ -196,7 +196,7 @@
 - [X] TD035 [P] Add whitespace normalization edge case tests for `buildContinueNoteBrief` in `tests/unit/notes/build-continue-note-brief.test.ts` — tabs, consecutive newlines, all-whitespace brief fallback
 - [X] TD036 [P] Add test for malformed echo returned from `listNoteEchoes` during 23505 reconciliation in `tests/unit/notes/note-echo-api.test.ts` — schema parse failure must propagate as `retryable_failure`, not crash
 - [X] TD037 Eliminate nested ternaries in `src/features/notes/api/list-note-candidates.ts:162-176` — extract `hasEnoughSameDayRows`, `otherDaysCursor`, `remainingSlots` as named variables (constitution: "No nested ternaries")
-- [X] TD038 Update `DATA-MODEL.md:12-13` to reflect that note echo CRUD flows are fully implemented, removing the "future phases" claim (comment rot)
+- [X] TD038 Update `docs-canonical/DATA-MODEL.md:12-13` to reflect that note echo CRUD flows are fully implemented, removing the "future phases" claim (comment rot)
 
 ---
 
@@ -229,7 +229,7 @@
 - US1: T015, T016, T017 e T018 podem rodar em paralelo antes da implementacao.
 - US2: T028, T029 e T030 podem rodar em paralelo antes da integracao T031.
 - US3: T037 pode rodar antes de T041; T041 precede T013; T039 roda depois de T041; T038 e T040 rodam depois da cobertura da migration quando seus demais pre-requisitos estiverem prontos.
-- Polimento: T046 e T047 podem rodar em paralelo antes dos gates T050..T055.
+- Polimento: T046 e T047 podem rodar em paralelo; T048 e T049 devem fechar antes dos gates T050..T054; T055 deve ser o ultimo passo.
 
 ## Estrategia de Implementacao
 
@@ -243,7 +243,7 @@
 
 1. Adicionar US2 para criacao/remocao manual de ecos.
 2. Adicionar US3 com RPC atomica.
-3. Fechar polimento, canon da raiz, CHANGELOG, revisoes de drift/migracao e bloco de evidencia concreta.
+3. Fechar polimento, canones executaveis, CHANGELOG, revisoes de drift/migracao e bloco de evidencia concreta.
 
 ## Resumo
 

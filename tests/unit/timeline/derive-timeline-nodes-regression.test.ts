@@ -41,7 +41,7 @@ const buildTask = (overrides: Partial<Task> = {}): Task => ({
 });
 
 describe("deriveTimelineNodes regressions", () => {
-  // @req FR-023
+  // @req 002-note-echo-flows:FR-023
   it("mantem TimelineNode sem side e ordena por sortAt, prioridade e id", () => {
     const nodes = deriveTimelineNodes({
       selectedDay,
@@ -75,7 +75,7 @@ describe("deriveTimelineNodes regressions", () => {
     }
   });
 
-  // @req FR-014
+  // @req 002-note-echo-flows:FR-014
   it("mantem tarefa same-day com horario como marker de criacao e item agendado", () => {
     const nodes = deriveTimelineNodes({
       selectedDay,
@@ -102,7 +102,7 @@ describe("deriveTimelineNodes regressions", () => {
     });
   });
 
-  // @req FR-016
+  // @req 002-note-echo-flows:FR-016
   it("mantem tarefa projetada apenas como ghost na origem", () => {
     const nodes = deriveTimelineNodes({
       selectedDay,
@@ -124,7 +124,7 @@ describe("deriveTimelineNodes regressions", () => {
     });
   });
 
-  // @req FR-017
+  // @req 002-note-echo-flows:FR-017
   it("mantem tarefa projetada como item real sem horario ou com horario no destino", () => {
     const untimedTask = buildTask({
       id: "20000000-0000-4000-8000-000000000004",
@@ -158,7 +158,7 @@ describe("deriveTimelineNodes regressions", () => {
     });
   });
 
-  // @req FR-018
+  // @req 002-note-echo-flows:FR-018
   it("mantem nota continuada como nota real sem ghost card ou campos de tarefa", () => {
     const continuedNote = buildNote({
       id: "10000000-0000-4000-8000-000000000099",

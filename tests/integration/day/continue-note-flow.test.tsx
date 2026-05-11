@@ -155,8 +155,8 @@ afterEach(() => {
 });
 
 describe("continue note flow", () => {
-  // @req FR-014
-  // @req FR-016
+  // @req 002-note-echo-flows:FR-014
+  // @req 002-note-echo-flows:FR-016
   it("cria continuidade no mesmo dia, recarrega e abre Reader uma vez", async () => {
     mockSupabase.setRpcHandler("continue_note", () => {
       const noteEcho = buildNoteEcho({
@@ -184,8 +184,8 @@ describe("continue note flow", () => {
     expect(useNavigationStore.getState().pendingReaderOpen).toBeNull();
   });
 
-  // @req FR-017
-  // @req FR-018
+  // @req 002-note-echo-flows:FR-017
+  // @req 002-note-echo-flows:FR-018
   it("cria continuidade futura, navega e abre Reader depois do reload do dia destino", async () => {
     mockSupabase.setRpcHandler("continue_note", (payload) => {
       const noteEcho = buildNoteEcho({
@@ -230,8 +230,8 @@ describe("continue note flow", () => {
     expect(useNavigationStore.getState().pendingReaderOpen).toBeNull();
   });
 
-  // @req FR-017
-  // @req FR-018
+  // @req 002-note-echo-flows:FR-017
+  // @req 002-note-echo-flows:FR-018
   it("preserva abertura pendente ate a nota criada aparecer no reload do destino", async () => {
     const noteEcho = buildNoteEcho({
       id: "30000000-0000-4000-8000-000000000101",

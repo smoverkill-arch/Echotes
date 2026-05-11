@@ -3,10 +3,12 @@
 **Branch**: `002-note-echo-flows` | **Data**: 2026-05-01 | **Spec**: [spec.md](./spec.md)
 **Entrada**: Especificacao da feature em `/specs/002-note-echo-flows/spec.md`
 
-**Observacao**: Este plano parte da constituicao do Echotes e dos canones
-vigentes da raiz, em especial `REQUIREMENTS.md`, `ARCHITECTURE.md`,
-`DATA-MODEL.md`, `TEST-SPEC.md`, `CURRENT-STATE.md`, `ROADMAP.md`,
-`SECURITY.md` e `ENVIRONMENT.md`.
+**Observacao**: Este plano parte da constituicao do Echotes, dos seis canones
+executaveis em `docs-canonical/` (`REQUIREMENTS.md`, `ARCHITECTURE.md`,
+`DATA-MODEL.md`, `TEST-SPEC.md`, `SECURITY.md`, `ENVIRONMENT.md`) e dos docs de
+governanca/status da raiz, em especial `README.md`, `CURRENT-STATE.md`,
+`ROADMAP.md`, `CHANGELOG.md`, `DRIFT-LOG.md` e
+`CANON-MIGRATION-COVERAGE.md`.
 
 ## Resumo / Summary
 

@@ -6,8 +6,9 @@
 **Entrada**: Descrição do usuário: "$ARGUMENTS"
 
 > Antes de redigir, revise a constituição do Echotes e os documentos canônicos
-> vigentes da raiz. A spec DEVE preservar o modelo centrado no dia e a
-> distinção entre tarefas, notas, ghost cards e ecos.
+> vigentes: os seis canones executáveis em `docs-canonical/` e os docs de
+> governança/status da raiz. A spec DEVE preservar o modelo centrado no dia e
+> a distinção entre tarefas, notas, ghost cards e ecos.
 
 ## Cenários do Usuário e Testes *(obrigatório)*
 

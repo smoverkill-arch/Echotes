@@ -119,7 +119,7 @@ describe("timeline view pending press handling", () => {
     jest.useRealTimers();
   });
 
-  // @req FR-019
+  // @req 002-note-echo-flows:FR-019
   it("abre o reader no single tap", async () => {
     const { onOpenReader, onOpenEditor } = renderTimelineView([noteNodeA]);
 
@@ -133,7 +133,7 @@ describe("timeline view pending press handling", () => {
     expect(onOpenEditor).not.toHaveBeenCalled();
   });
 
-  // @req FR-020
+  // @req 002-note-echo-flows:FR-020
   it("abre o editor no double tap do mesmo item", () => {
     const { onOpenReader, onOpenEditor } = renderTimelineView([noteNodeA]);
 

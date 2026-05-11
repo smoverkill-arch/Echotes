@@ -4,8 +4,8 @@
 **Entrada**: Especificação da feature em `/specs/[###-feature-name]/spec.md`
 
 **Observação**: Este template é preenchido pelo comando `/speckit.plan`. Use a
-constituição do projeto e os canones vigentes da raiz antes de fechar qualquer
-decisão técnica.
+constituição do projeto, os seis canones executáveis em `docs-canonical/` e os
+docs de governança/status da raiz antes de fechar qualquer decisão técnica.
 
 ## Resumo
 
@@ -34,7 +34,7 @@ decisão técnica.
 
 *BLOQUEIO: deve passar antes da Fase 0 de pesquisa. Revalidar após a Fase 1 de desenho.*
 
-- [ ] Os canones vigentes da raiz foram revisados e citados quando originam decisões.
+- [ ] Os canones executáveis em `docs-canonical/` e os docs de governança/status da raiz foram revisados e citados quando originam decisões.
 - [ ] A navegação centrada no dia e a timeline diária continuam como interação principal.
 - [ ] Os comportamentos de tarefa e nota continuam distintos; nenhuma abstração enfraquece ghost cards ou ecos.
 - [ ] Os invariantes temporais e cenários críticos têm cobertura explícita de verificação.

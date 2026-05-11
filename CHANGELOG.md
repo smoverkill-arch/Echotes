@@ -42,7 +42,7 @@ versioned releases when they start to exist.
 - TEST-SPEC now describes test suites without fragile file-level references
 - DocGuard config now disables the cross-platform `Docs-Diff` file-path
   heuristic and tracks generated assistant artifacts with `.docguardignore`
-- `DATA-MODEL.md`: updated note_echoes status — CRUD flows implemented in
+- `docs-canonical/DATA-MODEL.md`: updated note_echoes status — CRUD flows implemented in
   `002-note-echo-flows`; revision history reordered chronologically
 - `listRelatedNoteDetails` now degrades gracefully on `not_accessible` errors:
   returns `ok: true` with `UnavailableRelatedNote` entries instead of `ok: false`
@@ -61,6 +61,12 @@ versioned releases when they start to exist.
   preserved
 - `specs/002-note-echo-flows/research.md` now uses `newNoteDay` naming for
   continuation draft day selection
+- governance docs now explicitly treat `docs-canonical/` as the home of the six
+  executable DocGuard canons, with root docs reserved for governance, status,
+  operation and history
+- Phase 6 closure tasks now require feature-scoped `@req` tags for all tests
+  created or modified by feature 002, define `phase-6-evidence.md` as the
+  evidence destination and make T055 the final step after gates
 
 ### Fixed
 

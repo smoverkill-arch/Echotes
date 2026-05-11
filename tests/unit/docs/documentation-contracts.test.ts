@@ -7,7 +7,7 @@ const readJson = <T>(relativePath: string) =>
   JSON.parse(readFileSync(resolve(root, relativePath), "utf8")) as T;
 
 describe("documentation contracts", () => {
-  // @req SC-005
+  // @req 002-note-echo-flows:SC-005
   // @req NFR-005
   it("mantem o gate minimo e o mapa canonico do DocGuard alinhados ao repo", () => {
     const packageJson = readJson<{

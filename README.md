@@ -19,10 +19,14 @@ O corte atual entrega:
 
 O repo usa dois grupos principais de documentos.
 
-- `docs-canonical/` guarda os seis canones usados pelo DocGuard.
+- `docs-canonical/` guarda os seis canones executaveis usados pelo DocGuard.
 - a raiz guarda governanca, status, operacao e historico do repo.
 - `docs/` segue como acervo historico.
 - `specs/001-auth-day-surface/` preserva a feature que definiu o baseline.
+
+Ordem de autoridade: `.specify/memory/constitution.md`, depois os seis canones
+em `docs-canonical/`, depois o pacote ativo em `specs/<feature>/`, e por fim o
+codigo e os testes como estado executavel atual.
 
 ## Canones do DocGuard
 

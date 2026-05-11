@@ -10,8 +10,9 @@ registro do corte entregue e como referencia de rastreabilidade.
 
 ## Estado do Canon
 
-O repo adotou o canon da raiz como fonte vigente, com cobertura de migracao
-registrada em `CANON-MIGRATION-COVERAGE.md`.
+O repo adotou `docs-canonical/` como sede dos seis canones executaveis usados
+pelo DocGuard. A raiz guarda governanca, status, operacao e historico, com
+cobertura de migracao registrada em `CANON-MIGRATION-COVERAGE.md`.
 
 `docs/` permanece como acervo historico. Nao use `docs/` para reabrir ou
 sobrescrever o canon vigente sem registrar uma decisao explicita.
@@ -19,22 +20,25 @@ sobrescrever o canon vigente sem registrar uma decisao explicita.
 ## Ordem de Autoridade
 
 1. `.specify/memory/constitution.md`
-2. canones da raiz
+2. canones executaveis em `docs-canonical/`
 3. o pacote ativo em `specs/<feature>/`, quando houver feature nova aberta
 4. o codigo e os testes como estado executavel atual
 
-Se um arquivo historico em `docs/` parecer contradizer a raiz, trate isso como
-achado de auditoria documental, nao como autoridade automatica.
+Se um arquivo historico em `docs/` parecer contradizer o canon vigente, trate
+isso como achado de auditoria documental, nao como autoridade automatica.
 
-## Canones da Raiz
+## Canones Executaveis
+
+- `docs-canonical/REQUIREMENTS.md`
+- `docs-canonical/ARCHITECTURE.md`
+- `docs-canonical/DATA-MODEL.md`
+- `docs-canonical/SECURITY.md`
+- `docs-canonical/TEST-SPEC.md`
+- `docs-canonical/ENVIRONMENT.md`
+
+## Docs de Governanca, Status e Operacao na Raiz
 
 - `README.md`
-- `ARCHITECTURE.md`
-- `DATA-MODEL.md`
-- `SECURITY.md`
-- `TEST-SPEC.md`
-- `ENVIRONMENT.md`
-- `REQUIREMENTS.md`
 - `CURRENT-STATE.md`
 - `ROADMAP.md`
 - `DEPLOYMENT.md`
@@ -74,8 +78,9 @@ Use `corepack pnpm` quando `pnpm` nao estiver disponivel diretamente.
 ## Workflow Obrigatorio
 
 1. Leia o canon relevante antes de mudar codigo ou docs.
-2. Ao tocar docs da raiz, preserve a rastreabilidade em
-   `CANON-MIGRATION-COVERAGE.md` quando a mudanca vier de auditoria documental.
+2. Ao tocar canones executaveis ou docs de governanca/status da raiz, preserve
+   a rastreabilidade em `CANON-MIGRATION-COVERAGE.md` quando a mudanca vier de
+   auditoria documental.
 3. Rode `corepack pnpm run doc:guard` antes de considerar o trabalho fechado.
 4. Rode `corepack pnpm run lint`, `corepack pnpm run test` e
    `corepack pnpm run typecheck` quando a mudanca tocar implementacao.
@@ -85,13 +90,15 @@ Use `corepack pnpm` quando `pnpm` nao estiver disponivel diretamente.
 
 Atualize o canon correspondente quando mexer em:
 
-- auth, sessao ou protecao de rota -> `SECURITY.md`, `ARCHITECTURE.md`
-- schema, queries, RLS ou entidades -> `DATA-MODEL.md`
-- setup, env ou bootstrap local -> `ENVIRONMENT.md`, `RUNBOOKS.md`
-- journeys, escopo de produto ou regras fechadas -> `REQUIREMENTS.md`,
+- auth, sessao ou protecao de rota -> `docs-canonical/SECURITY.md`,
+  `docs-canonical/ARCHITECTURE.md`
+- schema, queries, RLS ou entidades -> `docs-canonical/DATA-MODEL.md`
+- setup, env ou bootstrap local -> `docs-canonical/ENVIRONMENT.md`,
+  `RUNBOOKS.md`
+- journeys, escopo de produto ou regras fechadas -> `docs-canonical/REQUIREMENTS.md`,
   `CURRENT-STATE.md`, `ROADMAP.md`
-- stores, algoritmo da timeline ou overlays -> `ARCHITECTURE.md`
-- suite de testes ou gates -> `TEST-SPEC.md`
+- stores, algoritmo da timeline ou overlays -> `docs-canonical/ARCHITECTURE.md`
+- suite de testes ou gates -> `docs-canonical/TEST-SPEC.md`
 
 ## Politica de Fechamento
 
