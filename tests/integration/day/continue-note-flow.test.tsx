@@ -229,4 +229,53 @@ describe("continue note flow", () => {
     });
     expect(useNavigationStore.getState().pendingReaderOpen).toBeNull();
   });
+
+  // @req FR-017
+  // @req FR-018
+  it("preserva abertura pendente ate a nota criada aparecer no reload do destino", async () => {
+    const noteEcho = buildNoteEcho({
+      id: "30000000-0000-4000-8000-000000000101",
+      from_note_id: sourceNote.id,
+      to_note_id: futureNewNote.id,
+      context_note_id: sourceNote.id,
+      context_day: "2026-05-01",
+      kind: "continue_note",
+    });
+
+    mockSupabase.setRpcHandler("continue_note", () =>
+      mockSupabase.ok({ newNote: futureNewNote, noteEcho }),
+    );
+
+    const route = render(<ProtectedDayRoute />);
+    await flushMicrotasks();
+    await openSourceReader();
+    await continueFromSource("2026-05-02");
+
+    await waitFor(() => {
+      expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-05-02");
+    });
+
+    mockSupabase.setTableRows("notes", []);
+    mockSupabase.setTableRows("note_echoes", []);
+    mockSearchParams.date = "2026-05-02";
+    route.rerender(<ProtectedDayRoute />);
+    await flushMicrotasks();
+
+    expect(useNavigationStore.getState().pendingReaderOpen).toMatchObject({
+      noteId: futureNewNote.id,
+      noteDay: "2026-05-02",
+      actionOrigin: "continue_note_created",
+    });
+
+    mockSupabase.setTableRows("notes", [futureNewNote]);
+    mockSupabase.setTableRows("note_echoes", [noteEcho]);
+    route.unmount();
+    render(<ProtectedDayRoute />);
+    await flushMicrotasks();
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Continuidade futura").length).toBeGreaterThan(1);
+    });
+    expect(useNavigationStore.getState().pendingReaderOpen).toBeNull();
+  });
 });

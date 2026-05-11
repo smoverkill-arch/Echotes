@@ -352,7 +352,6 @@ export default function ProtectedDayRoute() {
     const noteToOpen = notesById.get(pendingReaderOpen.noteId);
 
     if (!noteToOpen || noteToOpen.day !== pendingReaderOpen.noteDay) {
-      consumePendingReaderOpen(pendingReaderOpen.requestId);
       return;
     }
 

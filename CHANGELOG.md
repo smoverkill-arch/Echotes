@@ -65,6 +65,8 @@ versioned releases when they start to exist.
 ### Fixed
 
 - Spec Kit DocGuard integration no longer depends on `docguard-cli@latest`
+- future-day `Continuar desta nota` no longer consumes `pendingReaderOpen`
+  before the created note appears in the destination day reload
 - requirement traceability now links canonical IDs to the real test suites
 - documentation contracts now verify DocGuard gates and RLS coverage
 - note echo manual creation now relies on server-derived ownership instead of
