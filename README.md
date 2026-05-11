@@ -92,6 +92,8 @@ O gate local usa estes comandos:
   `commands/`, das metricas documentais.
 - `.agents/` guarda skills do projeto.
 - `.agent/` e `commands/` podem surgir por automacao.
+- `.clinerules`, `.cursor/`, `.gemini/` e `.windsurfrules` registram regras
+  para ferramentas auxiliares de desenvolvimento usadas esporadicamente.
 - `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` definem o bootstrap do app.
 - `eslint.config.js` e `jest.config.js` definem os gates tecnicos.
 - `.expo/` guarda estado local do Expo durante desenvolvimento.

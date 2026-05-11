@@ -215,9 +215,12 @@ export default function ProtectedDayRoute() {
       setEchoFeedbackMessage(
         result.status === "already_removed" ? "Eco ja removido." : "Eco removido.",
       );
+      replaceRelatedNotes(
+        relatedNotes.filter((note) => note.echoId !== relatedNote.echoId),
+      );
       await reload();
     },
-    [activeNote, reload],
+    [activeNote, relatedNotes, reload, replaceRelatedNotes],
   );
 
   useEffect(() => {
