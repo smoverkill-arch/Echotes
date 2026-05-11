@@ -29,7 +29,7 @@
 ## Traceability Quality
 
 - [X] CHK015 Is the `@req` tag format fully specified, including feature id, requirement id family, numbering range and one-tag-per-line expectation? [Clarity, Tasks §T046, Blueprint §T046]
-- [ ] CHK016 Are all expected suites for FR-001 through FR-024 and SC-001 through SC-006 listed with enough specificity to avoid relying on broad search output alone? [Completeness, Blueprint §T046]
+- [X] CHK016 Are all expected suites for FR-001 through FR-024 and SC-001 through SC-006 listed with enough specificity to avoid relying on broad search output alone? [Completeness, Blueprint §T046]
 - [X] CHK017 Does the traceability map cover both user-facing stories and technical safety contracts such as RPC atomicity, rollback and absence of task fields? [Coverage, Spec §FR-016, Spec §FR-018, Blueprint §T046]
 - [X] CHK018 Are requirements explicit for how to handle legacy unprefixed `@req FR-*` / `@req SC-*` tags in files touched by this feature? [Clarity, Tasks §T046]
 - [X] CHK019 Are requirements explicit for how to handle unprefixed tags in baseline-only suites so Phase 6 does not create unnecessary churn? [Boundary, Blueprint §T046]

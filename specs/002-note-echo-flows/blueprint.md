@@ -2302,9 +2302,9 @@ Mapa minimo de rastreabilidade por suite:
 | Suite | Requisitos esperados |
 |-------|----------------------|
 | `note-echo-relations.test.ts` | FR-003, FR-005, FR-008, SC-002 |
-| `use-day-entries.test.tsx` | FR-001, FR-002, FR-003, FR-004 |
-| `timeline-view.test.tsx` | FR-002, FR-003, FR-019, FR-020 |
-| `note-reader-relations.test.tsx` | FR-004, FR-010, FR-011, FR-021 |
+| `use-day-entries.test.tsx` | FR-001, FR-002, FR-003, FR-004, SC-001 |
+| `timeline-view.test.tsx` | FR-002, FR-003, FR-019, FR-020, SC-001, SC-006 |
+| `note-reader-relations.test.tsx` | FR-004, FR-010, FR-011, FR-021, SC-001 |
 | `note-echo-navigation.test.tsx` | FR-011, FR-012 |
 | `list-note-candidates.test.ts` | FR-022, FR-023, SC-004 |
 | `create-note-echo.test.ts` | FR-006, FR-007, FR-008, FR-010, SC-002 |
@@ -2315,6 +2315,17 @@ Mapa minimo de rastreabilidade por suite:
 | `continue-note.test.ts` | FR-014, FR-015, FR-016, FR-017, FR-018, SC-005 |
 | `continue-note-flow.test.tsx` | FR-014, FR-015, FR-016, FR-017, FR-018, SC-005, SC-006 |
 | `derive-timeline-nodes-regression.test.ts` | FR-018, FR-023, FR-024, SC-006 |
+
+Cobertura obrigatoria dos criterios de sucesso:
+
+| Criterio | Evidencia minima feature-scoped |
+|----------|---------------------------------|
+| `SC-001` | `use-day-entries.test.tsx`, `timeline-view.test.tsx` e `note-reader-relations.test.tsx` devem cobrir que ecos carregados no dia aparecem como contagem direta visivel na timeline e levam ao Reader contextual de notas conectadas. Como o tempo de 30 segundos depende de QA humano, Phase 6 deve registrar a evidencia automatizada como proxy e explicitar se QA cronometrado foi executado ou nao. |
+| `SC-002` | `note-echo-relations.test.ts` e `create-note-echo.test.ts` devem cobrir auto-relacao, duplicidade direta/invertida, ausencia de conexao invalida e feedback `Eco ja existe`. |
+| `SC-003` | `delete-note-echo.test.ts` e `note-echo-management.test.tsx` devem cobrir confirmacao, remocao apenas da relacao e preservacao das notas. |
+| `SC-004` | `list-note-candidates.test.ts` e `note-echo-management.test.tsx` devem cobrir candidata ja conectada desabilitada, lote acima de 50 e `carregar mais`. Como o tempo de 1 minuto depende de QA humano, Phase 6 deve registrar a evidencia automatizada como proxy e explicitar se QA cronometrado foi executado ou nao. |
+| `SC-005` | `build-continue-note-brief.test.ts`, `documentation-contracts.test.ts`, `continue-note.test.ts` e `continue-note-flow.test.tsx` devem cobrir mesmo dia, dia futuro, relacao visivel ao final e falha sem nota orfa. Como o tempo de 2 minutos depende de QA humano, Phase 6 deve registrar a evidencia automatizada como proxy e explicitar se QA cronometrado foi executado ou nao. |
+| `SC-006` | `timeline-view.test.tsx`, `continue-note-flow.test.tsx` e `derive-timeline-nodes-regression.test.ts` devem cobrir contagem direta na timeline e ausencia de ghost card, `source_day`, `target_day`, `scheduled_at` ou comportamento de tarefa para notas. |
 
 Se `FR-024` ou `SC-006` estiverem cobertos apenas por
 `tests/integration/day/ghost-navigation.test.tsx`, manter a suite como
@@ -2328,11 +2339,15 @@ Executar:
 
 ```powershell
 rg -n "@req 002-note-echo-flows:(FR|SC)-" tests/unit tests/integration/day
+rg -n "@req 002-note-echo-flows:SC-00[1-6]" tests/unit tests/integration/day
 rg -n "@req (FR|SC)-" tests/unit/notes tests/unit/day tests/unit/timeline tests/integration/day/continue-note-flow.test.tsx tests/integration/day/note-echo-management.test.tsx tests/integration/day/note-echo-navigation.test.tsx
 ```
 
 O primeiro comando precisa listar as suites da tabela. O segundo comando deve
-ser revisado: qualquer match em suite nova da feature precisa ser convertido ou
+conter pelo menos uma ocorrencia feature-scoped para cada `SC-001`..`SC-006`;
+ausencia de qualquer SC bloqueia T046 e deve ser corrigida na suite apropriada,
+nao justificada por cobertura baseline-only. O terceiro comando deve ser
+revisado: qualquer match em suite nova da feature precisa ser convertido ou
 justificado no bloco de evidencia final como tag herdada fora do escopo.
 
 ---
