@@ -157,4 +157,32 @@ describe("deriveTimelineNodes regressions", () => {
       scheduledAt: `${targetDay}T18:30:00+00:00`,
     });
   });
+
+  // @req FR-018
+  it("mantem nota continuada como nota real sem ghost card ou campos de tarefa", () => {
+    const continuedNote = buildNote({
+      id: "10000000-0000-4000-8000-000000000099",
+      day: targetDay,
+      title: "Continuidade",
+      created_at: `${targetDay}T11:00:00+00:00`,
+      updated_at: `${targetDay}T11:00:00+00:00`,
+    });
+
+    const nodes = deriveTimelineNodes({
+      selectedDay: targetDay,
+      notes: [continuedNote],
+      tasks: [],
+    });
+
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0]).toMatchObject({
+      type: "note",
+      itemKind: "note",
+      itemId: continuedNote.id,
+      scheduledAt: null,
+    });
+    expect(nodes[0].data).not.toHaveProperty("source_day");
+    expect(nodes[0].data).not.toHaveProperty("target_day");
+    expect(nodes[0].data).not.toHaveProperty("scheduled_at");
+  });
 });

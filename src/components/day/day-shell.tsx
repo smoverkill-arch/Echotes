@@ -1,7 +1,13 @@
 import { StyleSheet, View } from "react-native";
 
 import { AuthErrorBanner } from "../auth/auth-error-banner";
-import type { Note, NoteEcho, NoteEchoCandidate, RelatedNote } from "../../types/note";
+import type {
+  ContinueNoteInput,
+  Note,
+  NoteEcho,
+  NoteEchoCandidate,
+  RelatedNote,
+} from "../../types/note";
 import type { Task } from "../../types/task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
 import type { ReaderState, EditorState } from "../../stores/ui-store";
@@ -11,6 +17,7 @@ import { BreadcrumbBar } from "./breadcrumb-bar";
 import { DayHeader } from "./day-header";
 import { TaskEditor } from "../forms/task-editor";
 import { NoteEditor } from "../forms/note-editor";
+import { ContinueNoteEditor } from "../forms/continue-note-editor";
 import { NoteEchoPicker } from "../reader/note-echo-picker";
 import { NoteReader } from "../reader/note-reader";
 import { TaskReader } from "../reader/task-reader";
@@ -34,6 +41,9 @@ interface DayShellProps {
   relatedNotes: RelatedNote[];
   activeNoteEchoes: NoteEcho[];
   isEchoPickerVisible: boolean;
+  isContinueNoteEditorVisible: boolean;
+  isContinuingNote: boolean;
+  continueNoteErrorMessage: string | null;
   echoFeedbackMessage: string | null;
   onSignOut: () => Promise<void> | void;
   onTabChange: (tab: DayTab) => void;
@@ -49,6 +59,8 @@ interface DayShellProps {
   onSelectEchoCandidate: (candidate: NoteEchoCandidate) => Promise<void> | void;
   onRemoveEcho?: (relatedNote: RelatedNote) => void;
   onContinueNote?: () => void;
+  onCloseContinueNoteEditor: () => void;
+  onSubmitContinueNote: (input: ContinueNoteInput) => Promise<void> | void;
   onReturnToSource: () => void;
   onCloseReader: () => void;
   onCloseEditor: () => void;
@@ -73,6 +85,9 @@ export function DayShell({
   relatedNotes,
   activeNoteEchoes,
   isEchoPickerVisible,
+  isContinueNoteEditorVisible,
+  isContinuingNote,
+  continueNoteErrorMessage,
   echoFeedbackMessage,
   onSignOut,
   onTabChange,
@@ -88,6 +103,8 @@ export function DayShell({
   onSelectEchoCandidate,
   onRemoveEcho,
   onContinueNote,
+  onCloseContinueNoteEditor,
+  onSubmitContinueNote,
   onReturnToSource,
   onCloseReader,
   onCloseEditor,
@@ -151,6 +168,16 @@ export function DayShell({
         existingEchoes={activeNoteEchoes}
         onClose={onCloseEchoPicker}
         onSelectCandidate={onSelectEchoCandidate}
+      />
+
+      <ContinueNoteEditor
+        visible={isContinueNoteEditorVisible}
+        selectedDay={date}
+        sourceNote={activeNote}
+        isSubmitting={isContinuingNote}
+        errorMessage={continueNoteErrorMessage}
+        onClose={onCloseContinueNoteEditor}
+        onSubmit={onSubmitContinueNote}
       />
 
       <TaskReader

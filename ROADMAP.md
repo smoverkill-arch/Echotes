@@ -24,7 +24,7 @@ Current migration goals:
 The following areas remain outside the current baseline and should not be
 assumed delivered:
 
-- complete `note_echoes` lifecycle, including `continue_note`
+- inline mention semantics beyond the delivered `note_echoes` lifecycle
 - broader calendar behaviors beyond the current day-surface cut
 - automated product workflows
 - release and deployment automation for production mobile delivery

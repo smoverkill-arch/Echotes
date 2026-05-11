@@ -76,6 +76,10 @@ describe("documentation contracts", () => {
       resolve(root, "supabase/migrations/003_harden_note_echo_surface.sql"),
       "utf8",
     );
+    const noteEchoFlowsSql = readFileSync(
+      resolve(root, "supabase/migrations/002_note_echo_flows.sql"),
+      "utf8",
+    );
     const runbooks = readFileSync(resolve(root, "RUNBOOKS.md"), "utf8");
 
     expect(sql).toContain("alter table public.tags enable row level security;");
@@ -103,6 +107,18 @@ describe("documentation contracts", () => {
     );
     expect(hardeningSql).toContain("set search_path = public");
     expect(hardeningSql).toContain("drop extension if exists pg_graphql cascade");
+    expect(noteEchoFlowsSql).toContain("public.continue_note(");
+    expect(noteEchoFlowsSql).toContain("security definer");
+    expect(noteEchoFlowsSql).toContain("set search_path = public");
+    expect(noteEchoFlowsSql).toContain("current_user_id uuid := auth.uid()");
+    expect(noteEchoFlowsSql).toContain("insert into public.notes");
+    expect(noteEchoFlowsSql).toContain("insert into public.note_echoes");
+    expect(noteEchoFlowsSql).toContain("'continue_note'");
+    expect(noteEchoFlowsSql).toContain("source_note.day");
+    expect(noteEchoFlowsSql).toContain(
+      "grant execute on function public.continue_note",
+    );
+    expect(noteEchoFlowsSql).not.toContain("service_role");
     expect(runbooks).toContain("003_harden_note_echo_surface.sql");
     expect(runbooks).toContain("supabase migration repair <version> --status applied");
   });

@@ -6,6 +6,7 @@ import { AuthErrorBanner } from "../../src/components/auth/auth-error-banner";
 import { DayShell } from "../../src/components/day/day-shell";
 import { signOut } from "../../src/features/auth/api/sign-out";
 import { useAuthSession } from "../../src/features/auth/hooks/use-auth-session";
+import { continueNote } from "../../src/features/notes/api/continue-note";
 import { createNoteEcho } from "../../src/features/notes/api/create-note-echo";
 import { deleteNoteEcho } from "../../src/features/notes/api/delete-note-echo";
 import { listRelatedNoteDetails } from "../../src/features/notes/api/list-note-echoes";
@@ -14,7 +15,11 @@ import { useCalendarStore } from "../../src/stores/calendar-store";
 import { useDayTimeline } from "../../src/features/day/hooks/use-day-timeline";
 import { useNavigationStore } from "../../src/stores/navigation-store";
 import { useUIStore } from "../../src/stores/ui-store";
-import type { NoteEchoCandidate, RelatedNote } from "../../src/types/note";
+import type {
+  ContinueNoteInput,
+  NoteEchoCandidate,
+  RelatedNote,
+} from "../../src/types/note";
 import { parseDayKey } from "../../src/utils/date";
 
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -83,6 +88,12 @@ export default function ProtectedDayRoute() {
   );
   const [relatedNotes, setRelatedNotes] = useState<RelatedNote[]>([]);
   const [isEchoPickerVisible, setIsEchoPickerVisible] = useState(false);
+  const [isContinueNoteEditorVisible, setIsContinueNoteEditorVisible] =
+    useState(false);
+  const [isContinuingNote, setIsContinuingNote] = useState(false);
+  const [continueNoteErrorMessage, setContinueNoteErrorMessage] = useState<
+    string | null
+  >(null);
   const [echoFeedbackMessage, setEchoFeedbackMessage] = useState<string | null>(
     null,
   );
@@ -222,6 +233,56 @@ export default function ProtectedDayRoute() {
     },
     [activeNote, relatedNotes, reload, replaceRelatedNotes],
   );
+  const handleContinueNote = useCallback(
+    async (draft: ContinueNoteInput) => {
+      if (!activeNote || !session?.userId) {
+        return;
+      }
+
+      setIsContinuingNote(true);
+      setContinueNoteErrorMessage(null);
+
+      try {
+        const result = await continueNote(draft);
+
+        if (!result.ok) {
+          setContinueNoteErrorMessage(result.errorMessage);
+          return;
+        }
+
+        setIsContinueNoteEditorVisible(false);
+        setEchoFeedbackMessage("Nota continuada.");
+        setPendingReaderOpen({
+          noteId: result.newNote.id,
+          noteDay: result.newNote.day,
+          requestId: `${result.newNote.id}:${Date.now()}`,
+          sessionUserId: session.userId,
+          actionOrigin: "continue_note_created",
+        });
+
+        if (result.newNote.day === resolvedDate) {
+          await reload();
+          return;
+        }
+
+        closeReader();
+        closeEditor();
+        router.push(`/day/${result.newNote.day}`);
+      } finally {
+        setIsContinuingNote(false);
+      }
+    },
+    [
+      activeNote,
+      closeEditor,
+      closeReader,
+      reload,
+      resolvedDate,
+      router,
+      session?.userId,
+      setPendingReaderOpen,
+    ],
+  );
 
   useEffect(() => {
     setSelectedDate(resolvedDate);
@@ -229,6 +290,8 @@ export default function ProtectedDayRoute() {
 
   useEffect(() => {
     setIsEchoPickerVisible(false);
+    setIsContinueNoteEditorVisible(false);
+    setContinueNoteErrorMessage(null);
     setEchoFeedbackMessage(null);
   }, [activeNote?.id, resolvedDate]);
 
@@ -392,6 +455,9 @@ export default function ProtectedDayRoute() {
       relatedNotes={relatedNotes}
       activeNoteEchoes={activeNoteEchoes}
       isEchoPickerVisible={isEchoPickerVisible}
+      isContinueNoteEditorVisible={isContinueNoteEditorVisible}
+      isContinuingNote={isContinuingNote}
+      continueNoteErrorMessage={continueNoteErrorMessage}
       echoFeedbackMessage={echoFeedbackMessage}
       onSignOut={async () => {
         await signOut();
@@ -449,6 +515,14 @@ export default function ProtectedDayRoute() {
       onCloseEchoPicker={closeEchoPicker}
       onSelectEchoCandidate={handleSelectEchoCandidate}
       onRemoveEcho={handleRemoveEcho}
+      onContinueNote={() => {
+        setContinueNoteErrorMessage(null);
+        setIsContinueNoteEditorVisible(true);
+      }}
+      onCloseContinueNoteEditor={() => {
+        setIsContinueNoteEditorVisible(false);
+      }}
+      onSubmitContinueNote={handleContinueNote}
       onReturnToSource={() => {
         if (!destinationTemporalContext) {
           return;

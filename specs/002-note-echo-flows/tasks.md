@@ -100,22 +100,22 @@
 
 ### Pre-requisito tecnico da Historia do Usuario 3
 
-- [ ] T041 [US3] Criar migration da RPC atomica continue_note em supabase/migrations/002_note_echo_flows.sql
-- [ ] T013 [US3] Criar API de continuacao atomica via rpc em src/features/notes/api/continue-note.ts
+- [X] T041 [US3] Criar migration da RPC atomica continue_note em supabase/migrations/002_note_echo_flows.sql
+- [X] T013 [US3] Criar API de continuacao atomica via rpc em src/features/notes/api/continue-note.ts
 
 ### Testes da Historia do Usuario 3
 
-- [ ] T037 [P] [US3] Adicionar testes unitarios de buildContinueNoteBrief em tests/unit/notes/build-continue-note-brief.test.ts
-- [ ] T039 [P] [US3] Adicionar teste de contrato da migration RPC em tests/unit/docs/documentation-contracts.test.ts cobrindo existencia de supabase/migrations/002_note_echo_flows.sql, public.continue_note, security definer, auth.uid(), inserts em public.notes e public.note_echoes, kind = 'continue_note', rollback e ausencia de service_role
-- [ ] T038 [P] [US3] Adicionar testes unitarios de continueNote rpc sucesso/falha sem nota orfa em tests/unit/notes/continue-note.test.ts, com casos separados para mesmo dia e dia futuro cobrindo payload `new_note_day`, persistencia em `notes.day`, `context_day = selectedDay`, rollback e ausencia de `source_day`, `target_day`, `scheduled_at` ou campos de tarefa
-- [ ] T040 [US3] Adicionar teste de integracao para Continuar desta nota no mesmo dia e em dia futuro em tests/integration/day/continue-note-flow.test.tsx, com assercoes separadas para: mesmo dia sem navegacao, dia futuro navegando para `/day/[newNoteDay]`, `routeDay`, payload da RPC, `notes.day`, `context_day` como proveniencia e nao rota, Reader aberto apenas depois de `note.day` conferir, consumo unico de `pendingReaderOpen` e ausencia de campos temporais de tarefa
+- [X] T037 [P] [US3] Adicionar testes unitarios de buildContinueNoteBrief em tests/unit/notes/build-continue-note-brief.test.ts
+- [X] T039 [P] [US3] Adicionar teste de contrato da migration RPC em tests/unit/docs/documentation-contracts.test.ts cobrindo existencia de supabase/migrations/002_note_echo_flows.sql, public.continue_note, security definer, auth.uid(), inserts em public.notes e public.note_echoes, kind = 'continue_note', rollback e ausencia de service_role
+- [X] T038 [P] [US3] Adicionar testes unitarios de continueNote rpc sucesso/falha sem nota orfa em tests/unit/notes/continue-note.test.ts, com casos separados para mesmo dia e dia futuro cobrindo payload `new_note_day`, persistencia em `notes.day`, `context_day = selectedDay`, rollback e ausencia de `source_day`, `target_day`, `scheduled_at` ou campos de tarefa
+- [X] T040 [US3] Adicionar teste de integracao para Continuar desta nota no mesmo dia e em dia futuro em tests/integration/day/continue-note-flow.test.tsx, com assercoes separadas para: mesmo dia sem navegacao, dia futuro navegando para `/day/[newNoteDay]`, `routeDay`, payload da RPC, `notes.day`, `context_day` como proveniencia e nao rota, Reader aberto apenas depois de `note.day` conferir, consumo unico de `pendingReaderOpen` e ausencia de campos temporais de tarefa
 
 ### Implementacao da Historia do Usuario 3
 
-- [ ] T042 [US3] Implementar formulario/modal de continuacao com `newNoteDay` editavel e generatedBrief em src/components/forms/continue-note-editor.tsx, evitando vocabulario `targetDay`/`target_day` na UI e no estado de nota
-- [ ] T043 [US3] Integrar acao Continuar desta nota ao NoteReader em src/components/reader/note-reader.tsx
-- [ ] T044 [US3] Integrar fluxo de continuacao, rpc, reload, `pendingReaderOpen` de consumo unico e navegacao ao `newNoteDay` em app/day/[date].tsx, limpando pendencia em sucesso, falha, logout, cancelamento e navegacao manual
-- [ ] T045 [US3] Garantir que notas continuadas nao criam ghost card, `source_day`, `target_day`, `scheduled_at` ou qualquer estado/campo de tarefa em src/features/timeline/utils/derive-timeline-nodes.ts
+- [X] T042 [US3] Implementar formulario/modal de continuacao com `newNoteDay` editavel e generatedBrief em src/components/forms/continue-note-editor.tsx, evitando vocabulario `targetDay`/`target_day` na UI e no estado de nota
+- [X] T043 [US3] Integrar acao Continuar desta nota ao NoteReader em src/components/reader/note-reader.tsx
+- [X] T044 [US3] Integrar fluxo de continuacao, rpc, reload, `pendingReaderOpen` de consumo unico e navegacao ao `newNoteDay` em app/day/[date].tsx, limpando pendencia em sucesso, falha, logout, cancelamento e navegacao manual
+- [X] T045 [US3] Garantir que notas continuadas nao criam ghost card, `source_day`, `target_day`, `scheduled_at` ou qualquer estado/campo de tarefa em src/features/timeline/utils/derive-timeline-nodes.ts
 
 **Ponto de validacao**: Todas as historias funcionam com persistencia atomica de continuacao e sem estado parcial visivel.
 
