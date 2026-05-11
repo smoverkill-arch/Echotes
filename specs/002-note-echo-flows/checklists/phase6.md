@@ -12,8 +12,8 @@
 - [X] CHK002 Are the boundaries between the closed `001-auth-day-surface` baseline and active `002-note-echo-flows` traceability requirements stated without ambiguity? [Consistency, Tasks §T046, Blueprint §T046]
 - [X] CHK003 Does the Phase 6 requirement set state that inherited baseline tests may remain but cannot prove this feature without the `002-note-echo-flows:` prefix? [Clarity, Tasks §T046]
 - [X] CHK004 Are mentions inline `@nota` still specified as out of scope during Phase 6 closure, so canon updates cannot accidentally promote them as delivered? [Consistency, Spec §FR-024, Blueprint §T047]
-- [ ] CHK005 Does Phase 6 define which artifact has authority if root-canon instructions name files that are currently represented under `docs-canonical/*` instead of root-level paths? [Conflict, Blueprint §T047]
-- [ ] CHK006 Are `docs/` and `docs-canonical/*` roles distinguished clearly enough that neither can silently override the current canon authority? [Clarity, Constitution §I, Blueprint §T047]
+- [X] CHK005 Does Phase 6 define which artifact has authority if root-canon instructions name files that are currently represented under `docs-canonical/*` instead of root-level paths? [Conflict, Blueprint §T047]
+- [X] CHK006 Are `docs/` and `docs-canonical/*` roles distinguished clearly enough that neither can silently override the current canon authority? [Clarity, Constitution §I, Blueprint §T047]
 
 ## Requirement Completeness
 
@@ -44,7 +44,7 @@
 - [X] CHK025 Are requirements for `REQUIREMENTS.md` scoped to delivered behaviors while preserving `@nota` inline as excluded? [Consistency, Spec §FR-024, Blueprint §T047]
 - [ ] CHK026 Are `TEST-SPEC` requirements explicit about both feature-scoped suites and final gates, including `doc:score` as reported maturity rather than merge-blocking proof by itself? [Clarity, Blueprint §T047, Blueprint §T054]
 - [ ] CHK027 Does Phase 6 specify how root canon updates should handle already-present partial canon statements, so the final patch consolidates rather than contradicts them? [Ambiguity, Blueprint §T047]
-- [ ] CHK028 Are requirements clear that `docs-canonical/*` may be updated only as mirror/historical support and must not become the source of authority? [Consistency, Constitution §I, Blueprint §T047]
+- [X] CHK028 Are requirements clear that `docs-canonical/*` contains the executable canons, root docs contain governance/status, and `docs/` remains historical support without becoming current authority? [Consistency, Constitution §I, Blueprint §T047]
 
 ## Security And Data Boundaries
 

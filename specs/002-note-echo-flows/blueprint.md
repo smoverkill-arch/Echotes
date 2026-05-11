@@ -33,8 +33,9 @@ soberana, ecos exclusivos de notas, ghost card exclusivo de tarefas, sem
   DocGuard, lint, test e typecheck -> T046, T047, T048, T049, T050, T051,
   T052, T053, T054.
 - O fechamento exige bloco de evidencia concreta alem de DocGuard PASS: paths de
-  canon da raiz, revisao de drift/migracao, comandos exatos e evidencia da
-  migration/RPC -> T055.
+  canones executaveis em `docs-canonical/*`, docs de governanca/status da raiz,
+  revisao de drift/migracao, comandos exatos e evidencia da migration/RPC ->
+  T055.
 
 ## Implementation Order
 
@@ -2336,13 +2337,13 @@ justificado no bloco de evidencia final como tag herdada fora do escopo.
 
 ---
 
-### T047: Atualizar canon vigente da raiz
+### T047: Atualizar canon vigente
 
-**File**: `README.md`, `CURRENT-STATE.md`, `ROADMAP.md`,
-`DATA-MODEL.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `TEST-SPEC.md`,
-`SECURITY.md` quando RLS/RPC for afetado (modify). `docs-canonical/*` pode ser
-atualizado apenas como espelho historico/adicional se necessario; a autoridade
-continua no canon da raiz.
+**File**: canones executaveis em `docs-canonical/`:
+`REQUIREMENTS.md`, `ARCHITECTURE.md`, `DATA-MODEL.md`, `TEST-SPEC.md` e
+`SECURITY.md` quando RLS/RPC for afetado (modify). Documentos de
+governanca/status da raiz aplicaveis: `README.md`, `CURRENT-STATE.md`,
+`ROADMAP.md`, `CHANGELOG.md` e `DRIFT-LOG.md` (modify if needed).
 
 **Requirements**:
 
@@ -2354,9 +2355,13 @@ Historias implementadas e verificadas.
 
 **Implementation**:
 
-Atualizar a raiz como fonte vigente, usando `specs/002-note-echo-flows/spec.md`,
-`plan.md`, `contracts/continue-note.md`, codigo e testes como base. Nao usar
-`docs/` como autoridade para reabrir o corte.
+Atualizar o canon vigente conforme a constituicao 2.1.0: os canones
+executaveis vivem em `docs-canonical/*`; a raiz guarda governanca, status,
+operacao e historico; `docs/` permanece acervo historico. Usar
+`specs/002-note-echo-flows/spec.md`, `plan.md`, `contracts/continue-note.md`,
+codigo e testes como base. Nao usar `docs/` como autoridade para reabrir o
+corte nem deixar que um documento de raiz substitua o conteudo executavel dos
+canones em `docs-canonical/*`.
 
 Conteudo esperado por arquivo:
 
@@ -2365,22 +2370,24 @@ Conteudo esperado por arquivo:
 | `README.md` | Registrar `002-note-echo-flows` como comportamento entregue no fluxo do dia, com Reader, ecos diretos, Adicionar eco, Remover eco e Continuar desta nota. |
 | `CURRENT-STATE.md` | Mover US1, US2 e US3 para estado implementado, citando que Phase 6 e fechamento transversal e nao nova feature. |
 | `ROADMAP.md` | Retirar o corte de backlog futuro e manter `@nota` inline como fora de escopo. |
-| `DATA-MODEL.md` | Documentar `note_echoes`, proveniencias internas `manual_link` e `continue_note`, `context_day` como proveniencia da acao, `notes.day` como unico dia de destino da nota continuada e ausencia de campos de tarefa. |
-| `ARCHITECTURE.md` | Descrever carregamento relacional em `useDayEntries`, derivacao de contagem direta, Reader contextual, navegacao cross-day e consumo unico de `pendingReaderOpen` apos a nota existir no dia carregado. |
-| `REQUIREMENTS.md` | Registrar os requisitos entregues de ecos diretos, gerenciamento manual, continuacao atomica e a exclusao de mencoes inline. |
-| `TEST-SPEC.md` | Listar as suites feature-scoped e os gates `lint`, `test`, `typecheck`, `doc:guard` e `doc:score`. |
-| `SECURITY.md` | Registrar trust boundary da RPC `public.continue_note`: `SECURITY DEFINER` com checks por `auth.uid()`, `search_path` fixo, grant minimo para usuario autenticado, falha unauthenticated/cross-user sem escrita parcial e ausencia de `service_role` no cliente. |
+| `docs-canonical/DATA-MODEL.md` | Documentar `note_echoes`, proveniencias internas `manual_link` e `continue_note`, `context_day` como proveniencia da acao, `notes.day` como unico dia de destino da nota continuada e ausencia de campos de tarefa. |
+| `docs-canonical/ARCHITECTURE.md` | Descrever carregamento relacional em `useDayEntries`, derivacao de contagem direta, Reader contextual, navegacao cross-day e consumo unico de `pendingReaderOpen` apos a nota existir no dia carregado. |
+| `docs-canonical/REQUIREMENTS.md` | Registrar os requisitos entregues de ecos diretos, gerenciamento manual, continuacao atomica e a exclusao de mencoes inline. |
+| `docs-canonical/TEST-SPEC.md` | Listar as suites feature-scoped e os gates `lint`, `test`, `typecheck`, `doc:guard` e `doc:score`. |
+| `docs-canonical/SECURITY.md` | Registrar trust boundary da RPC `public.continue_note`: `SECURITY DEFINER` com checks por `auth.uid()`, `search_path` fixo, grant minimo para usuario autenticado, falha unauthenticated/cross-user sem escrita parcial e ausencia de `service_role` no cliente. |
 
-`docs-canonical/*` so entra se a alteracao da raiz exigir espelho historico
-para manter DocGuard coerente. Se entrar, declarar no bloco de evidencia que a
-autoridade continuou na raiz.
+Se um documento de raiz resumir uma decisao tambem descrita em
+`docs-canonical/*`, ele deve apontar para o canon executavel em vez de
+contradize-lo ou substitui-lo. `docs/` nao deve ser alterado nesta Phase 6
+salvo decisao explicita de auditoria documental, que deve ser registrada em
+`CANON-MIGRATION-COVERAGE.md`.
 
 **Verification**:
 
 Executar revisao textual antes de T053/T054:
 
 ```powershell
-rg -n "002-note-echo-flows|Continuar desta nota|Adicionar eco|Remover eco|note_echoes|continue_note|pendingReaderOpen|@nota|service_role" README.md CURRENT-STATE.md ROADMAP.md DATA-MODEL.md ARCHITECTURE.md REQUIREMENTS.md TEST-SPEC.md SECURITY.md
+rg -n "002-note-echo-flows|Continuar desta nota|Adicionar eco|Remover eco|note_echoes|continue_note|pendingReaderOpen|@nota|service_role" README.md CURRENT-STATE.md ROADMAP.md docs-canonical/REQUIREMENTS.md docs-canonical/ARCHITECTURE.md docs-canonical/DATA-MODEL.md docs-canonical/TEST-SPEC.md docs-canonical/SECURITY.md
 ```
 
 O output precisa mostrar o comportamento entregue nos canones corretos e
@@ -2439,9 +2446,9 @@ T047, T048.
 Abrir os dois arquivos e decidir com evidencia:
 
 - `DRIFT-LOG.md`: alterar somente se Phase 6 deixar desalinhamento temporario
-  entre codigo executavel e canon da raiz.
+  entre codigo executavel e canon vigente.
 - `CANON-MIGRATION-COVERAGE.md`: alterar somente se T047 absorver ou
-  reinterpretar conteudo historico vindo de `docs/` ou `docs-canonical/*`.
+  reinterpretar conteudo historico vindo de `docs/`.
 
 Se nenhum patch for necessario, nao fabricar entrada. Registrar no bloco final
 que os arquivos foram revisados e permaneceram sem mudanca.
@@ -2613,8 +2620,8 @@ Registrar no resumo da PR ou entrega, fora dos arquivos de codigo, um bloco com
 estes itens:
 
 - status de T046, incluindo suites com tags `@req 002-note-echo-flows:*`;
-- paths de canon da raiz alterados em T047;
-- status de `docs-canonical/*`, se usado apenas como espelho;
+- paths de canones executaveis alterados em `docs-canonical/*`;
+- paths de docs de governanca/status da raiz alterados em T047;
 - resultado da revisao de `DRIFT-LOG.md` e `CANON-MIGRATION-COVERAGE.md`;
 - comandos exatos de T050 a T054, exit code, contagem de testes e score;
 - evidencia de que `public.continue_note` cria nota e eco em transacao atomica
@@ -2678,7 +2685,7 @@ os outputs reais produzidos nesta fase.
 - [ ] T044: Integrar fluxo de continuacao, rpc, reload e navegacao ao dia destino
 - [ ] T045: Garantir que notas continuadas nao criam ghost card, source_day ou target_day
 - [ ] T046: Atualizar @req dos novos testes com tags feature-scoped 002-note-echo-flows
-- [ ] T047: Atualizar canon da raiz quando o comportamento estiver implementado
+- [ ] T047: Atualizar canon vigente quando o comportamento estiver implementado
 - [ ] T048: Atualizar CHANGELOG com a feature 002-note-echo-flows
 - [ ] T049: Revisar DRIFT-LOG e CANON-MIGRATION-COVERAGE
 - [ ] T050: Executar corepack pnpm run lint
