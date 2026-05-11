@@ -2249,9 +2249,36 @@ T021, T044.
 
 ## Phase 6: Polimento e Itens Transversais
 
-### T046: Atualizar @req dos novos testes
+**Terreno antes da Phase 6**:
 
-**File**: `tests/unit/` e `tests/integration/day/` (modify)
+- Phase 5 esta fechada em `tasks.md` ate T045, incluindo a correcao de
+  `pendingReaderOpen` para dia futuro.
+- A fase e documental/transversal por padrao. Nao adicionar nova capacidade de
+  produto nesta fase.
+- `001-auth-day-surface` permanece baseline fechado. Tags e testes herdados do
+  baseline podem continuar existindo, mas nao provam rastreabilidade desta
+  feature sem o prefixo `002-note-echo-flows:`.
+
+### T046: Normalizar @req feature-scoped dos testes novos
+
+**File**:
+
+- `tests/unit/notes/note-echo-relations.test.ts`
+- `tests/unit/day/use-day-entries.test.tsx`
+- `tests/unit/timeline/timeline-view.test.tsx`
+- `tests/unit/notes/note-reader-relations.test.tsx`
+- `tests/integration/day/note-echo-navigation.test.tsx`
+- `tests/unit/notes/list-note-candidates.test.ts`
+- `tests/unit/notes/create-note-echo.test.ts`
+- `tests/unit/notes/delete-note-echo.test.ts`
+- `tests/integration/day/note-echo-management.test.tsx`
+- `tests/unit/notes/build-continue-note-brief.test.ts`
+- `tests/unit/docs/documentation-contracts.test.ts`
+- `tests/unit/notes/continue-note.test.ts`
+- `tests/integration/day/continue-note-flow.test.tsx`
+- `tests/unit/timeline/derive-timeline-nodes-regression.test.ts`
+- `tests/unit/notes/note-echo-api.test.ts`, se o arquivo ainda guardar
+  contratos tecnicos da feature apos os debitos ja fechados.
 
 **Requirements**:
 
@@ -2263,20 +2290,53 @@ T015 a T040.
 
 **Implementation**:
 
-Adicionar comentarios `@req` feature-scoped em cada novo teste, mantendo
-rastreabilidade entre FRs, SCs e suites. O formato aceito para esta feature e
-`@req 002-note-echo-flows:FR-001` ou `@req 002-note-echo-flows:SC-001`.
-Tags legadas sem feature id, incluindo `@req FR-*` de 001, nao contam.
+Converter ou adicionar os comentarios dos testes da feature para o formato
+`@req 002-note-echo-flows:FR-014` e `@req 002-note-echo-flows:SC-005`,
+preservando uma tag por linha. Nao converter em massa suites herdadas do
+baseline; converter apenas asserts que provam comportamento de
+`002-note-echo-flows`.
+
+Mapa minimo de rastreabilidade por suite:
+
+| Suite | Requisitos esperados |
+|-------|----------------------|
+| `note-echo-relations.test.ts` | FR-003, FR-005, FR-008, SC-002 |
+| `use-day-entries.test.tsx` | FR-001, FR-002, FR-003, FR-004 |
+| `timeline-view.test.tsx` | FR-002, FR-003, FR-019, FR-020 |
+| `note-reader-relations.test.tsx` | FR-004, FR-010, FR-011, FR-021 |
+| `note-echo-navigation.test.tsx` | FR-011, FR-012 |
+| `list-note-candidates.test.ts` | FR-022, FR-023, SC-004 |
+| `create-note-echo.test.ts` | FR-006, FR-007, FR-008, FR-010, SC-002 |
+| `delete-note-echo.test.ts` | FR-009, SC-003 |
+| `note-echo-management.test.tsx` | FR-006, FR-009, FR-013, FR-022, FR-023, SC-003, SC-004 |
+| `build-continue-note-brief.test.ts` | FR-014, FR-017, SC-005 |
+| `documentation-contracts.test.ts` | FR-016, FR-018, SC-005 |
+| `continue-note.test.ts` | FR-014, FR-015, FR-016, FR-017, FR-018, SC-005 |
+| `continue-note-flow.test.tsx` | FR-014, FR-015, FR-016, FR-017, FR-018, SC-005, SC-006 |
+| `derive-timeline-nodes-regression.test.ts` | FR-018, FR-023, FR-024, SC-006 |
+
+Se `FR-024` ou `SC-006` estiverem cobertos apenas por
+`tests/integration/day/ghost-navigation.test.tsx`, manter a suite como
+regressao de baseline e adicionar cobertura feature-scoped em
+`derive-timeline-nodes-regression.test.ts` ou em uma suite de integracao da
+feature. A Phase 6 nao deve depender de tags sem prefixo.
 
 **Verification**:
 
-`rg -n "@req 002-note-echo-flows:(FR|SC)-" tests/unit tests/integration/day`.
-Conferir tambem que os arquivos novos esperados da feature aparecem no output,
-sem depender de matches de suites antigas.
+Executar:
+
+```powershell
+rg -n "@req 002-note-echo-flows:(FR|SC)-" tests/unit tests/integration/day
+rg -n "@req (FR|SC)-" tests/unit/notes tests/unit/day tests/unit/timeline tests/integration/day/continue-note-flow.test.tsx tests/integration/day/note-echo-management.test.tsx tests/integration/day/note-echo-navigation.test.tsx
+```
+
+O primeiro comando precisa listar as suites da tabela. O segundo comando deve
+ser revisado: qualquer match em suite nova da feature precisa ser convertido ou
+justificado no bloco de evidencia final como tag herdada fora do escopo.
 
 ---
 
-### T047: Atualizar canon quando comportamento estiver implementado
+### T047: Atualizar canon vigente da raiz
 
 **File**: `README.md`, `CURRENT-STATE.md`, `ROADMAP.md`,
 `DATA-MODEL.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md`, `TEST-SPEC.md`,
@@ -2294,21 +2354,42 @@ Historias implementadas e verificadas.
 
 **Implementation**:
 
-Mover `fluxos completos de eco` de futuro para comportamento entregue apenas
-apos implementacao. Registrar RPC atomica, Reader com conexoes, seletor de
-candidatas, remocao confirmada e exclusao de mencoes inline deste corte.
-Atualizar primeiro os canones da raiz exigidos pela constituicao; nao fechar a
-feature com apenas `docs-canonical/*` atualizado.
+Atualizar a raiz como fonte vigente, usando `specs/002-note-echo-flows/spec.md`,
+`plan.md`, `contracts/continue-note.md`, codigo e testes como base. Nao usar
+`docs/` como autoridade para reabrir o corte.
+
+Conteudo esperado por arquivo:
+
+| Arquivo | Atualizacao esperada |
+|---------|----------------------|
+| `README.md` | Registrar `002-note-echo-flows` como comportamento entregue no fluxo do dia, com Reader, ecos diretos, Adicionar eco, Remover eco e Continuar desta nota. |
+| `CURRENT-STATE.md` | Mover US1, US2 e US3 para estado implementado, citando que Phase 6 e fechamento transversal e nao nova feature. |
+| `ROADMAP.md` | Retirar o corte de backlog futuro e manter `@nota` inline como fora de escopo. |
+| `DATA-MODEL.md` | Documentar `note_echoes`, proveniencias internas `manual_link` e `continue_note`, `context_day` como proveniencia da acao, `notes.day` como unico dia de destino da nota continuada e ausencia de campos de tarefa. |
+| `ARCHITECTURE.md` | Descrever carregamento relacional em `useDayEntries`, derivacao de contagem direta, Reader contextual, navegacao cross-day e consumo unico de `pendingReaderOpen` apos a nota existir no dia carregado. |
+| `REQUIREMENTS.md` | Registrar os requisitos entregues de ecos diretos, gerenciamento manual, continuacao atomica e a exclusao de mencoes inline. |
+| `TEST-SPEC.md` | Listar as suites feature-scoped e os gates `lint`, `test`, `typecheck`, `doc:guard` e `doc:score`. |
+| `SECURITY.md` | Registrar trust boundary da RPC `public.continue_note`: `SECURITY DEFINER` com checks por `auth.uid()`, `search_path` fixo, grant minimo para usuario autenticado, falha unauthenticated/cross-user sem escrita parcial e ausencia de `service_role` no cliente. |
+
+`docs-canonical/*` so entra se a alteracao da raiz exigir espelho historico
+para manter DocGuard coerente. Se entrar, declarar no bloco de evidencia que a
+autoridade continuou na raiz.
 
 **Verification**:
 
-Revisao textual dos paths de canon da raiz alterados, seguida por T053 e T054.
-DocGuard PASS e necessario, mas nao substitui a verificacao semantica dos
-canones alterados.
+Executar revisao textual antes de T053/T054:
+
+```powershell
+rg -n "002-note-echo-flows|Continuar desta nota|Adicionar eco|Remover eco|note_echoes|continue_note|pendingReaderOpen|@nota|service_role" README.md CURRENT-STATE.md ROADMAP.md DATA-MODEL.md ARCHITECTURE.md REQUIREMENTS.md TEST-SPEC.md SECURITY.md
+```
+
+O output precisa mostrar o comportamento entregue nos canones corretos e
+manter `@nota` inline como fora de escopo. `service_role` nao pode aparecer
+como requisito de cliente.
 
 ---
 
-### T048: Atualizar CHANGELOG
+### T048: Consolidar CHANGELOG
 
 **File**: `CHANGELOG.md` (modify)
 
@@ -2322,13 +2403,22 @@ T047.
 
 **Implementation**:
 
-Adicionar entrada de `002-note-echo-flows` com resumo de ecos diretos,
-Adicionar eco, Remover eco, Continuar desta nota por RPC atomica e gates
-executados.
+Consolidar a entrada da feature sem duplicar historico ja registrado por
+correcoes da Phase 5. A entrada deve citar:
+
+- ecos diretos visiveis no fluxo do dia;
+- Reader com notas conectadas e navegacao cross-day;
+- `Adicionar eco`, candidatas desabilitadas, paginacao e `Remover eco`;
+- `Continuar desta nota` por RPC atomica;
+- preservacao de nota versus tarefa, sem ghost card, `source_day`,
+  `target_day`, `scheduled_at` ou projecao temporal;
+- gates executados em T050 a T054.
 
 **Verification**:
 
-`rg -n "002-note-echo-flows|Continuar desta nota|Adicionar eco" CHANGELOG.md`.
+```powershell
+rg -n "002-note-echo-flows|Continuar desta nota|Adicionar eco|Remover eco|doc:score" CHANGELOG.md
+```
 
 ---
 
@@ -2346,10 +2436,15 @@ T047, T048.
 
 **Implementation**:
 
-Se houver desalinhamento temporario entre codigo e canon, registrar em
-`DRIFT-LOG.md`. Se a feature absorver conteudo historico migrado, atualizar
-`CANON-MIGRATION-COVERAGE.md`. Se nao houver mudanca necessaria, registrar no
-resumo da PR que os arquivos foram revisados sem patch.
+Abrir os dois arquivos e decidir com evidencia:
+
+- `DRIFT-LOG.md`: alterar somente se Phase 6 deixar desalinhamento temporario
+  entre codigo executavel e canon da raiz.
+- `CANON-MIGRATION-COVERAGE.md`: alterar somente se T047 absorver ou
+  reinterpretar conteudo historico vindo de `docs/` ou `docs-canonical/*`.
+
+Se nenhum patch for necessario, nao fabricar entrada. Registrar no bloco final
+que os arquivos foram revisados e permaneceram sem mudanca.
 
 **Verification**:
 
@@ -2372,11 +2467,17 @@ T001 a T049.
 
 **Implementation**:
 
-Executar `corepack pnpm run lint` e corrigir violações no escopo da feature.
+Executar:
+
+```powershell
+corepack pnpm run lint
+```
+
+Corrigir apenas violacoes causadas pela feature ou pela Phase 6.
 
 **Verification**:
 
-Comando retorna exit code 0.
+Exit code 0 e output real preservado para T055.
 
 ---
 
@@ -2394,11 +2495,17 @@ T001 a T050.
 
 **Implementation**:
 
-Executar `corepack pnpm run test` e corrigir regressões no escopo da feature.
+Executar:
+
+```powershell
+corepack pnpm run test
+```
+
+Corrigir apenas regressoes no escopo de `002-note-echo-flows`.
 
 **Verification**:
 
-Comando retorna exit code 0.
+Exit code 0 e contagem de suites/testes preservada para T055.
 
 ---
 
@@ -2416,12 +2523,17 @@ T001 a T051.
 
 **Implementation**:
 
-Executar `corepack pnpm run typecheck` e corrigir erros TypeScript no escopo da
-feature.
+Executar:
+
+```powershell
+corepack pnpm run typecheck
+```
+
+Corrigir apenas erros TypeScript relacionados ao corte.
 
 **Verification**:
 
-Comando retorna exit code 0.
+Exit code 0 e output real preservado para T055.
 
 ---
 
@@ -2439,11 +2551,19 @@ T047, T048, T049.
 
 **Implementation**:
 
-Executar `corepack pnpm run doc:guard`. Guard vermelho bloqueia fechamento.
+Executar:
+
+```powershell
+corepack pnpm run doc:guard
+```
+
+Guard vermelho bloqueia fechamento. A linha avulsa do Windows
+`O sistema nao pode encontrar o caminho especificado.` so pode ser tratada como
+ruido se o exit code for 0 e o relatorio DocGuard estiver PASS.
 
 **Verification**:
 
-Comando retorna PASS.
+PASS com exit code 0 e output real preservado para T055.
 
 ---
 
@@ -2461,12 +2581,17 @@ T053.
 
 **Implementation**:
 
-Executar `corepack pnpm run doc:score` e preservar o output real no resumo
-final, sem mascarar score baixo se houver.
+Executar:
+
+```powershell
+corepack pnpm run doc:score
+```
+
+Preservar o output real no resumo final, sem mascarar score baixo se houver.
 
 **Verification**:
 
-Comando conclui e o resultado e reportado.
+Exit code e score real reportados em T055.
 
 ---
 
@@ -2484,15 +2609,25 @@ T047, T048, T049, T050, T051, T052, T053, T054.
 
 **Implementation**:
 
-Registrar um bloco de evidencia que liste: paths de canon da raiz alterados,
-resultado da revisao de `DRIFT-LOG.md` e `CANON-MIGRATION-COVERAGE.md`,
-comandos exatos executados com output/exit code, evidencia da migration/RPC
-aplicada ou contratualmente verificada, e nota explicita de que DocGuard PASS
-foi necessario mas insuficiente sozinho para provar alinhamento semantico.
+Registrar no resumo da PR ou entrega, fora dos arquivos de codigo, um bloco com
+estes itens:
+
+- status de T046, incluindo suites com tags `@req 002-note-echo-flows:*`;
+- paths de canon da raiz alterados em T047;
+- status de `docs-canonical/*`, se usado apenas como espelho;
+- resultado da revisao de `DRIFT-LOG.md` e `CANON-MIGRATION-COVERAGE.md`;
+- comandos exatos de T050 a T054, exit code, contagem de testes e score;
+- evidencia de que `public.continue_note` cria nota e eco em transacao atomica
+  e que falhas nao deixam nota orfa;
+- confirmacao de que DocGuard PASS foi necessario, mas nao usado como prova
+  unica de alinhamento semantico;
+- confirmacao explicita de que Phase 6 nao implementou Phase 7 nem reabriu
+  `001-auth-day-surface`.
 
 **Verification**:
 
-O bloco existe antes de declarar a branch fechada ou merge-ready.
+O bloco existe antes de declarar a branch fechada ou merge-ready e referencia
+os outputs reais produzidos nesta fase.
 
 ---
 
