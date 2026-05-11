@@ -3,6 +3,8 @@
 Echotes e um app Expo/React Native centrado em cada dia.
 O produto organiza notas e tarefas em uma timeline diaria.
 O baseline entregue hoje e `001-auth-day-surface`.
+O pacote `002-note-echo-flows` entrega os fluxos de ecos e continuacao de nota
+sobre esse baseline.
 
 ## Baseline Atual
 
@@ -12,6 +14,8 @@ O corte atual entrega:
 - rota protegida do dia em `app/day/[date].tsx`.
 - criacao e edicao basica de notas e tarefas do mesmo dia.
 - tarefas projected com ghost card, navegacao ao destino e breadcrumb.
+- leitura de ecos diretos, Reader com notas conectadas, `Adicionar eco`,
+  remocao confirmada e `Continuar desta nota`.
 - derivacao da timeline a partir do estado real do dia.
 - regressao automatizada para auth, timeline, navegacao temporal e contratos temporais.
 
@@ -56,7 +60,7 @@ codigo e os testes como estado executavel atual.
 2. Crie `.env` a partir de `.env.example`.
 3. Preencha `EXPO_PUBLIC_SUPABASE_URL`.
 4. Preencha `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-5. Aplique `supabase/migrations/001_auth_day_surface.sql`.
+5. Aplique as migrations em `supabase/migrations/` na ordem numerica.
 6. Inicie o app com `corepack pnpm expo start`.
 
 `pnpm` direto tambem funciona quando ja estiver disponivel.

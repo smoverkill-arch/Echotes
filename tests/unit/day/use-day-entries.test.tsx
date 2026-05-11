@@ -40,6 +40,11 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+// @req 002-note-echo-flows:FR-001
+// @req 002-note-echo-flows:FR-002
+// @req 002-note-echo-flows:FR-003
+// @req 002-note-echo-flows:FR-004
+// @req 002-note-echo-flows:SC-001
 const buildNote = (day: string, suffix: string) => ({
   id: `10000000-0000-4000-8000-00000000000${suffix}`,
   user_id: authenticatedSession.userId,

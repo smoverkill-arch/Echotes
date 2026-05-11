@@ -27,6 +27,8 @@ versioned releases when they start to exist.
 - US3 note continuation in `002-note-echo-flows`: atomic `continue_note` RPC,
   guided continuation modal, same-day reload/open flow, future-day navigation
   with one-shot pending Reader open, and rollback/contract coverage
+- Phase 6 closure for `002-note-echo-flows`: feature-scoped `@req` tags,
+  canonical documentation alignment and final evidence artifact for gates
 - documented occasional auxiliary development tool rules in the root README
 
 ### Changed
@@ -67,6 +69,8 @@ versioned releases when they start to exist.
 - Phase 6 closure tasks now require feature-scoped `@req` tags for all tests
   created or modified by feature 002, define `phase-6-evidence.md` as the
   evidence destination and make T055 the final step after gates
+- executable canons now treat manual note echoes and `continue_note` as
+  delivered feature 002 behavior, while inline `@nota` remains future scope
 
 ### Fixed
 

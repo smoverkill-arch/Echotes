@@ -125,16 +125,16 @@
 
 **Objetivo**: Fechar rastreabilidade, documentacao canonica e gates.
 
-- [ ] T046 [P] Atualizar @req em todos os testes criados ou modificados pela feature 002 para tags feature-scoped `@req 002-note-echo-flows:FR-001`..`@req 002-note-echo-flows:FR-024` e `@req 002-note-echo-flows:SC-001`..`@req 002-note-echo-flows:SC-006`; tags legadas sem feature id podem permanecer apenas em suites baseline-only que nao provam a feature 002
-- [ ] T047 [P] Atualizar os canones executaveis quando o comportamento da feature estiver implementado: docs-canonical/REQUIREMENTS.md, docs-canonical/ARCHITECTURE.md, docs-canonical/DATA-MODEL.md, docs-canonical/TEST-SPEC.md e docs-canonical/SECURITY.md quando RLS/RPC for afetado; atualizar tambem docs de governanca/status da raiz aplicaveis como README.md, CURRENT-STATE.md, ROADMAP.md, CHANGELOG.md e DRIFT-LOG.md
-- [ ] T048 Atualizar CHANGELOG.md com a feature 002-note-echo-flows
-- [ ] T049 Revisar DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md se houver desalinhamento temporario ou absorcao de acervo historico
-- [ ] T050 Executar corepack pnpm run lint conforme scripts em package.json
-- [ ] T051 Executar corepack pnpm run test conforme scripts em package.json
-- [ ] T052 Executar corepack pnpm run typecheck conforme scripts em package.json
-- [ ] T053 Executar corepack pnpm run doc:guard conforme scripts em package.json
-- [ ] T054 Executar corepack pnpm run doc:score conforme scripts em package.json
-- [ ] T055 Registrar bloco de evidencia concreta de fechamento em specs/002-note-echo-flows/phase-6-evidence.md e usar esse arquivo como base do resumo da PR/entrega: paths de canones executaveis e docs de raiz alterados, resultado da revisao de DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md, comandos exatos e outputs de lint/test/typecheck/doc:guard/doc:score, evidencia da migration/RPC aplicada ou contratualmente verificada, decisao explicita sobre evidencia de performance ou nao-gateamento das metas de performance, e confirmacao de que DocGuard PASS foi necessario mas nao usado como prova unica de alinhamento semantico
+- [X] T046 [P] Atualizar @req em todos os testes criados ou modificados pela feature 002 para tags feature-scoped `@req 002-note-echo-flows:FR-001`..`@req 002-note-echo-flows:FR-024` e `@req 002-note-echo-flows:SC-001`..`@req 002-note-echo-flows:SC-006`; tags legadas sem feature id podem permanecer apenas em suites baseline-only que nao provam a feature 002
+- [X] T047 [P] Atualizar os canones executaveis quando o comportamento da feature estiver implementado: docs-canonical/REQUIREMENTS.md, docs-canonical/ARCHITECTURE.md, docs-canonical/DATA-MODEL.md, docs-canonical/TEST-SPEC.md e docs-canonical/SECURITY.md quando RLS/RPC for afetado; atualizar tambem docs de governanca/status da raiz aplicaveis como README.md, CURRENT-STATE.md, ROADMAP.md, CHANGELOG.md e DRIFT-LOG.md
+- [X] T048 Atualizar CHANGELOG.md com a feature 002-note-echo-flows
+- [X] T049 Revisar DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md se houver desalinhamento temporario ou absorcao de acervo historico
+- [X] T050 Executar corepack pnpm run lint conforme scripts em package.json
+- [X] T051 Executar corepack pnpm run test conforme scripts em package.json
+- [X] T052 Executar corepack pnpm run typecheck conforme scripts em package.json
+- [X] T053 Executar corepack pnpm run doc:guard conforme scripts em package.json
+- [X] T054 Executar corepack pnpm run doc:score conforme scripts em package.json
+- [X] T055 Registrar bloco de evidencia concreta de fechamento em specs/002-note-echo-flows/phase-6-evidence.md e usar esse arquivo como base do resumo da PR/entrega: paths de canones executaveis e docs de raiz alterados, resultado da revisao de DRIFT-LOG.md e CANON-MIGRATION-COVERAGE.md, comandos exatos e outputs de lint/test/typecheck/doc:guard/doc:score, evidencia da migration/RPC aplicada ou contratualmente verificada, decisao explicita sobre evidencia de performance ou nao-gateamento das metas de performance, e confirmacao de que DocGuard PASS foi necessario mas nao usado como prova unica de alinhamento semantico
 
 ---
 

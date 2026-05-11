@@ -13,6 +13,10 @@ import {
   buildNoteEcho,
 } from "../../support/note-echo-fixtures";
 
+// @req 002-note-echo-flows:FR-003
+// @req 002-note-echo-flows:FR-005
+// @req 002-note-echo-flows:FR-008
+// @req 002-note-echo-flows:SC-002
 describe("note echo relation utilities", () => {
   it("normaliza par semantico e reconhece par invertido", () => {
     const { sourceNote, targetNote, invertedEcho } = buildInvertedConnectedPair();

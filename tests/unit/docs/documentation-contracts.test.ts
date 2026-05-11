@@ -6,6 +6,9 @@ const root = process.cwd();
 const readJson = <T>(relativePath: string) =>
   JSON.parse(readFileSync(resolve(root, relativePath), "utf8")) as T;
 
+// @req 002-note-echo-flows:FR-016
+// @req 002-note-echo-flows:FR-018
+// @req 002-note-echo-flows:SC-005
 describe("documentation contracts", () => {
   // @req 002-note-echo-flows:SC-005
   // @req NFR-005

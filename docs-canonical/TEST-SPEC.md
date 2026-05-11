@@ -10,6 +10,7 @@
 - testes de integracao para auth e rota protegida.
 - testes de integracao para superficie diaria same-day.
 - testes de integracao para navegacao temporal por ghost card.
+- testes unitarios e de integracao para `002-note-echo-flows`.
 
 ## Coverage Rules
 
@@ -38,10 +39,13 @@
 1. Criar nota independente.
 2. Posicionar nota pela hora intradiaria de `created_at`.
 3. Abrir Reader de nota.
-4. Manter badge de ecos como contagem direta quando a feature virar parte do corte.
+4. Manter badge de ecos como contagem direta.
+5. Listar notas conectadas no Reader.
+6. Criar eco manual sem duplicar par semantico.
+7. Remover eco com confirmacao.
+8. Continuar nota criando nova nota e eco `continue_note` atomicamente.
 
-Fluxos completos de eco, `continue_note` e mencoes inline seguem como canon absorvido.
-Esses fluxos ainda nao pertencem ao baseline entregue.
+Mencoes inline com `@nota` seguem fora do corte entregue.
 
 ## Suite Map
 
@@ -54,12 +58,16 @@ Esses fluxos ainda nao pertencem ao baseline entregue.
 - `src/features/day/hooks/*` usa suites em `tests/unit/day/`.
 - `app/day/[date].tsx` usa suites em `tests/integration/day/`.
 - `supabase/migrations/*` e `.docguard.json` usam a suite documental em `tests/unit/docs/`.
+- `002-note-echo-flows` usa `@req 002-note-echo-flows:*` nas suites criadas
+  ou modificadas pela feature.
 
 ## Critical User Journeys
 
 - US1 cobre entrar, restaurar sessao, proteger rota e sair.
 - US2 cobre criar nota e tarefa same-day com timeline coerente.
 - US3 cobre projetar tarefa, abrir destino e voltar ao contexto de origem.
+- `002-note-echo-flows` cobre Reader de notas conectadas, adicionamento manual,
+  remocao confirmada e continuacao de nota.
 
 Jest e React Native Testing Library cobrem esses journeys hoje.
 O repo ainda nao possui suite E2E separada.
@@ -70,6 +78,8 @@ O repo ainda nao possui suite E2E separada.
 - `corepack pnpm run lint`.
 - `corepack pnpm run test`.
 - `corepack pnpm run typecheck`.
+- `corepack pnpm run doc:score` como relatorio de maturidade documental, sem
+  substituir `doc:guard`.
 
 ## Recommended Test Patterns
 
@@ -84,9 +94,19 @@ O repo ainda nao possui suite E2E separada.
 - US1 vive nas suites de auth em `tests/integration/auth/` e `tests/unit/auth/`.
 - US2 vive nas suites same-day em `tests/integration/day/`, `tests/unit/schemas/` e `tests/unit/timeline/`.
 - US3 vive nas suites de projected task em `tests/integration/day/` e `tests/unit/timeline/`.
+- `002-note-echo-flows` vive nas suites `tests/unit/notes/`,
+  `tests/unit/day/use-day-entries.test.tsx`,
+  `tests/unit/timeline/timeline-view.test.tsx`,
+  `tests/unit/timeline/derive-timeline-nodes-regression.test.ts`,
+  `tests/unit/docs/documentation-contracts.test.ts`,
+  `tests/integration/day/note-echo-navigation.test.tsx`,
+  `tests/integration/day/note-echo-management.test.tsx` e
+  `tests/integration/day/continue-note-flow.test.tsx`.
 - Gate documental vive em `tests/unit/docs/`.
 
 ## Revision History
 
+- 2026-05-11 - `002-note-echo-flows` registrado no mapa de suites, tags
+  `@req` e gates de fechamento da Phase 6.
 - 2026-05-01 - Mapa de suites simplificado, contrato documental explicitado e referencias reformuladas para leitura estavel pelo guard.
 - 2026-04-26 - Especificacao de testes ampliada com casos canonicos de tarefa, nota e navegacao temporal.

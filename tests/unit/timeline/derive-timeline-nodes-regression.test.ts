@@ -40,6 +40,10 @@ const buildTask = (overrides: Partial<Task> = {}): Task => ({
   ...overrides,
 });
 
+// @req 002-note-echo-flows:FR-018
+// @req 002-note-echo-flows:FR-023
+// @req 002-note-echo-flows:FR-024
+// @req 002-note-echo-flows:SC-006
 describe("deriveTimelineNodes regressions", () => {
   // @req 002-note-echo-flows:FR-023
   it("mantem TimelineNode sem side e ordena por sortAt, prioridade e id", () => {

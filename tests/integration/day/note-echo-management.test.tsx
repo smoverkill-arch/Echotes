@@ -26,6 +26,13 @@ const mockSearchParams: { date?: string | string[] } = {
   date: "2026-05-01",
 };
 
+// @req 002-note-echo-flows:FR-006
+// @req 002-note-echo-flows:FR-009
+// @req 002-note-echo-flows:FR-013
+// @req 002-note-echo-flows:FR-022
+// @req 002-note-echo-flows:FR-023
+// @req 002-note-echo-flows:SC-003
+// @req 002-note-echo-flows:SC-004
 const mockSupabase = createSupabaseNoteEchoMock();
 
 jest.mock("expo-router", () => {

@@ -4,6 +4,11 @@ import { NoteReader } from "../../../src/components/reader/note-reader";
 import type { RelatedNote } from "../../../src/types/note";
 import { buildNote } from "../../support/note-echo-fixtures";
 
+// @req 002-note-echo-flows:FR-004
+// @req 002-note-echo-flows:FR-010
+// @req 002-note-echo-flows:FR-011
+// @req 002-note-echo-flows:FR-021
+// @req 002-note-echo-flows:SC-001
 const activeNote = buildNote({
   id: "10000000-0000-4000-8000-000000000001",
   title: "Nota aberta",

@@ -27,6 +27,8 @@ O acesso ao dia protegido depende de sessao valida.
 - o cliente trabalha exclusivamente com chaves publicas do Supabase
 
 RLS esta definida em `supabase/migrations/001_auth_day_surface.sql`.
+O RPC de continuacao de nota vive em
+`supabase/migrations/002_note_echo_flows.sql`.
 Hardening incremental vive em `supabase/migrations/003_harden_note_echo_surface.sql`.
 
 ## RLS Contract
@@ -54,6 +56,22 @@ O cliente usa REST/PostgREST com sessao autenticada.
 - a extensao GraphQL do banco e removida enquanto o app nao usar GraphQL como
   interface de produto
 
+## Note Continuation RPC
+
+`public.continue_note` e a superficie autorizada para criar uma nota continuada
+e seu eco `continue_note` de forma atomica.
+
+Contrato de seguranca:
+
+- roda como `security definer` com `search_path` fixo.
+- exige `auth.uid()` nao nulo.
+- valida ownership da nota de origem antes de criar qualquer linha.
+- cria a nova nota com `user_id = auth.uid()`.
+- cria o eco com `created_by_user_id = auth.uid()`.
+- concede execucao apenas para `authenticated`.
+- nao exige nem expõe `service_role` no cliente.
+- falhas retornam sem persistencia parcial de nota ou eco.
+
 ## Secrets Management
 
 O cliente usa apenas:
@@ -80,6 +98,8 @@ Regras:
 
 ## Revision History
 
+- 2026-05-11 - RPC `continue_note` documentado como superficie atomica e
+  autenticada de `002-note-echo-flows`.
 - 2026-05-06 - Hardening de superficie Supabase registrado para grants,
   policies, funcao de trigger e GraphQL.
 - 2026-04-25 - Canon consolidado na raiz apos o fechamento de

@@ -23,6 +23,11 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+// @req 002-note-echo-flows:FR-006
+// @req 002-note-echo-flows:FR-007
+// @req 002-note-echo-flows:FR-008
+// @req 002-note-echo-flows:FR-010
+// @req 002-note-echo-flows:SC-002
 describe("createNoteEcho", () => {
   beforeEach(() => {
     mockSupabase.reset();

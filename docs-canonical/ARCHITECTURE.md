@@ -10,6 +10,8 @@ O baseline atual entrega auth por email e senha.
 O baseline atual entrega superficie diaria protegida.
 O corte atual inclui CRUD basico de notas e tarefas.
 O corte atual inclui tarefa projected com ghost card e breadcrumb.
+`002-note-echo-flows` entrega leitura de ecos diretos, Reader contextual,
+criacao/remocao manual de eco e continuacao atomica de nota.
 O repo tambem guarda regressao automatizada.
 
 ## Product Truths
@@ -91,8 +93,10 @@ A orientacao esquerda ou direita pertence apenas a camada de renderizacao.
 - Guarda `sourceTaskId`.
 - Guarda `returnScrollOffset`.
 - Guarda `isTemporalNavigationActive`.
+- Guarda `pendingReaderOpen` para abrir uma nota depois de navegacao entre dias.
 
-Esse store existe para a navegacao temporal de tarefas.
+Esse store sustenta a navegacao temporal de tarefas e a abertura contextual
+one-shot de nota conectada ou continuada em outro dia.
 
 ### `uiStore`
 
@@ -112,6 +116,7 @@ Para `selectedDate = D`, a tela carrega:
 - tarefas com `source_day = D`.
 - tarefas com `target_day = D`.
 - notas com `day = D`.
+- ecos ligados a notas do dia para contagem direta e detalhes do Reader.
 
 Esse desenho preserva dominios separados.
 O baseline evita tabela generica unica.
@@ -175,13 +180,21 @@ O editor de tarefa permite:
 
 ### Note and Echo Flows
 
-O canon ja descreve nota independente.
-O canon tambem descreve eco manual.
-O canon tambem descreve `Continuar desta nota`.
-O canon tambem descreve mencao inline com `@nota`.
+Nota independente, eco manual e `Continuar desta nota` estao no corte entregue
+por `002-note-echo-flows`.
 
-O baseline atual entrega apenas parte desse conjunto.
-`CURRENT-STATE.md` indica o que ja chegou ao app.
+- `useDayEntries` carrega ecos ligados as notas do dia.
+- A timeline deriva badge pela contagem de ecos diretos.
+- O Reader mostra notas conectadas e degrada detalhes inacessiveis sem quebrar
+  a relacao.
+- `Adicionar eco` usa lista paginada de candidatas e desabilita notas ja
+  conectadas.
+- Criacao manual usa `kind = manual_link`.
+- Remocao exige confirmacao e apaga somente a relacao selecionada.
+- Notas conectadas de outro dia navegam para `/day/[date]` e usam
+  `pendingReaderOpen` para abrir o Reader uma unica vez.
+
+Mencao inline com `@nota` permanece fora do corte entregue.
 
 ### Content Mention Flow
 
@@ -205,6 +218,9 @@ Ao continuar uma nota, o sistema:
 - permite editar o briefing logo em seguida.
 - cria eco `continue_note`.
 - preserva o link com a nota de origem.
+- executa criacao de nota e eco de forma atomica via RPC `continue_note`.
+- quando o dia escolhido e diferente, navega ao destino e abre a nova nota com
+  `pendingReaderOpen`.
 
 ## Visual States
 
@@ -225,12 +241,12 @@ Implementado hoje:
 - superficie protegida do dia.
 - nota e tarefa same-day.
 - tarefa projected com ghost e breadcrumb.
+- leitura, criacao manual, remocao e navegacao contextual de ecos diretos.
+- continuacao atomica de nota por RPC `continue_note`.
 - regressao automatizada do corte.
 
 Canon absorvido para fases futuras:
 
-- fluxos completos de eco.
-- `continue_note`.
 - mencoes inline persistidas como chip.
 - release e deploy de producao.
 
@@ -260,5 +276,7 @@ flowchart TD
 
 ## Revision History
 
+- 2026-05-11 - Arquitetura atualizada para `002-note-echo-flows`: ecos
+  diretos, Reader contextual, `pendingReaderOpen` e RPC `continue_note`.
 - 2026-05-01 - Texto simplificado, `src/utils/` documentado e fluxos reagrupados por responsabilidade.
 - 2026-04-26 - Arquitetura ampliada com stores, estrategia de dados, algoritmo da timeline e estado honesto de migracao do canon.

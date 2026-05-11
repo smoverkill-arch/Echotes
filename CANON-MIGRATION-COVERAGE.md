@@ -66,12 +66,12 @@ caso, o destino canonico tambem registra que o baseline atual nao a entrega.
 | 10. Zod - tag | `docs-canonical/DATA-MODEL.md` | absorvida | Contrato de tag e cor refletido |
 | 11. Zod - tarefa | `docs-canonical/DATA-MODEL.md` | absorvida | |
 | 12. Zod - nota | `docs-canonical/DATA-MODEL.md` | absorvida | |
-| 13. Zod - eco | `docs-canonical/DATA-MODEL.md`, `CURRENT-STATE.md` | absorvida | Contrato refletido; baseline atual explicita que fluxos completos de eco seguem adiados |
+| 13. Zod - eco | `docs-canonical/DATA-MODEL.md`, `CURRENT-STATE.md` | absorvida | Contrato refletido; `002-note-echo-flows` registra os fluxos de eco entregues |
 | 14. Funcoes utilitarias | `docs-canonical/DATA-MODEL.md`, `docs-canonical/ARCHITECTURE.md` | absorvida | |
 | 14.1 Helpers de calendario semanal | `docs-canonical/ARCHITECTURE.md` | absorvida | |
 | 15. Heranca de cor por tag | `docs-canonical/DATA-MODEL.md`, `KNOWN-GOTCHAS.md` | absorvida | |
 | 16. Derivacao da timeline | `docs-canonical/ARCHITECTURE.md`, `docs-canonical/TEST-SPEC.md` | absorvida | |
-| 17. Continuacao de nota | `docs-canonical/REQUIREMENTS.md`, `docs-canonical/ARCHITECTURE.md`, `CURRENT-STATE.md` | absorvida | Canon absorvido; implementacao do baseline ainda nao cobre |
+| 17. Continuacao de nota | `docs-canonical/REQUIREMENTS.md`, `docs-canonical/ARCHITECTURE.md`, `CURRENT-STATE.md` | absorvida | Canon absorvido; `002-note-echo-flows` registra `continue_note` entregue |
 | 18. Mencao no conteudo | `docs-canonical/REQUIREMENTS.md`, `docs-canonical/ARCHITECTURE.md`, `CURRENT-STATE.md` | absorvida | Canon absorvido; implementacao do baseline ainda nao cobre |
 | 19. Exclusao | `docs-canonical/REQUIREMENTS.md`, `docs-canonical/DATA-MODEL.md` | absorvida | |
 | 20. Defaults sugeridos | `docs-canonical/DATA-MODEL.md` | absorvida | |

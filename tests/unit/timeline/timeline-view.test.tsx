@@ -5,6 +5,12 @@ import type { Note } from "../../../src/types/note";
 import type { Task } from "../../../src/types/task";
 import type { TimelineNode } from "../../../src/types/timeline";
 
+// @req 002-note-echo-flows:FR-002
+// @req 002-note-echo-flows:FR-003
+// @req 002-note-echo-flows:FR-019
+// @req 002-note-echo-flows:FR-020
+// @req 002-note-echo-flows:SC-001
+// @req 002-note-echo-flows:SC-006
 const noteA: Note = {
   id: "30000000-0000-4000-8000-000000000001",
   user_id: "f3b86608-11f6-4df4-b902-3bc0b1d5b8bc",

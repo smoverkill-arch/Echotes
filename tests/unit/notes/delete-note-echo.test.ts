@@ -28,6 +28,8 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+// @req 002-note-echo-flows:FR-009
+// @req 002-note-echo-flows:SC-003
 describe("deleteNoteEcho", () => {
   beforeEach(() => {
     mockSupabase.reset();

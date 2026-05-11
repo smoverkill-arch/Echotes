@@ -24,6 +24,9 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+// @req 002-note-echo-flows:FR-022
+// @req 002-note-echo-flows:FR-023
+// @req 002-note-echo-flows:SC-004
 const buildCandidateNotes = (total: number) =>
   Array.from({ length: total }, (_, index) => {
     const suffix = String(index + 2).padStart(12, "0");

@@ -15,6 +15,8 @@ import { useUIStore } from "../../../src/stores/ui-store";
 import type { AuthenticatedSession } from "../../../src/types/auth";
 import { createSupabaseNoteEchoMock } from "../../support/supabase-note-echo-mock";
 
+// @req 002-note-echo-flows:FR-011
+// @req 002-note-echo-flows:FR-012
 const navigateToDay = (href: string) => {
   const match = href.match(/^\/day\/(\d{4}-\d{2}-\d{2})$/);
 

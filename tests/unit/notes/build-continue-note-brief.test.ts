@@ -1,6 +1,9 @@
 import { buildContinueNoteBrief } from "../../../src/features/notes/utils/build-continue-note-brief";
 import { buildNote } from "../../support/note-echo-fixtures";
 
+// @req 002-note-echo-flows:FR-014
+// @req 002-note-echo-flows:FR-017
+// @req 002-note-echo-flows:SC-005
 describe("buildContinueNoteBrief", () => {
   it("prioriza brief util antes de content e title", () => {
     const note = buildNote({

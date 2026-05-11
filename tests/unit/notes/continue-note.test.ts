@@ -25,6 +25,12 @@ const authenticatedSession: AuthenticatedSession = {
   refreshToken: "refresh-token",
 };
 
+// @req 002-note-echo-flows:FR-014
+// @req 002-note-echo-flows:FR-015
+// @req 002-note-echo-flows:FR-016
+// @req 002-note-echo-flows:FR-017
+// @req 002-note-echo-flows:FR-018
+// @req 002-note-echo-flows:SC-005
 beforeEach(() => {
   mockSupabase.reset();
   useAuthStore.setState({
