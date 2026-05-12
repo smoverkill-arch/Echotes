@@ -56,7 +56,8 @@ export const classifySupabaseNoteEchoError = (
   if (
     status === 400 ||
     code === "23503" ||
-    code === "23502"
+    code === "23502" ||
+    code === "23514"
   ) {
     return "invalid_input";
   }

@@ -98,6 +98,7 @@ export default function ProtectedDayRoute() {
     null,
   );
   const relatedNotesCountRef = useRef(0);
+  const pendingReaderNavigationTargetRef = useRef<string | null>(null);
   const replaceRelatedNotes = useCallback((nextRelatedNotes: RelatedNote[]) => {
     relatedNotesCountRef.current = nextRelatedNotes.length;
     setRelatedNotes(nextRelatedNotes);
@@ -267,6 +268,7 @@ export default function ProtectedDayRoute() {
 
         closeReader();
         closeEditor();
+        pendingReaderNavigationTargetRef.current = result.newNote.day;
         router.push(`/day/${result.newNote.day}`);
       } finally {
         setIsContinuingNote(false);
@@ -337,10 +339,24 @@ export default function ProtectedDayRoute() {
     }
 
     if (pendingReaderOpen.noteDay !== resolvedDate) {
+      if (pendingReaderNavigationTargetRef.current === pendingReaderOpen.noteDay) {
+        return;
+      }
+
+      clearPendingReaderOpen();
       return;
     }
 
-    if (isTimelineLoading || timelineErrorMessage) {
+    if (pendingReaderNavigationTargetRef.current === resolvedDate) {
+      pendingReaderNavigationTargetRef.current = null;
+    }
+
+    if (isTimelineLoading) {
+      return;
+    }
+
+    if (timelineErrorMessage) {
+      clearPendingReaderOpen();
       return;
     }
 
@@ -352,6 +368,7 @@ export default function ProtectedDayRoute() {
     const noteToOpen = notesById.get(pendingReaderOpen.noteId);
 
     if (!noteToOpen || noteToOpen.day !== pendingReaderOpen.noteDay) {
+      clearPendingReaderOpen();
       return;
     }
 
@@ -502,6 +519,7 @@ export default function ProtectedDayRoute() {
           sessionUserId: session.userId,
           actionOrigin: "connected_note_tap",
         });
+        pendingReaderNavigationTargetRef.current = relatedNote.day;
         router.push(`/day/${relatedNote.day}`);
       }}
       onReloadRelatedNote={async () => {

@@ -127,6 +127,32 @@ describe("continueNote", () => {
   });
 
   // @req 002-note-echo-flows:FR-015
+  // @req 002-note-echo-flows:FR-020
+  it("classifica constraint de dia anterior da RPC como input invalido", async () => {
+    mockSupabase.enqueueRpcResult(
+      "continue_note",
+      mockSupabase.error("new note day cannot be before source note day", {
+        code: "23514",
+      }),
+    );
+
+    const result = await continueNote({
+      sourceNoteId: "10000000-0000-4000-8000-000000000001",
+      newNoteDay: NOTE_ECHO_SOURCE_DAY,
+      title: "Continuidade",
+      generatedBrief: "Briefing gerado",
+      content: "",
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: "invalid_input",
+      newNote: null,
+      noteEcho: null,
+    });
+  });
+
+  // @req 002-note-echo-flows:FR-015
   it("rejeita payload invalido antes de chamar Supabase", async () => {
     const result = await continueNote({
       sourceNoteId: "10000000-0000-4000-8000-000000000001",

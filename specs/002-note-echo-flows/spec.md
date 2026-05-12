@@ -2,7 +2,7 @@
 
 **Branch da feature**: `002-note-echo-flows`
 **Criada em**: 2026-05-01
-**Status**: Rascunho
+**Status**: Aprovada
 **Entrada**: Descricao do usuario: "Ativar o proximo corte do Echotes para notas relacionais, com contagem direta de ecos, Reader com notas conectadas, acao Adicionar eco e Continuar desta nota, sem incluir mencoes inline neste corte."
 
 > Esta spec deriva do canon vigente da raiz e do baseline fechado

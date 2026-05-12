@@ -109,7 +109,7 @@ Result:
 
 ```text
 Test Suites: 29 passed, 29 total
-Tests:       141 passed, 141 total
+Tests:       144 passed, 144 total
 Snapshots:   0 total
 ```
 
@@ -129,7 +129,7 @@ Result:
 
 ```text
 PASS — All 171 checks passed
-Badge: CDD_Guard-169/171_passed
+Badge: CDD_Guard-169/172_passed
 ```
 
 The command still prints the known Windows line after the PASS:

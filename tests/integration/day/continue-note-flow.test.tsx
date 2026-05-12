@@ -239,7 +239,7 @@ describe("continue note flow", () => {
 
   // @req 002-note-echo-flows:FR-017
   // @req 002-note-echo-flows:FR-018
-  it("preserva abertura pendente ate a nota criada aparecer no reload do destino", async () => {
+  it("limpa abertura pendente quando o reload do destino nao contem a nota criada", async () => {
     const noteEcho = buildNoteEcho({
       id: "30000000-0000-4000-8000-000000000101",
       from_note_id: sourceNote.id,
@@ -268,21 +268,45 @@ describe("continue note flow", () => {
     route.rerender(<ProtectedDayRoute />);
     await flushMicrotasks();
 
-    expect(useNavigationStore.getState().pendingReaderOpen).toMatchObject({
+    expect(useNavigationStore.getState().pendingReaderOpen).toBeNull();
+  });
+
+  // @req 002-note-echo-flows:FR-012
+  // @req 002-note-echo-flows:FR-018
+  it("limpa abertura pendente quando a nota esperada nao aparece apos reload", async () => {
+    useNavigationStore.getState().setPendingReaderOpen({
       noteId: futureNewNote.id,
       noteDay: "2026-05-02",
+      requestId: "stale-request",
+      sessionUserId: authenticatedSession.userId,
       actionOrigin: "continue_note_created",
     });
+    mockSearchParams.date = "2026-05-02";
+    useCalendarStore.setState({ selectedDate: "2026-05-02" });
+    mockSupabase.setTableRows("notes", []);
 
-    mockSupabase.setTableRows("notes", [futureNewNote]);
-    mockSupabase.setTableRows("note_echoes", [noteEcho]);
-    route.unmount();
     render(<ProtectedDayRoute />);
     await flushMicrotasks();
 
-    await waitFor(() => {
-      expect(screen.getAllByText("Continuidade futura").length).toBeGreaterThan(1);
+    expect(useNavigationStore.getState().pendingReaderOpen).toBeNull();
+  });
+
+  // @req 002-note-echo-flows:FR-012
+  // @req 002-note-echo-flows:FR-018
+  it("limpa abertura pendente quando a rota manual diverge do dia esperado", async () => {
+    useNavigationStore.getState().setPendingReaderOpen({
+      noteId: futureNewNote.id,
+      noteDay: "2026-05-02",
+      requestId: "manual-route-mismatch",
+      sessionUserId: authenticatedSession.userId,
+      actionOrigin: "continue_note_created",
     });
+    mockSearchParams.date = "2026-05-03";
+    useCalendarStore.setState({ selectedDate: "2026-05-03" });
+
+    render(<ProtectedDayRoute />);
+    await flushMicrotasks();
+
     expect(useNavigationStore.getState().pendingReaderOpen).toBeNull();
   });
 });
