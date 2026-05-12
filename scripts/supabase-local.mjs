@@ -5,6 +5,8 @@ import path from "node:path";
 
 const PROJECT_ID = "Echotes";
 const CONTAINER_NAME_PATTERN = /^supabase_.+_Echotes$/;
+const LOCAL_NETWORK = "echotes_supabase_localhost";
+const LOCAL_NETWORK_BINDING = "127.0.0.1";
 const LOCAL_PORTS = [55420, 55421, 55422, 55423, 55424, 55427, 55429];
 const isWindows = process.platform === "win32";
 
@@ -67,6 +69,46 @@ const outputLines = (command, args) => {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
+};
+
+const dockerNetworkBinding = () =>
+  outputLines("docker", [
+    "network",
+    "inspect",
+    LOCAL_NETWORK,
+    "--format",
+    "{{ index .Options \"com.docker.network.bridge.host_binding_ipv4\" }}",
+  ])[0] ?? null;
+
+const ensureLocalhostNetwork = () => {
+  const binding = dockerNetworkBinding();
+
+  if (binding === LOCAL_NETWORK_BINDING) {
+    return 0;
+  }
+
+  if (binding !== null) {
+    console.error(
+      `[supabase-local] Docker network ${LOCAL_NETWORK} exists with host binding ${binding || "<unset>"}.`,
+    );
+    console.error(
+      `[supabase-local] Expected ${LOCAL_NETWORK_BINDING}. Remove or rename that network manually before starting Echotes.`,
+    );
+    return 1;
+  }
+
+  console.log(
+    `[supabase-local] Creating localhost-only Docker network ${LOCAL_NETWORK}.`,
+  );
+  const result = runInherited("docker", [
+    "network",
+    "create",
+    "-o",
+    `com.docker.network.bridge.host_binding_ipv4=${LOCAL_NETWORK_BINDING}`,
+    LOCAL_NETWORK,
+  ]);
+
+  return result.status ?? 1;
 };
 
 const dockerContainerNames = () => {
@@ -183,6 +225,9 @@ const dockerRows = () => {
   });
 };
 
+const unsafePublishedPorts = (ports) =>
+  /(^|,\s*)(0\.0\.0\.0|\[::\]):\d+->/.test(ports);
+
 const publishedEchotesPorts = (rows) => {
   const ports = new Set();
 
@@ -205,7 +250,19 @@ const printDoctor = async () => {
   const portResults = await Promise.all(LOCAL_PORTS.map((port) => checkPort(port)));
   for (const result of portResults) {
     if (publishedPorts.has(result.port)) {
-      console.log(`- ${result.port}: ECHOTES (published by local stack)`);
+      const unsafeRow = rows.find(
+        (row) =>
+          row.ports.includes(`:${result.port}->`) && unsafePublishedPorts(row.ports),
+      );
+
+      if (unsafeRow) {
+        console.log(
+          `- ${result.port}: UNSAFE (${unsafeRow.name} published beyond localhost: ${unsafeRow.ports})`,
+        );
+        continue;
+      }
+
+      console.log(`- ${result.port}: ECHOTES (localhost-only local stack)`);
       continue;
     }
 
@@ -229,7 +286,17 @@ const printDoctor = async () => {
 };
 
 const start = async () => {
-  const startResult = runInherited("supabase", ["start"]);
+  const networkResult = ensureLocalhostNetwork();
+
+  if (networkResult !== 0) {
+    process.exit(networkResult);
+  }
+
+  const startResult = runInherited("supabase", [
+    "start",
+    "--network-id",
+    LOCAL_NETWORK,
+  ]);
 
   if (startResult.error) {
     console.error(

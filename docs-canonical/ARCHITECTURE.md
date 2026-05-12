@@ -32,10 +32,14 @@ O repo tambem guarda regressao automatizada.
 - `src/components/timeline/*` renderiza eixo, wrappers e acao principal.
 - `src/components/cards/*` renderiza cards reais, marker e ghost.
 - `src/components/reader/*` abre overlays de leitura.
+  O Reader de nota organiza acao primaria, acoes secundarias e acao destrutiva
+  separadamente para preservar clareza em mobile.
 - `src/components/forms/*` abre overlays de criacao e edicao.
 - `src/features/day/hooks/*` carrega entradas e monta a timeline.
 - `src/features/tasks/*` concentra regras e APIs de tarefa.
 - `src/features/notes/*` concentra regras e APIs de nota.
+- `src/theme/*` guarda tokens compartilhados de cor, espaco, raio, tipografia
+  e alvos de toque para a superficie mobile.
 - `src/utils/*` guarda helpers de data, sort local e formatacao do dia.
 
 ## Layer Boundaries
@@ -45,6 +49,9 @@ O repo tambem guarda regressao automatizada.
 - `src/features/` implementa comportamento de dominio por feature.
 - `src/stores/` guarda estado de calendario, auth, navegacao e UI.
 - `src/schemas/` e `src/types/` definem contratos locais.
+- `src/theme/` centraliza constantes visuais reutilizaveis; componentes podem
+  compor estilos locais, mas nao devem recriar linguagem visual global quando
+  houver token aplicavel.
 - `src/utils/` oferece helpers puros usados por formularios e timeline.
 - `supabase/migrations/` preserva schema e RLS.
 
@@ -81,10 +88,13 @@ A orientacao esquerda ou direita pertence apenas a camada de renderizacao.
 ### `calendarStore`
 
 - Guarda `selectedDate`.
+- Guarda `clockDate`.
 - Guarda `calendarMode`.
 - Em modo semanal, a semana sempre comeca aos domingos.
 - A strip semanal acompanha a semana que contem `selectedDate`.
 - Uma troca de data fora da semana recalcula a faixa visivel.
+- A interface deve distinguir o dia real do relogio e o dia selecionado pelo
+  usuario.
 
 ### `navigationStore`
 
@@ -158,7 +168,7 @@ Eles nao viram rotas proprias.
 - clique simples abre Reader.
 - double tap abre Editor em `edit`.
 - o Reader tambem oferece botao de editar.
-- nota e tarefa compartilham a ideia de overlay.
+- nota e tarefa compartilham a ideia de sheet mobile sobre a superficie do dia.
 - cada dominio usa formulario e leitura proprios.
 
 ## Creation and Editing Flows
@@ -168,12 +178,15 @@ Eles nao viram rotas proprias.
 O `+` abre uma escolha simples.
 A pessoa escolhe entre criar tarefa e criar nota.
 Depois disso, o app abre o editor correto em modo `create`.
+A escolha e os editores usam sheets mobile com tokens compartilhados, feedback
+de pressao/desabilitado e alvos de toque confortaveis.
 
 ### Task Creation
 
 O editor de tarefa permite:
 
 - definir `target_day`.
+- ajustar `target_day` por controles de dia anterior, dia seguinte e hoje.
 - informar `scheduled_time` opcional.
 - compor `scheduled_at` a partir de `target_day + scheduled_time`.
 - validar `scheduled_at > created_at` antes de persistir.
@@ -188,11 +201,15 @@ por `002-note-echo-flows`.
 - O Reader mostra notas conectadas e degrada detalhes inacessiveis sem quebrar
   a relacao.
 - `Adicionar eco` usa lista paginada de candidatas e desabilita notas ja
-  conectadas.
+  conectadas. A superficie visual e um sheet mobile acionado pelo Reader, com
+  origem explicita, chip de mesmo dia/outro dia e feedback de erro/vazio.
 - Criacao manual usa `kind = manual_link`.
 - Remocao exige confirmacao e apaga somente a relacao selecionada.
 - Notas conectadas de outro dia navegam para `/day/[date]` e usam
   `pendingReaderOpen` para abrir o Reader uma unica vez.
+- `Continuar desta nota` preserva o contrato `newNoteDay` em `YYYY-MM-DD`, mas
+  apresenta controles mobile de dia anterior, dia seguinte e hoje antes de
+  chamar a RPC atomica `continue_note`.
 
 Mencao inline com `@nota` permanece fora do corte entregue.
 
@@ -276,6 +293,12 @@ flowchart TD
 
 ## Revision History
 
+- 2026-05-12 - Criacao, edicao de nota/tarefa e Reader de tarefa em
+  `003-mobile-day-shell-ux` atualizados para sheets mobile com tokens.
+- 2026-05-12 - Fluxos abertos pelo Reader em `003-mobile-day-shell-ux`
+  atualizados para sheets mobile com tokens e controles de data guiados.
+- 2026-05-12 - `003-mobile-day-shell-ux` iniciou shell temporal mobile,
+  `src/theme/` e calendario semanal/mensal para a superficie do dia.
 - 2026-05-11 - Arquitetura atualizada para `002-note-echo-flows`: ecos
   diretos, Reader contextual, `pendingReaderOpen` e RPC `continue_note`.
 - 2026-05-01 - Texto simplificado, `src/utils/` documentado e fluxos reagrupados por responsabilidade.

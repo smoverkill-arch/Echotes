@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,10 +12,13 @@ import {
 import { createTask } from "../../features/tasks/api/create-task";
 import { updateTask } from "../../features/tasks/api/update-task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
+import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { Task } from "../../types/task";
 import {
+  addDaysToDayKey,
   extractTimePart,
   formatDisplayDay,
+  getTodayDateKey,
   parseDisplayDayInput,
 } from "../../utils/date";
 
@@ -59,6 +63,25 @@ export function TaskEditor({
   if (!visible) {
     return null;
   }
+
+  const originDay = mode === "edit" && task ? task.source_day : selectedDay;
+  const titleLabel = mode === "create" ? "Criar tarefa" : "Editar tarefa";
+
+  const updateTargetDayInput = (value: string) => {
+    setTargetDayInput(value);
+    setErrorMessage(null);
+  };
+
+  const shiftTargetDay = (amount: number) => {
+    try {
+      const currentTargetDay = parseDisplayDayInput(targetDayInput);
+      updateTargetDayInput(formatDisplayDay(addDaysToDayKey(currentTargetDay, amount)));
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Data invalida. Use o formato DD-MM-AAAA.",
+      );
+    }
+  };
 
   const persistEditedTask = async () => {
     if (!task) {
@@ -145,66 +168,176 @@ export function TaskEditor({
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.eyebrow}>
-            {mode === "create" ? "Criar tarefa" : "Editar tarefa"}
-          </Text>
-          <Text style={styles.meta}>
-            Dia de origem: {formatDisplayDay(mode === "edit" && task ? task.source_day : selectedDay)}
-          </Text>
-          {temporalContext ? (
-            <Text style={styles.contextMeta}>
-              Editando o item real aberto a partir de {formatDisplayDay(temporalContext.sourceDate)}.
-            </Text>
-          ) : null}
+          <View style={styles.handle} />
+          <View style={styles.header}>
+            <View style={styles.headerCopy}>
+              <Text style={styles.eyebrow}>{titleLabel}</Text>
+              <Text style={styles.title}>
+                {mode === "create" ? "Nova tarefa do dia" : task?.title}
+              </Text>
+              <View style={styles.originRow}>
+                <Text style={styles.originLabel}>Dia de origem</Text>
+                <Text style={styles.originChip}>{formatDisplayDay(originDay)}</Text>
+              </View>
+            </View>
 
-          <Text style={styles.label}>Titulo</Text>
-          <TextInput
-            placeholder="Titulo da tarefa"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-            testID="task-editor-title-input"
-            value={title}
-            onChangeText={setTitle}
-          />
+            <Pressable
+              accessibilityLabel="Fechar editor de tarefa"
+              accessibilityRole="button"
+              accessibilityState={{ disabled: isSubmitting }}
+              disabled={isSubmitting}
+              style={({ pressed }) => [
+                styles.closeButton,
+                pressed && !isSubmitting ? styles.closeButtonPressed : null,
+                isSubmitting ? styles.disabledButton : null,
+              ]}
+              testID="task-editor-close-button"
+              onPress={onClose}
+            >
+              <Text style={styles.closeButtonText}>X</Text>
+            </Pressable>
+          </View>
 
-          <Text style={styles.label}>Conteudo</Text>
-          <TextInput
-            multiline
-            placeholder="Detalhes opcionais"
-            placeholderTextColor="#9ca3af"
-            style={[styles.input, styles.multiline]}
-            testID="task-editor-content-input"
-            value={content}
-            onChangeText={setContent}
-          />
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            style={styles.body}
+          >
+            {temporalContext ? (
+              <View style={styles.contextBlock}>
+                <Text style={styles.contextTitle}>Aberta a partir de ghost card</Text>
+                <Text style={styles.contextText}>
+                  Item real vindo de {formatDisplayDay(temporalContext.sourceDate)}.
+                </Text>
+              </View>
+            ) : null}
 
-          <Text style={styles.label}>Dia de destino (DD-MM-AAAA)</Text>
-          <TextInput
-            placeholder="DD-MM-AAAA"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-            testID="task-editor-target-day-input"
-            value={targetDayInput}
-            onChangeText={setTargetDayInput}
-          />
+            <Text style={styles.label}>Titulo</Text>
+            <TextInput
+              placeholder="Titulo da tarefa"
+              placeholderTextColor={colors.textSubtle}
+              style={styles.input}
+              testID="task-editor-title-input"
+              value={title}
+              onChangeText={(value) => {
+                setTitle(value);
+                setErrorMessage(null);
+              }}
+            />
 
-          <Text style={styles.label}>Horario (HH:mm)</Text>
-          <TextInput
-            placeholder="Opcional, ex.: 18:30"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-            testID="task-editor-time-input"
-            value={scheduledTime}
-            onChangeText={setScheduledTime}
-          />
+            <Text style={styles.label}>Conteudo</Text>
+            <TextInput
+              multiline
+              placeholder="Detalhes opcionais"
+              placeholderTextColor={colors.textSubtle}
+              style={[styles.input, styles.multiline]}
+              testID="task-editor-content-input"
+              value={content}
+              onChangeText={(value) => {
+                setContent(value);
+                setErrorMessage(null);
+              }}
+            />
 
-          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+            <Text style={styles.label}>Dia de destino</Text>
+            <View style={styles.dayControls}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isSubmitting }}
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.dayControlButton,
+                  pressed && !isSubmitting ? styles.buttonPressed : null,
+                  isSubmitting ? styles.disabledButton : null,
+                ]}
+                testID="task-editor-previous-day-button"
+                onPress={() => {
+                  shiftTargetDay(-1);
+                }}
+              >
+                <Text style={styles.dayControlLabel}>Dia anterior</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isSubmitting }}
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.dayControlButton,
+                  pressed && !isSubmitting ? styles.buttonPressed : null,
+                  isSubmitting ? styles.disabledButton : null,
+                ]}
+                testID="task-editor-next-day-button"
+                onPress={() => {
+                  shiftTargetDay(1);
+                }}
+              >
+                <Text style={styles.dayControlLabel}>Dia seguinte</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isSubmitting }}
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.dayControlButton,
+                  styles.todayButton,
+                  pressed && !isSubmitting ? styles.todayButtonPressed : null,
+                  isSubmitting ? styles.disabledButton : null,
+                ]}
+                testID="task-editor-today-button"
+                onPress={() => {
+                  updateTargetDayInput(formatDisplayDay(getTodayDateKey()));
+                }}
+              >
+                <Text style={[styles.dayControlLabel, styles.todayButtonLabel]}>
+                  Hoje
+                </Text>
+              </Pressable>
+            </View>
+            <TextInput
+              placeholder="DD-MM-AAAA"
+              placeholderTextColor={colors.textSubtle}
+              style={styles.input}
+              testID="task-editor-target-day-input"
+              value={targetDayInput}
+              onChangeText={updateTargetDayInput}
+            />
+
+            <Text style={styles.label}>Horario</Text>
+            <TextInput
+              placeholder="Opcional, ex.: 18:30"
+              placeholderTextColor={colors.textSubtle}
+              style={styles.input}
+              testID="task-editor-time-input"
+              value={scheduledTime}
+              onChangeText={(value) => {
+                setScheduledTime(value);
+                setErrorMessage(null);
+              }}
+            />
+            <Text style={styles.helperText}>Use HH:mm quando houver horario.</Text>
+
+            {errorMessage ? (
+              <View
+                accessibilityRole="alert"
+                style={styles.errorBlock}
+                testID="task-editor-error"
+              >
+                <Text style={styles.errorTitle}>Nao foi possivel salvar</Text>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+          </ScrollView>
 
           <View style={styles.actions}>
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ disabled: isSubmitting }}
               disabled={isSubmitting}
-              style={styles.secondaryButton}
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                pressed && !isSubmitting ? styles.buttonPressed : null,
+                isSubmitting ? styles.disabledButton : null,
+              ]}
               testID="task-editor-cancel-button"
               onPress={onClose}
             >
@@ -213,8 +346,13 @@ export function TaskEditor({
 
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ disabled: isSubmitting }}
               disabled={isSubmitting}
-              style={styles.primaryButton}
+              style={({ pressed }) => [
+                styles.primaryButton,
+                pressed && !isSubmitting ? styles.primaryButtonPressed : null,
+                isSubmitting ? styles.disabledButton : null,
+              ]}
               testID="task-editor-submit-button"
               onPress={() => {
                 void handleSubmit();
@@ -234,91 +372,216 @@ export function TaskEditor({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(15, 23, 42, 0.48)",
-    padding: 24,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(23, 33, 27, 0.45)",
   },
   sheet: {
-    borderRadius: 24,
-    backgroundColor: "#ffffff",
-    padding: 24,
+    maxHeight: "92%",
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  handle: {
+    alignSelf: "center",
+    width: 38,
+    height: 4,
+    borderRadius: radius.pill,
+    backgroundColor: colors.borderStrong,
+    marginBottom: spacing.lg,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+  headerCopy: {
+    flex: 1,
   },
   eyebrow: {
-    fontSize: 12,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.task,
+  },
+  title: {
+    marginTop: spacing.xs,
+    fontSize: typography.title,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  originRow: {
+    marginTop: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  originLabel: {
+    fontSize: typography.caption,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#6b7280",
+    color: colors.textMuted,
   },
-  meta: {
-    marginTop: 10,
-    fontSize: 13,
-    color: "#4b5563",
+  originChip: {
+    overflow: "hidden",
+    borderRadius: radius.pill,
+    backgroundColor: colors.taskSoft,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.task,
   },
-  contextMeta: {
-    marginTop: 6,
-    fontSize: 13,
-    lineHeight: 18,
-    color: "#1d4ed8",
+  closeButton: {
+    minWidth: touchTarget.min,
+    minHeight: touchTarget.min,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeButtonPressed: {
+    backgroundColor: colors.surfacePressed,
+  },
+  closeButtonText: {
+    fontSize: typography.bodyLarge,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  body: {
+    marginTop: spacing.lg,
+  },
+  contextBlock: {
+    borderRadius: radius.md,
+    backgroundColor: colors.taskSoft,
+    padding: spacing.md,
+  },
+  contextTitle: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.task,
+  },
+  contextText: {
+    marginTop: spacing.xxs,
+    fontSize: typography.body,
+    color: colors.task,
   },
   label: {
-    marginTop: 16,
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
   },
   input: {
-    minHeight: 48,
-    borderRadius: 14,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    backgroundColor: "#f9fafb",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#111827",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    fontSize: typography.bodyLarge,
+    color: colors.text,
   },
   multiline: {
     minHeight: 110,
     textAlignVertical: "top",
   },
+  dayControls: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  dayControlButton: {
+    minHeight: touchTarget.min,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+  },
+  dayControlLabel: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  todayButton: {
+    borderColor: colors.task,
+    backgroundColor: colors.taskSoft,
+  },
+  todayButtonPressed: {
+    backgroundColor: colors.surfacePressed,
+  },
+  todayButtonLabel: {
+    color: colors.task,
+  },
+  helperText: {
+    marginTop: spacing.xs,
+    fontSize: typography.caption,
+    color: colors.textMuted,
+  },
+  errorBlock: {
+    marginTop: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.dangerSoft,
+    padding: spacing.md,
+  },
+  errorTitle: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.danger,
+  },
   errorText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: "#b91c1c",
+    marginTop: spacing.xxs,
+    fontSize: typography.body,
+    color: colors.danger,
   },
   actions: {
-    marginTop: 20,
+    marginTop: spacing.lg,
     flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
+    gap: spacing.sm,
   },
   secondaryButton: {
-    minHeight: 44,
-    borderRadius: 12,
+    flex: 1,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
   },
   secondaryLabel: {
-    fontSize: 14,
+    fontSize: typography.body,
     fontWeight: "700",
-    color: "#374151",
+    color: colors.text,
   },
   primaryButton: {
-    minHeight: 44,
-    borderRadius: 12,
-    backgroundColor: "#111827",
+    flex: 1.25,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
+  },
+  primaryButtonPressed: {
+    backgroundColor: colors.primaryPressed,
   },
   primaryLabel: {
-    fontSize: 14,
+    fontSize: typography.body,
     fontWeight: "700",
-    color: "#ffffff",
+    color: colors.white,
+  },
+  buttonPressed: {
+    backgroundColor: colors.surfacePressed,
+  },
+  disabledButton: {
+    opacity: 0.55,
   },
 });

@@ -928,7 +928,7 @@ T031 e T016.
 
 ### T041: Criar migration da RPC atomica continue_note
 
-**File**: `supabase/migrations/002_note_echo_flows.sql` (new)
+**File**: `supabase/migrations/004_note_echo_flows.sql` (new)
 
 **Requirements**:
 
@@ -939,7 +939,7 @@ FR-016, FR-018, FR-020, SC-005.
 Nenhuma.
 
 ```sql
--- 002_note_echo_flows.sql
+-- 004_note_echo_flows.sql
 -- RPC atomica para Continuar desta nota.
 
 create or replace function public.continue_note(
@@ -1223,7 +1223,7 @@ T041.
       "utf8",
     );
     const continueNoteSql = readFileSync(
-      resolve(root, "supabase/migrations/002_note_echo_flows.sql"),
+      resolve(root, "supabase/migrations/004_note_echo_flows.sql"),
       "utf8",
     );
     const runbooks = readFileSync(resolve(root, "RUNBOOKS.md"), "utf8");

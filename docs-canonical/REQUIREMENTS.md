@@ -248,7 +248,7 @@ retornar ao contexto original sem perder o vinculo temporal.
 | Same-day notes/tasks | `src/features/notes/*`, `src/features/tasks/*`, `src/components/forms/*`, `src/components/reader/*` | `tests/integration/day/day-surface-same-day.test.tsx` |
 | Projected tasks + breadcrumb | `src/features/timeline/utils/derive-timeline-nodes.ts`, `src/stores/navigation-store.ts`, `src/components/day/breadcrumb-bar.tsx` | `tests/integration/day/ghost-navigation.test.tsx`, `tests/integration/day/day-surface-regression.test.tsx` |
 | Timeline derivation + render axis | `src/features/day/hooks/*`, `src/components/timeline/*` | `tests/unit/timeline/*`, `tests/unit/day/use-day-entries.test.tsx` |
-| Note echo flows | `src/features/notes/api/*`, `src/features/notes/utils/*`, `src/components/reader/note-reader.tsx`, `src/components/forms/continue-note-editor.tsx`, `supabase/migrations/002_note_echo_flows.sql` | `tests/unit/notes/*`, `tests/integration/day/note-echo-*.test.tsx`, `tests/integration/day/continue-note-flow.test.tsx` |
+| Note echo flows | `src/features/notes/api/*`, `src/features/notes/utils/*`, `src/components/reader/note-reader.tsx`, `src/components/forms/continue-note-editor.tsx`, `supabase/migrations/004_note_echo_flows.sql` | `tests/unit/notes/*`, `tests/integration/day/note-echo-*.test.tsx`, `tests/integration/day/continue-note-flow.test.tsx` |
 
 ## Revision History
 

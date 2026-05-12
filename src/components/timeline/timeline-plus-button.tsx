@@ -1,4 +1,6 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 
 interface TimelinePlusButtonProps {
   isSheetOpen: boolean;
@@ -22,56 +24,74 @@ export function TimelinePlusButton({
       {isSheetOpen ? (
         <View style={styles.sheetBackdrop} testID="timeline-plus-sheet-backdrop">
           <View collapsable={false} style={styles.sheet} testID="timeline-plus-sheet">
+            <View style={styles.handle} />
             <Text style={styles.sheetEyebrow}>Criar</Text>
             <Text style={styles.sheetTitle}>Escolha uma acao</Text>
 
             <View style={styles.menu}>
-              <TouchableOpacity
+              <Pressable
+                accessibilityLabel="Criar nota"
                 accessibilityRole="button"
-                activeOpacity={0.88}
-                style={styles.option}
+                style={({ pressed }) => [
+                  styles.option,
+                  styles.noteOption,
+                  pressed ? styles.optionPressed : null,
+                ]}
                 testID="timeline-create-note-button"
                 onPress={onCreateNote}
               >
                 <Text style={styles.optionLabel}>Criar nota</Text>
-              </TouchableOpacity>
+                <Text style={styles.optionHint}>Registrar uma ideia deste dia.</Text>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
+                accessibilityLabel="Criar tarefa"
                 accessibilityRole="button"
-                activeOpacity={0.88}
-                style={styles.option}
+                style={({ pressed }) => [
+                  styles.option,
+                  styles.taskOption,
+                  pressed ? styles.optionPressed : null,
+                ]}
                 testID="timeline-create-task-button"
                 onPress={onCreateTask}
               >
                 <Text style={styles.optionLabel}>Criar tarefa</Text>
-              </TouchableOpacity>
+                <Text style={styles.optionHint}>Projetar uma acao no tempo.</Text>
+              </Pressable>
             </View>
 
-            <TouchableOpacity
+            <Pressable
+              accessibilityLabel="Cancelar criacao"
               accessibilityRole="button"
-              activeOpacity={0.88}
-              style={styles.cancelButton}
+              style={({ pressed }) => [
+                styles.cancelButton,
+                pressed ? styles.optionPressed : null,
+              ]}
               testID="timeline-plus-cancel-button"
               onPress={onCloseSheet}
             >
               <Text style={styles.cancelLabel}>Cancelar</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       ) : null}
 
-      <TouchableOpacity
+      <Pressable
         accessibilityHint="Abre o menu de criação de nota ou tarefa"
         accessibilityLabel="Abrir menu de criação"
         accessibilityRole="button"
-        activeOpacity={0.92}
+        accessibilityState={{ disabled: isDisabled }}
         disabled={isDisabled}
-        style={[styles.button, isDisabled ? styles.buttonDisabled : null]}
+        style={({ pressed }) => [
+          styles.button,
+          pressed && !isDisabled ? styles.buttonPressed : null,
+          isDisabled ? styles.buttonDisabled : null,
+        ]}
         testID="timeline-plus-button"
         onPress={onOpenSheet}
       >
         <Text style={styles.buttonLabel}>+</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
@@ -86,76 +106,101 @@ const styles = StyleSheet.create({
   sheetBackdrop: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(15, 23, 42, 0.28)",
+    backgroundColor: "rgba(23, 33, 27, 0.32)",
   },
   sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 28,
-    gap: 14,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
+    gap: spacing.md,
+  },
+  handle: {
+    alignSelf: "center",
+    width: 38,
+    height: 4,
+    borderRadius: radius.pill,
+    backgroundColor: colors.borderStrong,
   },
   sheetEyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0,
-    color: "#6b7280",
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.primary,
   },
   sheetTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
+    fontSize: typography.title,
+    fontWeight: "800",
+    color: colors.text,
   },
   menu: {
-    gap: 8,
+    gap: spacing.sm,
   },
   option: {
-    borderRadius: 14,
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceMuted,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: colors.border,
+  },
+  noteOption: {
+    borderColor: colors.noteSoft,
+  },
+  taskOption: {
+    borderColor: colors.taskSoft,
+  },
+  optionPressed: {
+    backgroundColor: colors.surfacePressed,
   },
   cancelButton: {
-    borderRadius: 14,
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: colors.border,
     alignItems: "center",
+    justifyContent: "center",
   },
   optionLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#111827",
+    fontSize: typography.bodyLarge,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  optionHint: {
+    marginTop: spacing.xxs,
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   cancelLabel: {
-    fontSize: 14,
+    fontSize: typography.body,
     fontWeight: "700",
-    color: "#374151",
+    color: colors.text,
   },
   button: {
     marginRight: 0,
     marginBottom: 0,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#111827",
+    backgroundColor: colors.primary,
+  },
+  buttonPressed: {
+    backgroundColor: colors.primaryPressed,
   },
   buttonDisabled: {
-    backgroundColor: "#9ca3af",
+    backgroundColor: colors.disabled,
   },
   buttonLabel: {
     fontSize: 28,
     lineHeight: 30,
     fontWeight: "600",
-    color: "#ffffff",
+    color: colors.white,
   },
 });

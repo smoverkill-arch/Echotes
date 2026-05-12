@@ -100,6 +100,8 @@ O gate local usa estes comandos:
   `commands/`, das metricas documentais.
 - `.agents/` guarda skills do projeto.
 - `.agent/` e `commands/` podem surgir por automacao.
+- `.codex/` guarda artefatos locais auxiliares do Codex neste workspace, como
+  skills ou caches de execucao gerados durante desenvolvimento assistido.
 - `.clinerules`, `.cursor/`, `.gemini/` e `.windsurfrules` registram regras
   para ferramentas auxiliares de desenvolvimento usadas esporadicamente.
 - `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` definem o bootstrap do app.

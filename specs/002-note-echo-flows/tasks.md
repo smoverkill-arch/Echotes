@@ -100,13 +100,13 @@
 
 ### Pre-requisito tecnico da Historia do Usuario 3
 
-- [X] T041 [US3] Criar migration da RPC atomica continue_note em supabase/migrations/002_note_echo_flows.sql
+- [X] T041 [US3] Criar migration da RPC atomica continue_note em supabase/migrations/004_note_echo_flows.sql
 - [X] T013 [US3] Criar API de continuacao atomica via rpc em src/features/notes/api/continue-note.ts
 
 ### Testes da Historia do Usuario 3
 
 - [X] T037 [P] [US3] Adicionar testes unitarios de buildContinueNoteBrief em tests/unit/notes/build-continue-note-brief.test.ts
-- [X] T039 [P] [US3] Adicionar teste de contrato da migration RPC em tests/unit/docs/documentation-contracts.test.ts cobrindo existencia de supabase/migrations/002_note_echo_flows.sql, public.continue_note, security definer, auth.uid(), inserts em public.notes e public.note_echoes, kind = 'continue_note', rollback e ausencia de service_role
+- [X] T039 [P] [US3] Adicionar teste de contrato da migration RPC em tests/unit/docs/documentation-contracts.test.ts cobrindo existencia de supabase/migrations/004_note_echo_flows.sql, public.continue_note, security definer, auth.uid(), inserts em public.notes e public.note_echoes, kind = 'continue_note', rollback e ausencia de service_role
 - [X] T038 [P] [US3] Adicionar testes unitarios de continueNote rpc sucesso/falha sem nota orfa em tests/unit/notes/continue-note.test.ts, com casos separados para mesmo dia e dia futuro cobrindo payload `new_note_day`, persistencia em `notes.day`, `context_day = selectedDay`, rollback e ausencia de `source_day`, `target_day`, `scheduled_at` ou campos de tarefa
 - [X] T040 [US3] Adicionar teste de integracao para Continuar desta nota no mesmo dia e em dia futuro em tests/integration/day/continue-note-flow.test.tsx, com assercoes separadas para: mesmo dia sem navegacao, dia futuro navegando para `/day/[newNoteDay]`, `routeDay`, payload da RPC, `notes.day`, `context_day` como proveniencia e nao rota, Reader aberto apenas depois de `note.day` conferir, consumo unico de `pendingReaderOpen` e ausencia de campos temporais de tarefa
 

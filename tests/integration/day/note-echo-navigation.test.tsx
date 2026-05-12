@@ -194,7 +194,7 @@ describe("note echo cross-day navigation", () => {
     await flushMicrotasks();
 
     expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-19");
-    expect(screen.getByText("19-04-2026")).toBeTruthy();
+    expect(screen.getAllByText("19-04-2026").length).toBeGreaterThan(0);
     expect(screen.getByText("Reader de nota")).toBeTruthy();
     expect(screen.getAllByText("Nota conectada futura").length).toBeGreaterThan(0);
   });

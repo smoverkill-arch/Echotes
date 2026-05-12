@@ -150,7 +150,7 @@ Na Phase 4, revise primeiro se os comandos de criar/remover eco substituem a opc
 
 ### 1. RPC atomica em vez de duas escritas pelo cliente
 
-**O que fizemos**: `supabase/migrations/002_note_echo_flows.sql` cria `public.continue_note`, que insere a nova nota e o `note_echo` `continue_note` na mesma funcao transacional.
+**O que fizemos**: `supabase/migrations/004_note_echo_flows.sql` cria `public.continue_note`, que insere a nova nota e o `note_echo` `continue_note` na mesma funcao transacional.
 
 **Por que**: a promessa principal da Phase 5 e nao deixar nota orfa quando a criacao do eco falha. Se o cliente fizesse `insert notes` e depois `insert note_echoes`, queda de rede, RLS ou erro no segundo passo poderia declarar um estado que o produto nao sabe reconciliar com seguranca.
 

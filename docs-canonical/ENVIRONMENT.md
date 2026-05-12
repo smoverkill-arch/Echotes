@@ -78,6 +78,14 @@ portas padrao bloqueadas pelo Windows, Docker Desktop ou outros projetos:
 deve religar a stack do Echotes automaticamente; a stack local deve subir
 apenas por comando explicito.
 
+O start local solicita a Docker network `echotes_supabase_localhost`,
+configurada com `com.docker.network.bridge.host_binding_ipv4=127.0.0.1`.
+Docker Desktop ainda pode publicar portas da Supabase CLI em `0.0.0.0` ou
+`[::]`; `supabase:doctor` deve tratar essa publicacao como achado operacional.
+Em Windows, a contencao de host vive tambem na regra criada por
+`scripts/apply-echotes-supabase-firewall.ps1`, que bloqueia entrada TCP externa
+em `55420..55429` e preserva acesso local por `127.0.0.1`.
+
 ## Operational Notes
 
 - a sessao do cliente usa a chave local `echotes.auth.session`
@@ -92,6 +100,9 @@ apenas por comando explicito.
 
 ## Revision History
 
+- 2026-05-12 - Supabase local passou a solicitar Docker network dedicada e
+  registrar no doctor publicacao insegura de portas alem de localhost; firewall
+  Windows versionado como contencao de host.
 - 2026-05-09 - Supabase local isolado na faixa `55420..55429` e wrapper
   operacional registrado para impedir restart automatico da stack do Echotes.
 - 2026-05-06 - Supabase CLI/Docker e workflow remoto registrados para

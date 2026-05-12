@@ -158,3 +158,71 @@ export const getWeekRangeForSelectedDay = (value: Date | string) => {
     return formatDayKey(currentDay);
   });
 };
+
+export const addDaysToDayKey = (day: string, amount: number) => {
+  const nextDate = parseDayKey(day);
+  nextDate.setDate(nextDate.getDate() + amount);
+
+  return formatDayKey(nextDate);
+};
+
+export const addWeeksToDayKey = (day: string, amount: number) =>
+  addDaysToDayKey(day, amount * 7);
+
+const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+const MONTH_LABELS = [
+  "Janeiro",
+  "Fevereiro",
+  "Marco",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
+export const formatWeekdayShort = (day: string) =>
+  WEEKDAY_LABELS[parseDayKey(day).getDay()];
+
+export const formatDayOfMonth = (day: string) =>
+  `${parseDayKey(day).getDate()}`;
+
+export const formatMonthYear = (day: string) => {
+  const date = parseDayKey(day);
+
+  return `${MONTH_LABELS[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+export const addMonthsToDayKey = (day: string, amount: number) => {
+  const date = parseDayKey(day);
+  const nextDate = new Date(date.getFullYear(), date.getMonth() + amount, 1);
+
+  return formatDayKey(nextDate);
+};
+
+export const getMonthGridForSelectedDay = (day: string) => {
+  const selectedDate = parseDayKey(day);
+  const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+  const gridStart = parseDayKey(getStartOfWeekSunday(monthStart));
+
+  return Array.from({ length: 42 }, (_, offset) => {
+    const currentDate = new Date(gridStart);
+    currentDate.setDate(gridStart.getDate() + offset);
+
+    return formatDayKey(currentDate);
+  });
+};
+
+export const isSameMonth = (leftDay: string, rightDay: string) => {
+  const left = parseDayKey(leftDay);
+  const right = parseDayKey(rightDay);
+
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth()
+  );
+};

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -9,7 +10,14 @@ import {
 } from "react-native";
 
 import { buildContinueNoteBrief } from "../../features/notes/utils/build-continue-note-brief";
+import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { ContinueNoteInput, Note } from "../../types/note";
+import {
+  addDaysToDayKey,
+  formatDisplayDay,
+  getTodayDateKey,
+  parseDayKey,
+} from "../../utils/date";
 
 interface ContinueNoteEditorProps {
   visible: boolean;
@@ -56,6 +64,28 @@ export function ContinueNoteEditor({
     return null;
   }
 
+  const updateNewNoteDay = (nextDay: string) => {
+    setNewNoteDay(nextDay);
+    setLocalErrorMessage(null);
+  };
+
+  const shiftNewNoteDay = (amount: number) => {
+    try {
+      updateNewNoteDay(addDaysToDayKey(newNoteDay, amount));
+    } catch {
+      setLocalErrorMessage("Dia da nova nota invalido. Use YYYY-MM-DD.");
+    }
+  };
+
+  const isNewNoteDayBeforeOriginal = (() => {
+    try {
+      parseDayKey(newNoteDay);
+      return newNoteDay < sourceNote.day;
+    } catch {
+      return false;
+    }
+  })();
+
   const handleSubmit = async () => {
     setLocalErrorMessage(null);
 
@@ -66,6 +96,13 @@ export function ContinueNoteEditor({
 
     if (!generatedBrief.trim()) {
       setLocalErrorMessage("Briefing gerado e obrigatorio.");
+      return;
+    }
+
+    try {
+      parseDayKey(newNoteDay);
+    } catch {
+      setLocalErrorMessage("Dia da nova nota invalido. Use YYYY-MM-DD.");
       return;
     }
 
@@ -87,60 +124,170 @@ export function ContinueNoteEditor({
     <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.eyebrow}>Continuar nota</Text>
-          <Text style={styles.meta}>Dia original: {sourceNote.day}</Text>
+          <View style={styles.handle} />
+          <View style={styles.header}>
+            <View style={styles.headerCopy}>
+              <Text style={styles.eyebrow}>Continuar desta nota</Text>
+              <Text numberOfLines={2} style={styles.title}>
+                {sourceNote.title}
+              </Text>
+              <View style={styles.originRow}>
+                <Text style={styles.originLabel}>Dia original</Text>
+                <Text style={styles.originChip}>{formatDisplayDay(sourceNote.day)}</Text>
+              </View>
+            </View>
 
-          <Text style={styles.label}>Titulo</Text>
-          <TextInput
-            placeholder="Titulo da nova nota"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-            testID="continue-note-title-input"
-            value={title}
-            onChangeText={setTitle}
-          />
+            <Pressable
+              accessibilityLabel="Fechar continuidade"
+              accessibilityRole="button"
+              accessibilityState={{ disabled: isSubmitting }}
+              disabled={isSubmitting}
+              style={({ pressed }) => [
+                styles.closeButton,
+                pressed && !isSubmitting ? styles.closeButtonPressed : null,
+                isSubmitting ? styles.disabledButton : null,
+              ]}
+              testID="continue-note-close-button"
+              onPress={onClose}
+            >
+              <Text style={styles.closeButtonText}>X</Text>
+            </Pressable>
+          </View>
 
-          <Text style={styles.label}>Dia da nota</Text>
-          <TextInput
-            placeholder="AAAA-MM-DD"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
-            testID="continue-note-day-input"
-            value={newNoteDay}
-            onChangeText={setNewNoteDay}
-          />
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            style={styles.body}
+          >
+            <Text style={styles.label}>Titulo</Text>
+            <TextInput
+              placeholder="Titulo da nova nota"
+              placeholderTextColor={colors.textSubtle}
+              style={styles.input}
+              testID="continue-note-title-input"
+              value={title}
+              onChangeText={(value) => {
+                setTitle(value);
+                setLocalErrorMessage(null);
+              }}
+            />
 
-          <Text style={styles.label}>Briefing</Text>
-          <TextInput
-            multiline
-            placeholder="Resumo gerado"
-            placeholderTextColor="#9ca3af"
-            style={[styles.input, styles.multiline]}
-            testID="continue-note-brief-input"
-            value={generatedBrief}
-            onChangeText={setGeneratedBrief}
-          />
+            <Text style={styles.label}>Dia da nova nota</Text>
+            <View style={styles.dayControls}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isSubmitting }}
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.dayControlButton,
+                  pressed && !isSubmitting ? styles.buttonPressed : null,
+                  isSubmitting ? styles.disabledButton : null,
+                ]}
+                testID="continue-note-previous-day-button"
+                onPress={() => {
+                  shiftNewNoteDay(-1);
+                }}
+              >
+                <Text style={styles.dayControlLabel}>Dia anterior</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isSubmitting }}
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.dayControlButton,
+                  pressed && !isSubmitting ? styles.buttonPressed : null,
+                  isSubmitting ? styles.disabledButton : null,
+                ]}
+                testID="continue-note-next-day-button"
+                onPress={() => {
+                  shiftNewNoteDay(1);
+                }}
+              >
+                <Text style={styles.dayControlLabel}>Dia seguinte</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isSubmitting }}
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.dayControlButton,
+                  styles.todayButton,
+                  pressed && !isSubmitting ? styles.todayButtonPressed : null,
+                  isSubmitting ? styles.disabledButton : null,
+                ]}
+                testID="continue-note-today-button"
+                onPress={() => {
+                  updateNewNoteDay(getTodayDateKey());
+                }}
+              >
+                <Text style={[styles.dayControlLabel, styles.todayButtonLabel]}>Hoje</Text>
+              </Pressable>
+            </View>
+            <TextInput
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor={colors.textSubtle}
+              style={styles.input}
+              testID="continue-note-day-input"
+              value={newNoteDay}
+              onChangeText={updateNewNoteDay}
+            />
+            {isNewNoteDayBeforeOriginal ? (
+              <View style={styles.warningBlock} testID="continue-note-before-origin-warning">
+                <Text style={styles.warningTitle}>Dia anterior ao original</Text>
+                <Text style={styles.warningText}>
+                  A continuidade precisa ficar no mesmo dia ou depois da nota de origem.
+                </Text>
+              </View>
+            ) : null}
 
-          <Text style={styles.label}>Conteudo</Text>
-          <TextInput
-            multiline
-            placeholder="Escreva a continuidade"
-            placeholderTextColor="#9ca3af"
-            style={[styles.input, styles.multiline]}
-            testID="continue-note-content-input"
-            value={content}
-            onChangeText={setContent}
-          />
+            <Text style={styles.label}>Briefing</Text>
+            <TextInput
+              multiline
+              placeholder="Resumo gerado"
+              placeholderTextColor={colors.textSubtle}
+              style={[styles.input, styles.multiline]}
+              testID="continue-note-brief-input"
+              value={generatedBrief}
+              onChangeText={(value) => {
+                setGeneratedBrief(value);
+                setLocalErrorMessage(null);
+              }}
+            />
 
-          {localErrorMessage || errorMessage ? (
-            <Text style={styles.errorText}>{localErrorMessage ?? errorMessage}</Text>
-          ) : null}
+            <Text style={styles.label}>Conteudo</Text>
+            <TextInput
+              multiline
+              placeholder="Escreva a continuidade"
+              placeholderTextColor={colors.textSubtle}
+              style={[styles.input, styles.multiline]}
+              testID="continue-note-content-input"
+              value={content}
+              onChangeText={setContent}
+            />
+
+            {localErrorMessage || errorMessage ? (
+              <View
+                accessibilityRole="alert"
+                style={styles.errorBlock}
+                testID="continue-note-error"
+              >
+                <Text style={styles.errorTitle}>Nao foi possivel continuar</Text>
+                <Text style={styles.errorText}>{localErrorMessage ?? errorMessage}</Text>
+              </View>
+            ) : null}
+          </ScrollView>
 
           <View style={styles.actions}>
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ disabled: isSubmitting }}
               disabled={isSubmitting}
-              style={styles.secondaryButton}
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                pressed && !isSubmitting ? styles.buttonPressed : null,
+                isSubmitting ? styles.disabledButton : null,
+              ]}
               testID="continue-note-cancel-button"
               onPress={onClose}
             >
@@ -150,7 +297,12 @@ export function ContinueNoteEditor({
             <Pressable
               accessibilityRole="button"
               disabled={isSubmitting}
-              style={styles.primaryButton}
+              accessibilityState={{ disabled: isSubmitting }}
+              style={({ pressed }) => [
+                styles.primaryButton,
+                pressed && !isSubmitting ? styles.primaryButtonPressed : null,
+                isSubmitting ? styles.disabledButton : null,
+              ]}
               testID="continue-note-submit-button"
               onPress={() => {
                 void handleSubmit();
@@ -170,85 +322,212 @@ export function ContinueNoteEditor({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(15, 23, 42, 0.48)",
-    padding: 24,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(23, 33, 27, 0.45)",
   },
   sheet: {
-    borderRadius: 24,
-    backgroundColor: "#ffffff",
-    padding: 24,
+    maxHeight: "92%",
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  handle: {
+    alignSelf: "center",
+    width: 38,
+    height: 4,
+    borderRadius: radius.pill,
+    backgroundColor: colors.borderStrong,
+    marginBottom: spacing.lg,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+  headerCopy: {
+    flex: 1,
   },
   eyebrow: {
-    fontSize: 12,
+    fontSize: typography.caption,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#6b7280",
+    color: colors.primary,
   },
-  meta: {
-    marginTop: 10,
-    fontSize: 13,
-    color: "#4b5563",
+  title: {
+    marginTop: spacing.xs,
+    fontSize: typography.title,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  originRow: {
+    marginTop: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  originLabel: {
+    fontSize: typography.caption,
+    fontWeight: "700",
+    color: colors.textMuted,
+  },
+  originChip: {
+    overflow: "hidden",
+    borderRadius: radius.pill,
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.primary,
+  },
+  closeButton: {
+    minWidth: touchTarget.min,
+    minHeight: touchTarget.min,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeButtonPressed: {
+    backgroundColor: colors.surfacePressed,
+  },
+  closeButtonText: {
+    fontSize: typography.bodyLarge,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  body: {
+    marginTop: spacing.lg,
   },
   label: {
-    marginTop: 16,
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
   },
   input: {
-    minHeight: 48,
-    borderRadius: 14,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    backgroundColor: "#f9fafb",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#111827",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    fontSize: typography.bodyLarge,
+    color: colors.text,
+  },
+  dayControls: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  dayControlButton: {
+    minHeight: touchTarget.min,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+  },
+  dayControlLabel: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  todayButton: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
+  },
+  todayButtonPressed: {
+    backgroundColor: colors.surfacePressed,
+  },
+  todayButtonLabel: {
+    color: colors.primary,
   },
   multiline: {
     minHeight: 96,
     textAlignVertical: "top",
   },
+  warningBlock: {
+    marginTop: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.dangerSoft,
+    padding: spacing.md,
+  },
+  warningTitle: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.danger,
+  },
+  warningText: {
+    marginTop: spacing.xxs,
+    fontSize: typography.body,
+    color: colors.danger,
+  },
+  errorBlock: {
+    marginTop: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.dangerSoft,
+    padding: spacing.md,
+  },
+  errorTitle: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.danger,
+  },
   errorText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: "#b91c1c",
+    marginTop: spacing.xxs,
+    fontSize: typography.body,
+    color: colors.danger,
   },
   actions: {
-    marginTop: 20,
+    marginTop: spacing.lg,
     flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
+    gap: spacing.sm,
   },
   secondaryButton: {
-    minHeight: 44,
-    borderRadius: 12,
+    flex: 1,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
   },
   secondaryLabel: {
-    fontSize: 14,
+    fontSize: typography.body,
     fontWeight: "700",
-    color: "#374151",
+    color: colors.text,
   },
   primaryButton: {
-    minHeight: 44,
-    borderRadius: 12,
-    backgroundColor: "#111827",
+    flex: 1.25,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
+  },
+  primaryButtonPressed: {
+    backgroundColor: colors.primaryPressed,
   },
   primaryLabel: {
-    fontSize: 14,
+    fontSize: typography.body,
     fontWeight: "700",
-    color: "#ffffff",
+    color: colors.white,
+  },
+  buttonPressed: {
+    backgroundColor: colors.surfacePressed,
+  },
+  disabledButton: {
+    opacity: 0.55,
   },
 });

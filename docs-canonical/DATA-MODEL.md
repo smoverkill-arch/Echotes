@@ -151,11 +151,13 @@ A migration base preserva:
 
 O SQL executavel vive em `supabase/migrations/001_auth_day_surface.sql`.
 Esse arquivo e a fonte operacional para o banco.
-O fluxo de continuacao vive em `supabase/migrations/002_note_echo_flows.sql`.
 O default de ownership para projetos existentes vive em
 `supabase/migrations/002_note_echo_owner_default.sql`.
 Hardening incremental de grants, policies, funcao auxiliar e GraphQL vive em
 `supabase/migrations/003_harden_note_echo_surface.sql`.
+O fluxo de continuacao vive em `supabase/migrations/004_note_echo_flows.sql`.
+Hardening de advisors Supabase vive em
+`supabase/migrations/005_supabase_advisor_hardening.sql`.
 Este canon descreve o contrato que novas migrations devem manter.
 
 ## Indexes
@@ -171,6 +173,8 @@ O baseline cria indexes para:
 - ecos por `from_note_id`.
 - ecos por `to_note_id`.
 - par semantico de `note_echoes`.
+- FKs usadas por tags, contexto de eco e autoria de eco para reduzir alertas de
+  performance do Supabase Advisor.
 
 ## Day Queries
 
@@ -274,9 +278,10 @@ Helpers canonicos usados pelo repo:
 O schema atual nasce de:
 
 - `supabase/migrations/001_auth_day_surface.sql`.
-- `supabase/migrations/002_note_echo_flows.sql`.
 - `supabase/migrations/002_note_echo_owner_default.sql`.
 - `supabase/migrations/003_harden_note_echo_surface.sql`.
+- `supabase/migrations/004_note_echo_flows.sql`.
+- `supabase/migrations/005_supabase_advisor_hardening.sql`.
 
 Novas migrations devem preservar:
 
@@ -316,6 +321,8 @@ Checklist canonico ativo:
 
 ## Revision History
 
+- 2026-05-12 - Reordenada migration de `continue_note` para versao unica `004`
+  e registrado hardening de advisors Supabase em `005`.
 - 2026-05-11 - Registrado `continue_note` atomico, `manual_link` e
   `continue_note` como provenance entregue por `002-note-echo-flows`.
 - 2026-05-06 - Atualizado status dos fluxos de eco: CRUD implementado em `002-note-echo-flows`.

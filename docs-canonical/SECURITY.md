@@ -28,8 +28,10 @@ O acesso ao dia protegido depende de sessao valida.
 
 RLS esta definida em `supabase/migrations/001_auth_day_surface.sql`.
 O RPC de continuacao de nota vive em
-`supabase/migrations/002_note_echo_flows.sql`.
+`supabase/migrations/004_note_echo_flows.sql`.
 Hardening incremental vive em `supabase/migrations/003_harden_note_echo_surface.sql`.
+Hardening de advisors Supabase vive em
+`supabase/migrations/005_supabase_advisor_hardening.sql`.
 
 ## RLS Contract
 
@@ -55,6 +57,16 @@ O cliente usa REST/PostgREST com sessao autenticada.
 - funcoes auxiliares de trigger usam `search_path` fixo
 - a extensao GraphQL do banco e removida enquanto o app nao usar GraphQL como
   interface de produto
+- policies de RLS usam `(select auth.uid())` para evitar reavaliacao por linha
+  apontada pelo Supabase Advisor
+
+## Local Host Containment
+
+No Windows, a stack local pode aparecer publicada pelo Docker Desktop em
+`0.0.0.0` mesmo quando a rede Docker dedicada solicita bind em `127.0.0.1`.
+Para smoke local em rede nao confiavel, a regra versionada em
+`scripts/apply-echotes-supabase-firewall.ps1` bloqueia entrada TCP externa em
+`55420..55429` e preserva uso por localhost.
 
 ## Note Continuation RPC
 
@@ -98,6 +110,10 @@ Regras:
 
 ## Revision History
 
+- 2026-05-12 - Registrado hardening de advisors Supabase para RLS e indices de
+  FKs, mantendo grants minimos e cliente sem `service_role`.
+- 2026-05-12 - Registrada contencao por Windows Firewall para a faixa local
+  Supabase quando Docker Desktop publica portas alem de localhost.
 - 2026-05-11 - RPC `continue_note` documentado como superficie atomica e
   autenticada de `002-note-echo-flows`.
 - 2026-05-06 - Hardening de superficie Supabase registrado para grants,

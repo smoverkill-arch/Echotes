@@ -10,9 +10,11 @@ import type {
 } from "../../types/note";
 import type { Task } from "../../types/task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
+import type { CalendarMode } from "../../stores/calendar-store";
 import type { ReaderState, EditorState } from "../../stores/ui-store";
 import type { DayTab, TimelineItemKind, TimelineNode } from "../../types/timeline";
 import type { AuthStatus } from "../../types/auth";
+import { colors, spacing } from "../../theme/tokens";
 import { BreadcrumbBar } from "./breadcrumb-bar";
 import { DayHeader } from "./day-header";
 import { TaskEditor } from "../forms/task-editor";
@@ -25,11 +27,13 @@ import { TimelineView } from "../timeline/timeline-view";
 
 interface DayShellProps {
   date: string;
+  clockDate: string;
   email: string;
   isSigningOut: boolean;
   authStatus: AuthStatus;
   authErrorMessage: string | null;
   activeTab: DayTab;
+  calendarMode: CalendarMode;
   readerState: ReaderState;
   editorState: EditorState;
   timelineNodes: TimelineNode[];
@@ -46,6 +50,8 @@ interface DayShellProps {
   continueNoteErrorMessage: string | null;
   echoFeedbackMessage: string | null;
   onSignOut: () => Promise<void> | void;
+  onDateChange: (date: string) => void;
+  onCalendarModeChange: (mode: CalendarMode) => void;
   onTabChange: (tab: DayTab) => void;
   onCreateNote: () => void;
   onCreateTask: () => void;
@@ -69,11 +75,13 @@ interface DayShellProps {
 
 export function DayShell({
   date,
+  clockDate,
   email,
   isSigningOut,
   authStatus,
   authErrorMessage,
   activeTab,
+  calendarMode,
   readerState,
   editorState,
   timelineNodes,
@@ -90,6 +98,8 @@ export function DayShell({
   continueNoteErrorMessage,
   echoFeedbackMessage,
   onSignOut,
+  onDateChange,
+  onCalendarModeChange,
   onTabChange,
   onCreateNote,
   onCreateTask,
@@ -116,9 +126,13 @@ export function DayShell({
 
       <DayHeader
         date={date}
+        clockDate={clockDate}
         email={email}
         activeTab={activeTab}
+        calendarMode={calendarMode}
         isSigningOut={isSigningOut}
+        onDateChange={onDateChange}
+        onCalendarModeChange={onCalendarModeChange}
         onTabChange={onTabChange}
         onSignOut={onSignOut}
       />
@@ -229,9 +243,9 @@ export function DayShell({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: "#f7f8fb",
+    gap: spacing.md,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl,
+    backgroundColor: colors.background,
   },
 });

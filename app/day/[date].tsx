@@ -46,8 +46,11 @@ export default function ProtectedDayRoute() {
   const router = useRouter();
   const params = useLocalSearchParams<{ date?: string | string[] }>();
   const setSelectedDate = useCalendarStore((state) => state.setSelectedDate);
+  const calendarMode = useCalendarStore((state) => state.calendarMode);
+  const setCalendarMode = useCalendarStore((state) => state.setCalendarMode);
   const {
     authStatus,
+    clockDate,
     errorMessage,
     isAuthenticated,
     isBootstrapping,
@@ -124,6 +127,29 @@ export default function ProtectedDayRoute() {
     errorMessage: timelineErrorMessage,
     reload,
   } = useDayTimeline(resolvedDate, activeTab);
+  const handleDateChange = useCallback(
+    (nextDate: string) => {
+      if (nextDate === resolvedDate) {
+        return;
+      }
+
+      closeReader();
+      closeEditor();
+      clearPendingReaderOpen();
+      clearTemporalNavigationContext();
+      setSelectedDate(nextDate);
+      router.push(`/day/${nextDate}`);
+    },
+    [
+      clearPendingReaderOpen,
+      clearTemporalNavigationContext,
+      closeEditor,
+      closeReader,
+      resolvedDate,
+      router,
+      setSelectedDate,
+    ],
+  );
   const activeItemId = readerState.id ?? editorState.id;
   const activeNote = useMemo(
     () =>
@@ -455,11 +481,13 @@ export default function ProtectedDayRoute() {
   return (
     <DayShell
       date={resolvedDate}
+      clockDate={clockDate}
       email={session.email}
       isSigningOut={isSigningOut}
       authStatus={authStatus}
       authErrorMessage={errorMessage}
       activeTab={activeTab}
+      calendarMode={calendarMode}
       readerState={readerState}
       editorState={editorState}
       timelineNodes={timelineNodes}
@@ -478,6 +506,8 @@ export default function ProtectedDayRoute() {
       onSignOut={async () => {
         await signOut();
       }}
+      onDateChange={handleDateChange}
+      onCalendarModeChange={setCalendarMode}
       onTabChange={setActiveTab}
       onCreateNote={() => {
         openEditor({ mode: "create", kind: "note" });

@@ -80,7 +80,11 @@ describe("documentation contracts", () => {
       "utf8",
     );
     const noteEchoFlowsSql = readFileSync(
-      resolve(root, "supabase/migrations/002_note_echo_flows.sql"),
+      resolve(root, "supabase/migrations/004_note_echo_flows.sql"),
+      "utf8",
+    );
+    const advisorHardeningSql = readFileSync(
+      resolve(root, "supabase/migrations/005_supabase_advisor_hardening.sql"),
       "utf8",
     );
     const runbooks = readFileSync(resolve(root, "RUNBOOKS.md"), "utf8");
@@ -122,7 +126,13 @@ describe("documentation contracts", () => {
       "grant execute on function public.continue_note",
     );
     expect(noteEchoFlowsSql).not.toContain("service_role");
+    expect(advisorHardeningSql).toContain("idx_tasks_tag_id");
+    expect(advisorHardeningSql).toContain("idx_notes_tag_id");
+    expect(advisorHardeningSql).toContain("idx_note_echoes_context_note_id");
+    expect(advisorHardeningSql).toContain("(select auth.uid())");
     expect(runbooks).toContain("003_harden_note_echo_surface.sql");
+    expect(runbooks).toContain("004_note_echo_flows.sql");
+    expect(runbooks).toContain("005_supabase_advisor_hardening.sql");
     expect(runbooks).toContain("supabase migration repair <version> --status applied");
   });
 });

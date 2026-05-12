@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 
+import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { Note, RelatedNote } from "../../types/note";
 import { formatDisplayDay } from "../../utils/date";
 
@@ -24,6 +25,17 @@ interface NoteReaderProps {
   onContinueNote?: () => void;
   echoFeedbackMessage?: string | null;
 }
+
+const getRelationContextLabel = (note: Note, relatedNote: RelatedNote) => {
+  if (relatedNote.availability !== "available") {
+    return "Indisponivel";
+  }
+
+  return relatedNote.day === note.day ? "Mesmo dia" : "Outro dia";
+};
+
+const getRelationKindLabel = (relatedNote: RelatedNote) =>
+  relatedNote.kind === "continue_note" ? "Continuacao" : "Eco manual";
 
 export function NoteReader({
   visible,
@@ -42,51 +54,135 @@ export function NoteReader({
     return null;
   }
 
+  const echoCountLabel =
+    relatedNotes.length === 1 ? "1 nota conectada" : `${relatedNotes.length} notas conectadas`;
+
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
           <ScrollView contentContainerStyle={styles.content}>
-            <Text style={styles.eyebrow}>Reader de nota</Text>
-            <Text style={styles.title}>{note.title}</Text>
-            <Text style={styles.meta}>Dia: {formatDisplayDay(note.day)}</Text>
+            <View style={styles.header}>
+              <View style={styles.titleBlock}>
+                <Text style={styles.eyebrow}>Reader de nota</Text>
+                <Text style={styles.title}>{note.title}</Text>
+                <View style={styles.noteMetaRow}>
+                  <Text style={styles.noteDateChip}>{formatDisplayDay(note.day)}</Text>
+                  <Text style={styles.noteMetaText}>Reader contextual do dia</Text>
+                </View>
+              </View>
+            </View>
+
             {note.brief ? <Text style={styles.brief}>{note.brief}</Text> : null}
             {note.content ? <Text style={styles.body}>{note.content}</Text> : null}
 
-            <View style={styles.echoSection}>
-              <View style={styles.echoHeader}>
-                <Text style={styles.echoTitle}>Ecos</Text>
+            <View style={styles.primaryActionArea}>
+              {onContinueNote ? (
+                <Pressable
+                  accessibilityLabel="Continuar desta nota"
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.continueButton,
+                    pressed ? styles.continueButtonPressed : null,
+                  ]}
+                  testID="note-reader-continue-note-button"
+                  onPress={onContinueNote}
+                >
+                  <Text style={styles.continueLabel}>Continuar desta nota</Text>
+                </Pressable>
+              ) : null}
+
+              <View style={styles.secondaryActions}>
                 {onAddEcho ? (
                   <Pressable
+                    accessibilityLabel="Adicionar eco manual"
                     accessibilityRole="button"
-                    style={styles.echoActionButton}
+                    style={({ pressed }) => [
+                      styles.secondaryButton,
+                      pressed ? styles.secondaryButtonPressed : null,
+                    ]}
                     testID="note-reader-add-echo-button"
                     onPress={onAddEcho}
                   >
-                    <Text style={styles.echoActionLabel}>Adicionar eco</Text>
+                    <Text style={styles.secondaryLabel}>Adicionar eco</Text>
                   </Pressable>
                 ) : null}
+
+                <Pressable
+                  accessibilityLabel="Editar nota"
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.secondaryButton,
+                    pressed ? styles.secondaryButtonPressed : null,
+                  ]}
+                  testID="note-reader-edit-button"
+                  onPress={onEdit}
+                >
+                  <Text style={styles.secondaryLabel}>Editar</Text>
+                </Pressable>
               </View>
+            </View>
+
+            <View style={styles.echoSection}>
+              <View style={styles.echoHeader}>
+                <View>
+                  <Text style={styles.echoTitle}>Ecos</Text>
+                  <Text style={styles.echoSubtitle}>{echoCountLabel}</Text>
+                </View>
+              </View>
+
               {echoFeedbackMessage ? (
                 <Text style={styles.echoFeedbackText}>{echoFeedbackMessage}</Text>
               ) : null}
 
               {relatedNotes.length === 0 ? (
-                <Text style={styles.emptyEchoText}>Nenhuma nota conectada</Text>
+                <View style={styles.emptyEchoBox}>
+                  <Text style={styles.emptyEchoTitle}>Nenhuma nota conectada</Text>
+                  <Text style={styles.emptyEchoText}>
+                    Use Adicionar eco para ligar esta nota a outra ideia.
+                  </Text>
+                </View>
               ) : (
                 relatedNotes.map((relatedNote) => {
                   const isAvailable = relatedNote.availability === "available";
+                  const relationContext = getRelationContextLabel(note, relatedNote);
 
                   return (
                     <View
                       key={`${relatedNote.echoId}:${relatedNote.id}`}
-                      style={styles.relatedNoteItem}
+                      style={[
+                        styles.relatedNoteItem,
+                        !isAvailable ? styles.relatedNoteItemUnavailable : null,
+                      ]}
                       testID={`note-reader-related-note-${relatedNote.id}`}
                     >
+                      <View style={styles.relatedMetaRow}>
+                        <Text
+                          style={[
+                            styles.relationChip,
+                            relationContext === "Outro dia" ? styles.relationChipOtherDay : null,
+                            relationContext === "Indisponivel"
+                              ? styles.relationChipUnavailable
+                              : null,
+                          ]}
+                          testID={`note-reader-relation-chip-${relatedNote.id}`}
+                        >
+                          {relationContext}
+                        </Text>
+                        <Text style={styles.relationKind}>
+                          {getRelationKindLabel(relatedNote)}
+                        </Text>
+                      </View>
+
                       {isAvailable ? (
-                        <View>
+                        <>
                           <Pressable
+                            accessibilityLabel={`Abrir nota conectada ${relatedNote.title}`}
                             accessibilityRole="button"
+                            style={({ pressed }) => [
+                              styles.relatedOpenButton,
+                              pressed ? styles.relatedOpenButtonPressed : null,
+                            ]}
                             testID={`note-reader-open-related-note-${relatedNote.id}`}
                             onPress={() => {
                               onOpenRelatedNote?.(relatedNote);
@@ -100,10 +196,15 @@ export function NoteReader({
                               <Text style={styles.relatedBrief}>{relatedNote.brief}</Text>
                             ) : null}
                           </Pressable>
+
                           {onRemoveEcho ? (
                             <Pressable
+                              accessibilityLabel={`Remover eco com ${relatedNote.title}`}
                               accessibilityRole="button"
-                              style={styles.removeEchoButton}
+                              style={({ pressed }) => [
+                                styles.removeEchoButton,
+                                pressed ? styles.removeEchoButtonPressed : null,
+                              ]}
                               testID={`note-reader-remove-echo-${relatedNote.echoId}`}
                               onPress={() => {
                                 Alert.alert(
@@ -125,7 +226,7 @@ export function NoteReader({
                               <Text style={styles.removeEchoLabel}>Remover eco</Text>
                             </Pressable>
                           ) : null}
-                        </View>
+                        </>
                       ) : (
                         <View>
                           <Text style={styles.relatedTitle}>Item indisponivel</Text>
@@ -133,8 +234,12 @@ export function NoteReader({
                             Nao foi possivel carregar esta nota conectada.
                           </Text>
                           <Pressable
+                            accessibilityLabel="Recarregar nota conectada"
                             accessibilityRole="button"
-                            style={styles.reloadButton}
+                            style={({ pressed }) => [
+                              styles.reloadButton,
+                              pressed ? styles.reloadButtonPressed : null,
+                            ]}
                             testID={`note-reader-reload-related-note-${relatedNote.id}`}
                             onPress={() => {
                               onReloadRelatedNote?.();
@@ -151,34 +256,18 @@ export function NoteReader({
             </View>
           </ScrollView>
 
-          <View style={styles.actions}>
-            {onContinueNote ? (
-              <Pressable
-                accessibilityRole="button"
-                style={styles.secondaryButton}
-                testID="note-reader-continue-note-button"
-                onPress={onContinueNote}
-              >
-                <Text style={styles.secondaryLabel}>Continuar desta nota</Text>
-              </Pressable>
-            ) : null}
-
+          <View style={styles.footerActions}>
             <Pressable
+              accessibilityLabel="Fechar Reader"
               accessibilityRole="button"
-              style={styles.secondaryButton}
+              style={({ pressed }) => [
+                styles.closeButton,
+                pressed ? styles.closeButtonPressed : null,
+              ]}
               testID="note-reader-close-button"
               onPress={onClose}
             >
-              <Text style={styles.secondaryLabel}>Fechar</Text>
-            </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              style={styles.primaryButton}
-              testID="note-reader-edit-button"
-              onPress={onEdit}
-            >
-              <Text style={styles.primaryLabel}>Editar</Text>
+              <Text style={styles.closeLabel}>Fechar</Text>
             </Pressable>
           </View>
         </View>
@@ -190,169 +279,278 @@ export function NoteReader({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(15, 23, 42, 0.48)",
-    padding: 24,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(23, 33, 27, 0.48)",
   },
   sheet: {
-    maxHeight: "88%",
-    borderRadius: 24,
-    backgroundColor: "#ffffff",
-    padding: 20,
+    maxHeight: "92%",
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
   },
   content: {
-    paddingBottom: 6,
+    paddingBottom: spacing.md,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+  titleBlock: {
+    flex: 1,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 0.8,
-    color: "#6b7280",
+    color: colors.note,
   },
   title: {
-    marginTop: 10,
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#111827",
+    marginTop: spacing.sm,
+    fontSize: typography.title,
+    fontWeight: "800",
+    color: colors.text,
   },
-  meta: {
-    marginTop: 8,
-    fontSize: 13,
-    color: "#4b5563",
+  noteMetaRow: {
+    marginTop: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  noteDateChip: {
+    overflow: "hidden",
+    borderRadius: radius.pill,
+    backgroundColor: colors.noteSoft,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.note,
+  },
+  noteMetaText: {
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   brief: {
-    marginTop: 12,
-    fontSize: 14,
+    marginTop: spacing.lg,
+    fontSize: typography.body,
     lineHeight: 20,
-    color: "#475569",
+    color: colors.textMuted,
   },
   body: {
-    marginTop: 12,
-    fontSize: 15,
-    lineHeight: 22,
-    color: "#1f2937",
+    marginTop: spacing.md,
+    fontSize: typography.bodyLarge,
+    lineHeight: 24,
+    color: colors.text,
+  },
+  primaryActionArea: {
+    marginTop: spacing.xl,
+    gap: spacing.md,
+  },
+  continueButton: {
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.lg,
+  },
+  continueButtonPressed: {
+    backgroundColor: colors.primaryPressed,
+  },
+  continueLabel: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.white,
+  },
+  secondaryActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  secondaryButton: {
+    minHeight: touchTarget.min,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.lg,
+  },
+  secondaryButtonPressed: {
+    backgroundColor: colors.surfacePressed,
+  },
+  secondaryLabel: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
   },
   echoSection: {
-    marginTop: 18,
-    gap: 10,
+    marginTop: spacing.xxl,
+    gap: spacing.md,
   },
   echoHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 12,
+    gap: spacing.md,
   },
   echoTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
+    fontSize: typography.bodyLarge,
+    fontWeight: "800",
+    color: colors.text,
   },
-  echoActionButton: {
-    minHeight: 36,
-    borderRadius: 10,
-    backgroundColor: "#eff6ff",
-    justifyContent: "center",
-    paddingHorizontal: 12,
+  echoSubtitle: {
+    marginTop: spacing.xxs,
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
-  echoActionLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#1d4ed8",
+  emptyEchoBox: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
+    padding: spacing.md,
+  },
+  emptyEchoTitle: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
   },
   emptyEchoText: {
-    fontSize: 13,
-    color: "#64748b",
+    marginTop: spacing.xs,
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   relatedNoteItem: {
-    borderRadius: 14,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#f8fafc",
-    padding: 12,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  relatedNoteItemUnavailable: {
+    backgroundColor: colors.dangerSoft,
+    borderColor: colors.dangerSoft,
+  },
+  relatedMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  relationChip: {
+    overflow: "hidden",
+    borderRadius: radius.pill,
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.primary,
+  },
+  relationChipOtherDay: {
+    backgroundColor: colors.noteSoft,
+    color: colors.note,
+  },
+  relationChipUnavailable: {
+    backgroundColor: colors.dangerSoft,
+    color: colors.danger,
+  },
+  relationKind: {
+    fontSize: typography.caption,
+    color: colors.textMuted,
+  },
+  relatedOpenButton: {
+    borderRadius: radius.md,
+    paddingVertical: spacing.xs,
+  },
+  relatedOpenButtonPressed: {
+    backgroundColor: colors.surfacePressed,
   },
   relatedTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#111827",
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
   },
   relatedMeta: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#64748b",
+    marginTop: spacing.xs,
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   relatedBrief: {
-    marginTop: 6,
-    fontSize: 13,
+    marginTop: spacing.xs,
+    fontSize: typography.caption,
     lineHeight: 18,
-    color: "#475569",
+    color: colors.textMuted,
   },
   echoFeedbackText: {
-    fontSize: 13,
-    color: "#047857",
+    fontSize: typography.caption,
+    fontWeight: "700",
+    color: colors.primary,
   },
   removeEchoButton: {
     alignSelf: "flex-start",
-    marginTop: 10,
-    minHeight: 34,
-    borderRadius: 10,
+    minHeight: touchTarget.min,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#fecaca",
+    borderColor: colors.danger,
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
+  },
+  removeEchoButtonPressed: {
+    backgroundColor: colors.dangerSoft,
   },
   removeEchoLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#b91c1c",
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.danger,
   },
   reloadButton: {
     alignSelf: "flex-start",
-    marginTop: 8,
-    minHeight: 34,
-    borderRadius: 10,
+    marginTop: spacing.sm,
+    minHeight: touchTarget.min,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: colors.danger,
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
+  },
+  reloadButtonPressed: {
+    backgroundColor: colors.surface,
   },
   reloadLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#334155",
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.danger,
   },
-  actions: {
-    marginTop: 20,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
-    gap: 12,
+  footerActions: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing.md,
   },
-  secondaryButton: {
-    minHeight: 44,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#d1d5db",
+  closeButton: {
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    backgroundColor: colors.text,
+    paddingHorizontal: spacing.lg,
   },
-  secondaryLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#374151",
+  closeButtonPressed: {
+    backgroundColor: colors.primaryPressed,
   },
-  primaryButton: {
-    minHeight: 44,
-    borderRadius: 12,
-    backgroundColor: "#111827",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-  },
-  primaryLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#ffffff",
+  closeLabel: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.white,
   },
 });

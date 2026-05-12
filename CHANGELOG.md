@@ -30,6 +30,10 @@ versioned releases when they start to exist.
 - Phase 6 closure for `002-note-echo-flows`: feature-scoped `@req` tags,
   canonical documentation alignment and final evidence artifact for gates
 - documented occasional auxiliary development tool rules in the root README
+- `003-mobile-day-shell-ux` initial feature artifacts and S21 smoke quickstart
+  for the mobile day-surface UX upgrade
+- shared mobile UI tokens in `src/theme/` and a temporal day shell with weekly
+  navigation, Today return and monthly selector
 
 ### Changed
 
@@ -71,6 +75,19 @@ versioned releases when they start to exist.
   evidence destination and make T055 the final step after gates
 - executable canons now treat manual note echoes and `continue_note` as
   delivered feature 002 behavior, while inline `@nota` remains future scope
+- Supabase local startup now requests a localhost-bound Docker network and
+  reports unsafe `0.0.0.0` or `[::]` port publication in `supabase:doctor`
+- Windows Firewall containment script for Echotes Supabase local ports
+  `55420..55429`
+- authenticated day header now prioritizes the Echotes mobile shell, visible
+  calendar navigation and day-level tabs instead of the former generic MVP
+  header copy
+- note Reader now uses the mobile token system, clearer action hierarchy and
+  same-day/other-day/unavailable relation chips for note echoes
+- Reader-launched `Adicionar eco` and `Continuar desta nota` now use mobile
+  sheets, shared tokens, contextual day chips and clearer feedback states
+- day-surface creation, note editing, task editing and task Reader surfaces now
+  use mobile sheets, shared tokens, clearer metadata chips and guided date controls
 
 ### Fixed
 
@@ -91,6 +108,9 @@ versioned releases when they start to exist.
   the package manager is available to `actions/setup-node`
 - Supabase local development now uses the dedicated `55420..55429` port range
   and forces Echotes containers to `restart=no` after startup
+- Supabase migrations now use a unique `004_note_echo_flows.sql` version for
+  the `continue_note` RPC and `005_supabase_advisor_hardening.sql` for advisor
+  performance fixes
 
 ### Removed
 

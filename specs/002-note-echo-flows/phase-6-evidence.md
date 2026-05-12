@@ -68,12 +68,12 @@ Root docs changed:
 Contract evidence:
 
 ```powershell
-supabase/migrations/002_note_echo_flows.sql:12:security definer
-supabase/migrations/002_note_echo_flows.sql:13:set search_path = public
-supabase/migrations/002_note_echo_flows.sql:16:current_user_id uuid := auth.uid()
-supabase/migrations/002_note_echo_flows.sql:81:created_by_user_id
-supabase/migrations/002_note_echo_flows.sql:107:grant execute on function public.continue_note(uuid, date, text, text, text) to authenticated
-supabase/migrations/002_note_echo_flows.sql:110:-- drop function if exists public.continue_note(uuid, date, text, text, text)
+supabase/migrations/004_note_echo_flows.sql:12:security definer
+supabase/migrations/004_note_echo_flows.sql:13:set search_path = public
+supabase/migrations/004_note_echo_flows.sql:16:current_user_id uuid := auth.uid()
+supabase/migrations/004_note_echo_flows.sql:81:created_by_user_id
+supabase/migrations/004_note_echo_flows.sql:107:grant execute on function public.continue_note(uuid, date, text, text, text) to authenticated
+supabase/migrations/004_note_echo_flows.sql:110:-- drop function if exists public.continue_note(uuid, date, text, text, text)
 tests/unit/docs/documentation-contracts.test.ts:124:expect(noteEchoFlowsSql).not.toContain("service_role")
 ```
 
@@ -128,8 +128,8 @@ Exit code: 0.
 Result:
 
 ```text
-PASS — All 171 checks passed
-Badge: CDD_Guard-169/172_passed
+PASS — All 176 checks passed
+Badge: CDD_Guard-172/177_passed
 ```
 
 The command still prints the known Windows line after the PASS:

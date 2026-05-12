@@ -26,6 +26,14 @@ const availableRelatedNote: RelatedNote = {
   availability: "available",
 };
 
+const otherDayRelatedNote: RelatedNote = {
+  ...availableRelatedNote,
+  id: "10000000-0000-4000-8000-000000000004",
+  day: "2026-05-02",
+  title: "Nota de outro dia",
+  echoId: "30000000-0000-4000-8000-000000000003",
+};
+
 const unavailableRelatedNote: RelatedNote = {
   id: "10000000-0000-4000-8000-000000000003",
   day: null,
@@ -38,7 +46,8 @@ const unavailableRelatedNote: RelatedNote = {
 };
 
 describe("NoteReader note echo relations", () => {
-  it("renderiza ecos e item indisponivel sem expor acoes de fases futuras", () => {
+  // @req 003-mobile-day-shell-ux:FR-010
+  it("renderiza ecos com contexto de mesmo dia, outro dia e item indisponivel", () => {
     const onOpenRelatedNote = jest.fn();
     const onReloadRelatedNote = jest.fn();
 
@@ -46,7 +55,11 @@ describe("NoteReader note echo relations", () => {
       <NoteReader
         visible
         note={activeNote}
-        relatedNotes={[availableRelatedNote, unavailableRelatedNote]}
+        relatedNotes={[
+          availableRelatedNote,
+          otherDayRelatedNote,
+          unavailableRelatedNote,
+        ]}
         onClose={jest.fn()}
         onEdit={jest.fn()}
         onOpenRelatedNote={onOpenRelatedNote}
@@ -58,8 +71,21 @@ describe("NoteReader note echo relations", () => {
     expect(screen.queryByText("Adicionar eco")).toBeNull();
     expect(screen.queryByText("Continuar desta nota")).toBeNull();
     expect(screen.getByText("Nota conectada")).toBeTruthy();
+    expect(screen.getByText("Nota de outro dia")).toBeTruthy();
     expect(screen.getByText("Item indisponivel")).toBeTruthy();
     expect(screen.getByText("Recarregar")).toBeTruthy();
+    expect(
+      screen.getByTestId(`note-reader-relation-chip-${availableRelatedNote.id}`)
+        .props.children,
+    ).toBe("Mesmo dia");
+    expect(
+      screen.getByTestId(`note-reader-relation-chip-${otherDayRelatedNote.id}`)
+        .props.children,
+    ).toBe("Outro dia");
+    expect(
+      screen.getByTestId(`note-reader-relation-chip-${unavailableRelatedNote.id}`)
+        .props.children,
+    ).toBe("Indisponivel");
 
     fireEvent.press(
       screen.getByTestId(`note-reader-open-related-note-${availableRelatedNote.id}`),
@@ -72,9 +98,11 @@ describe("NoteReader note echo relations", () => {
     expect(onReloadRelatedNote).toHaveBeenCalledTimes(1);
   });
 
+  // @req 003-mobile-day-shell-ux:FR-009
   it("renderiza comandos opcionais apenas quando handlers existem", () => {
     const onAddEcho = jest.fn();
     const onContinueNote = jest.fn();
+    const onEdit = jest.fn();
 
     render(
       <NoteReader
@@ -82,7 +110,7 @@ describe("NoteReader note echo relations", () => {
         note={activeNote}
         relatedNotes={[]}
         onClose={jest.fn()}
-        onEdit={jest.fn()}
+        onEdit={onEdit}
         onAddEcho={onAddEcho}
         onContinueNote={onContinueNote}
       />,
@@ -90,8 +118,10 @@ describe("NoteReader note echo relations", () => {
 
     fireEvent.press(screen.getByTestId("note-reader-add-echo-button"));
     fireEvent.press(screen.getByTestId("note-reader-continue-note-button"));
+    fireEvent.press(screen.getByTestId("note-reader-edit-button"));
 
     expect(onAddEcho).toHaveBeenCalledTimes(1);
     expect(onContinueNote).toHaveBeenCalledTimes(1);
+    expect(onEdit).toHaveBeenCalledTimes(1);
   });
 });

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { listNoteCandidates } from "../../features/notes/api/list-note-candidates";
+import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type {
   Note,
   NoteEcho,
@@ -18,6 +19,11 @@ interface NoteEchoPickerProps {
   onClose: () => void;
   onSelectCandidate: (candidate: NoteEchoCandidate) => Promise<void> | void;
 }
+
+const getCandidateContextLabel = (
+  sourceNote: Note,
+  candidate: NoteEchoCandidate,
+) => (candidate.day === sourceNote.day ? "Mesmo dia" : "Outro dia");
 
 export function NoteEchoPicker({
   visible,
@@ -82,46 +88,79 @@ export function NoteEchoPicker({
   }
 
   return (
-    <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
+    <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
           <View style={styles.header}>
-            <View>
+            <View style={styles.headerText}>
               <Text style={styles.eyebrow}>Adicionar eco</Text>
               <Text style={styles.title}>{sourceNote.title}</Text>
+              <View style={styles.originRow}>
+                <Text style={styles.originChip}>{formatDisplayDay(sourceNote.day)}</Text>
+                <Text style={styles.originText}>Nota de origem</Text>
+              </View>
             </View>
             <Pressable
+              accessibilityLabel="Fechar seletor de eco"
               accessibilityRole="button"
-              style={styles.closeButton}
+              style={({ pressed }) => [
+                styles.closeButton,
+                pressed ? styles.closeButtonPressed : null,
+              ]}
               testID="note-echo-picker-close-button"
               onPress={onClose}
             >
-              <Text style={styles.closeLabel}>Fechar</Text>
+              <Text style={styles.closeLabel}>X</Text>
             </Pressable>
           </View>
 
           {errorMessage ? (
-            <Text style={styles.errorText} testID="note-echo-picker-error">
-              {errorMessage}
-            </Text>
+            <View
+              accessibilityRole="alert"
+              style={styles.feedbackBoxError}
+              testID="note-echo-picker-error"
+            >
+              <Text style={styles.feedbackTitle}>Nao foi possivel carregar</Text>
+              <Text style={styles.feedbackBody}>{errorMessage}</Text>
+            </View>
           ) : null}
 
           <ScrollView contentContainerStyle={styles.list}>
-            {items.length === 0 && !isLoading ? (
-              <Text style={styles.emptyText}>Nenhuma candidata disponivel</Text>
+            {items.length === 0 && isLoading ? (
+              <View style={styles.feedbackBox} testID="note-echo-picker-loading">
+                <Text style={styles.feedbackTitle}>Carregando candidatas</Text>
+                <Text style={styles.feedbackBody}>
+                  Buscando notas recentes para conectar.
+                </Text>
+              </View>
+            ) : null}
+
+            {items.length === 0 && !isLoading && !errorMessage ? (
+              <View style={styles.feedbackBox} testID="note-echo-picker-empty">
+                <Text style={styles.feedbackTitle}>Nenhuma candidata disponivel</Text>
+                <Text style={styles.feedbackBody}>
+                  Crie mais notas para ligar esta ideia a outro contexto.
+                </Text>
+              </View>
             ) : null}
 
             {items.map((candidate) => {
               const isDisabled = candidate.isAlreadyConnected;
+              const contextLabel = getCandidateContextLabel(sourceNote, candidate);
 
               return (
                 <Pressable
+                  accessibilityLabel={`${candidate.title}. ${contextLabel}${
+                    isDisabled ? ". Eco ja existe" : ""
+                  }`}
                   accessibilityRole="button"
+                  accessibilityState={{ disabled: isDisabled }}
                   disabled={isDisabled}
                   key={candidate.id}
-                  style={[
+                  style={({ pressed }) => [
                     styles.candidateButton,
                     isDisabled ? styles.disabledCandidate : null,
+                    pressed && !isDisabled ? styles.candidateButtonPressed : null,
                   ]}
                   testID={`note-echo-candidate-${candidate.id}`}
                   onPress={() => {
@@ -129,10 +168,21 @@ export function NoteEchoPicker({
                   }}
                 >
                   <View style={styles.candidateTextGroup}>
+                    <View style={styles.candidateMetaRow}>
+                      <Text
+                        style={[
+                          styles.candidateChip,
+                          contextLabel === "Outro dia" ? styles.candidateChipOtherDay : null,
+                        ]}
+                        testID={`note-echo-candidate-chip-${candidate.id}`}
+                      >
+                        {contextLabel}
+                      </Text>
+                      <Text style={styles.candidateDay}>
+                        {formatDisplayDay(candidate.day)}
+                      </Text>
+                    </View>
                     <Text style={styles.candidateTitle}>{candidate.title}</Text>
-                    <Text style={styles.candidateMeta}>
-                      Dia da nota: {formatDisplayDay(candidate.day)}
-                    </Text>
                     {candidate.brief ? (
                       <Text style={styles.candidateBrief}>{candidate.brief}</Text>
                     ) : null}
@@ -146,19 +196,34 @@ export function NoteEchoPicker({
           </ScrollView>
 
           {nextCursor ? (
-            <Pressable
-              accessibilityRole="button"
-              disabled={isLoading}
-              style={styles.loadMoreButton}
-              testID="note-echo-picker-load-more-button"
-              onPress={() => {
-                void loadPage(nextCursor);
-              }}
-            >
-              <Text style={styles.loadMoreLabel}>
-                {isLoading ? "Carregando..." : "carregar mais"}
-              </Text>
-            </Pressable>
+            <View style={styles.footer}>
+              <Pressable
+                accessibilityLabel={
+                  isLoading ? "Carregando mais candidatas" : "Carregar mais candidatas"
+                }
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isLoading }}
+                disabled={isLoading}
+                style={({ pressed }) => [
+                  styles.loadMoreButton,
+                  isLoading ? styles.loadMoreButtonDisabled : null,
+                  pressed && !isLoading ? styles.loadMoreButtonPressed : null,
+                ]}
+                testID="note-echo-picker-load-more-button"
+                onPress={() => {
+                  void loadPage(nextCursor);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.loadMoreLabel,
+                    isLoading ? styles.loadMoreLabelDisabled : null,
+                  ]}
+                >
+                  {isLoading ? "Carregando..." : "Carregar mais"}
+                </Text>
+              </Pressable>
+            </View>
           ) : null}
         </View>
       </View>
@@ -169,113 +234,195 @@ export function NoteEchoPicker({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(15, 23, 42, 0.48)",
-    padding: 24,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(23, 33, 27, 0.48)",
   },
   sheet: {
-    maxHeight: "84%",
-    borderRadius: 16,
-    backgroundColor: "#ffffff",
-    padding: 18,
+    maxHeight: "88%",
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
   },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: 12,
+    gap: spacing.md,
+  },
+  headerText: {
+    flex: 1,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: 0.6,
-    color: "#6b7280",
+    letterSpacing: 0,
+    color: colors.note,
   },
   title: {
-    marginTop: 6,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#111827",
+    marginTop: spacing.sm,
+    fontSize: typography.bodyLarge,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  originRow: {
+    marginTop: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  originChip: {
+    overflow: "hidden",
+    borderRadius: radius.pill,
+    backgroundColor: colors.noteSoft,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.note,
+  },
+  originText: {
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   closeButton: {
-    minHeight: 36,
-    borderRadius: 10,
+    minWidth: touchTarget.min,
+    minHeight: touchTarget.min,
+    borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: "#d1d5db",
+    borderColor: colors.border,
+    alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
+  },
+  closeButtonPressed: {
+    backgroundColor: colors.surfacePressed,
   },
   closeLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#374151",
+    fontSize: typography.bodyLarge,
+    fontWeight: "800",
+    color: colors.text,
   },
-  errorText: {
-    marginTop: 12,
-    fontSize: 13,
-    color: "#b91c1c",
+  feedbackBox: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
+    padding: spacing.md,
+  },
+  feedbackBoxError: {
+    marginTop: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
+    padding: spacing.md,
+  },
+  feedbackTitle: {
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  feedbackBody: {
+    marginTop: spacing.xs,
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   list: {
-    gap: 10,
-    paddingTop: 16,
-    paddingBottom: 10,
-  },
-  emptyText: {
-    fontSize: 13,
-    color: "#64748b",
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   candidateButton: {
-    minHeight: 72,
-    borderRadius: 12,
+    minHeight: 84,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#f8fafc",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 12,
-    padding: 12,
+    gap: spacing.md,
+    padding: spacing.md,
+  },
+  candidateButtonPressed: {
+    backgroundColor: colors.surfacePressed,
   },
   disabledCandidate: {
-    opacity: 0.62,
+    opacity: 0.68,
   },
   candidateTextGroup: {
     flex: 1,
+    gap: spacing.xs,
+  },
+  candidateMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  candidateChip: {
+    overflow: "hidden",
+    borderRadius: radius.pill,
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.primary,
+  },
+  candidateChipOtherDay: {
+    backgroundColor: colors.noteSoft,
+    color: colors.note,
+  },
+  candidateDay: {
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   candidateTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  candidateMeta: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#64748b",
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
   },
   candidateBrief: {
-    marginTop: 6,
-    fontSize: 13,
+    fontSize: typography.caption,
     lineHeight: 18,
-    color: "#475569",
+    color: colors.textMuted,
   },
   disabledLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#6b7280",
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.textMuted,
+  },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing.md,
   },
   loadMoreButton: {
-    minHeight: 42,
-    borderRadius: 12,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
+  },
+  loadMoreButtonDisabled: {
+    backgroundColor: colors.surfaceMuted,
+  },
+  loadMoreButtonPressed: {
+    backgroundColor: colors.surfacePressed,
   },
   loadMoreLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#334155",
+    fontSize: typography.body,
+    fontWeight: "800",
+    color: colors.text,
+  },
+  loadMoreLabelDisabled: {
+    color: colors.textSubtle,
   },
 });

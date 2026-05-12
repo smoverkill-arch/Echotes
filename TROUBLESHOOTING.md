@@ -37,6 +37,20 @@
 - run `corepack pnpm run supabase:doctor` to confirm port availability before
   starting the stack again
 
+## Supabase local publishes ports beyond localhost
+
+- run `corepack pnpm run supabase:stop`
+- confirm the Docker network `echotes_supabase_localhost` uses
+  `com.docker.network.bridge.host_binding_ipv4=127.0.0.1`
+- if that network exists with a different host binding, remove or rename it
+  manually while the stack is stopped
+- run `corepack pnpm run supabase:start`
+- run `corepack pnpm run supabase:doctor` and confirm ports are not published
+  on `0.0.0.0` or `[::]`
+- if Docker Desktop still publishes `0.0.0.0`, apply
+  `scripts/apply-echotes-supabase-firewall.ps1` from an Administrator
+  PowerShell and treat the firewall rule as the containment layer
+
 ## A projected task does not return to the source context
 
 - confirm the navigation context was set before pushing the destination day
