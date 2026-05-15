@@ -174,7 +174,7 @@ describe("day surface regressions", () => {
   it("mantem estado vazio alinhado com US3 no dia protegido", async () => {
     render(<ProtectedDayRoute />);
 
-    expect(await screen.findByText("Timeline do dia")).toBeTruthy();
+    expect(await screen.findByTestId("day-tab-timeline")).toBeTruthy();
     expect(await screen.findByText("Nada registrado neste dia ainda.")).toBeTruthy();
     expect(
       screen.getByText(
@@ -262,7 +262,7 @@ describe("day surface regressions", () => {
     render(<ProtectedDayRoute />);
 
     expect(screen.getByText("/sign-in")).toBeTruthy();
-    expect(screen.queryByText("Timeline do dia")).toBeNull();
+    expect(screen.queryByTestId("day-tab-timeline")).toBeNull();
 
     await waitFor(() => {
       expect(screen.getByTestId("redirect-target")).toBeTruthy();

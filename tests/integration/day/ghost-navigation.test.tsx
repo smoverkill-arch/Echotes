@@ -243,7 +243,7 @@ const renderReadyDayRoute = async () => {
   render(<ProtectedDayRoute />);
   await flushMicrotasks();
 
-  expect(screen.getByText("Timeline do dia")).toBeTruthy();
+  expect(screen.getByTestId("day-tab-timeline")).toBeTruthy();
   expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
 };
 

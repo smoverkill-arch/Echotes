@@ -123,7 +123,9 @@ export function NoteReader({
               </View>
             </View>
 
-            <View style={styles.echoSection}>
+            <View style={styles.echoSectionDivider} testID="note-reader-echo-section-divider" />
+
+            <View style={styles.echoSection} testID="note-reader-echo-section">
               <View style={styles.echoHeader}>
                 <View>
                   <Text style={styles.echoTitle}>Ecos</Text>
@@ -393,8 +395,18 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   echoSection: {
-    marginTop: spacing.xxl,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceMuted,
+    padding: spacing.md,
     gap: spacing.md,
+  },
+  echoSectionDivider: {
+    marginTop: spacing.xxl,
+    marginBottom: spacing.md,
+    height: 1,
+    backgroundColor: colors.border,
   },
   echoHeader: {
     flexDirection: "row",
@@ -416,7 +428,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.surface,
     padding: spacing.md,
   },
   emptyEchoTitle: {
@@ -433,7 +445,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.surface,
     padding: spacing.md,
     gap: spacing.sm,
   },

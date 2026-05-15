@@ -1,4 +1,10 @@
+import { useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 
@@ -9,6 +15,7 @@ interface TimelinePlusButtonProps {
   onCreateNote: () => void;
   onCreateTask: () => void;
   isDisabled?: boolean;
+  isChromeVisible?: boolean;
 }
 
 export function TimelinePlusButton({
@@ -18,9 +25,25 @@ export function TimelinePlusButton({
   onCreateNote,
   onCreateTask,
   isDisabled = false,
+  isChromeVisible = true,
 }: TimelinePlusButtonProps) {
+  const resolvedVisibility = isChromeVisible || isSheetOpen ? 1 : 0;
+  const visibility = useSharedValue(resolvedVisibility);
+
+  useEffect(() => {
+    visibility.value = withTiming(resolvedVisibility, { duration: 160 });
+  }, [resolvedVisibility, visibility]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: visibility.value,
+    transform: [{ translateY: (1 - visibility.value) * 18 }],
+  }));
+
   return (
-    <View pointerEvents="box-none" style={styles.container}>
+    <Animated.View
+      pointerEvents={resolvedVisibility ? "box-none" : "none"}
+      style={[styles.container, animatedStyle]}
+    >
       {isSheetOpen ? (
         <View style={styles.sheetBackdrop} testID="timeline-plus-sheet-backdrop">
           <View collapsable={false} style={styles.sheet} testID="timeline-plus-sheet">
@@ -92,7 +115,7 @@ export function TimelinePlusButton({
       >
         <Text style={styles.buttonLabel}>+</Text>
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }
 

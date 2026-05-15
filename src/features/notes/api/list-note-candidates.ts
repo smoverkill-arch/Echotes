@@ -18,7 +18,7 @@ import {
 } from "./note-echo-errors";
 
 export interface ListNoteCandidatesInput {
-  sourceNoteId: string;
+  sourceNoteId: string | null;
   selectedDay: string;
   existingEchoes: NoteEcho[];
   cursor?: NoteEchoCandidateCursor | null;
@@ -51,7 +51,7 @@ interface NoteCandidateRow {
 
 const mapRowToCandidate = (
   row: NoteCandidateRow,
-  sourceNoteId: string,
+  sourceNoteId: string | null,
   existingEchoes: NoteEcho[],
 ): NoteEchoCandidate => {
   if (
@@ -74,9 +74,9 @@ const mapRowToCandidate = (
     title,
     brief: typeof row.brief === "string" ? row.brief : null,
     created_at,
-    isAlreadyConnected: existingEchoes.some((echo) =>
-      isSameSemanticNotePair(echo, sourceNoteId, id),
-    ),
+    isAlreadyConnected: sourceNoteId
+      ? existingEchoes.some((echo) => isSameSemanticNotePair(echo, sourceNoteId, id))
+      : false,
   };
 };
 
@@ -142,8 +142,11 @@ export const listNoteCandidates = async ({
     ) => {
       let query = getSupabaseClient()
         .from("notes")
-        .select("id,day,title,brief,created_at")
-        .neq("id", sourceNoteId);
+        .select("id,day,title,brief,created_at");
+
+      if (sourceNoteId) {
+        query = query.neq("id", sourceNoteId);
+      }
 
       query = isSelectedDayGroup
         ? query.eq("day", selectedDay)

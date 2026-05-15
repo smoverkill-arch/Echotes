@@ -87,7 +87,10 @@ const ghostNode: TimelineNode = {
   data: timedTask,
 };
 
-const renderTimelineView = (nodes: TimelineNode[]) => {
+const renderTimelineView = (
+  nodes: TimelineNode[],
+  overrides: Partial<Parameters<typeof TimelineView>[0]> = {},
+) => {
   const onCreateNote = jest.fn();
   const onCreateTask = jest.fn();
   const onOpenReader = jest.fn();
@@ -105,6 +108,7 @@ const renderTimelineView = (nodes: TimelineNode[]) => {
       onOpenReader={onOpenReader}
       onOpenEditor={onOpenEditor}
       onNavigateToTask={onNavigateToTask}
+      {...overrides}
     />,
   );
 
@@ -112,6 +116,8 @@ const renderTimelineView = (nodes: TimelineNode[]) => {
     onOpenReader,
     onOpenEditor,
     onNavigateToTask,
+    onScrollInteractionStart: overrides.onScrollInteractionStart,
+    onScrollInteractionEnd: overrides.onScrollInteractionEnd,
   };
 };
 
@@ -193,5 +199,22 @@ describe("timeline view pending press handling", () => {
     expect(screen.getByTestId(`note-echo-badge-${noteA.id}`)).toBeTruthy();
     expect(screen.getByText("Ecos 2")).toBeTruthy();
     expect(screen.queryByTestId(`note-echo-badge-${noteB.id}`)).toBeNull();
+  });
+
+  // @req 003-mobile-day-shell-ux:FR-008
+  it("dispara callbacks de esconder e restaurar chrome durante scroll", () => {
+    const onScrollInteractionStart = jest.fn();
+    const onScrollInteractionEnd = jest.fn();
+
+    renderTimelineView([noteNodeA], {
+      onScrollInteractionStart,
+      onScrollInteractionEnd,
+    });
+
+    fireEvent(screen.getByTestId("timeline-view"), "scrollBeginDrag");
+    fireEvent(screen.getByTestId("timeline-view"), "scrollEndDrag");
+
+    expect(onScrollInteractionStart).toHaveBeenCalledTimes(1);
+    expect(onScrollInteractionEnd).toHaveBeenCalledTimes(1);
   });
 });

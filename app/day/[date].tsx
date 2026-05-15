@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { AuthErrorBanner } from "../../src/components/auth/auth-error-banner";
-import { DayShell } from "../../src/components/day/day-shell";
+import { DayShell, type DayShellSavedOptions } from "../../src/components/day/day-shell";
 import { signOut } from "../../src/features/auth/api/sign-out";
 import { useAuthSession } from "../../src/features/auth/hooks/use-auth-session";
 import { continueNote } from "../../src/features/notes/api/continue-note";
@@ -582,10 +582,18 @@ export default function ProtectedDayRoute() {
       }}
       onCloseReader={closeReader}
       onCloseEditor={closeEditor}
-      onSaved={async () => {
+      onSaved={async (options?: DayShellSavedOptions) => {
         await reload();
         closeEditor();
         closeReader();
+
+        if (options?.echoFeedbackMessage) {
+          setEchoFeedbackMessage(options.echoFeedbackMessage);
+        }
+
+        if (options?.openReader) {
+          openReader(options.openReader.kind, options.openReader.id);
+        }
       }}
     />
   );

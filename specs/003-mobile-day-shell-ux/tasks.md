@@ -82,9 +82,25 @@
 - [x] T038 [US5] Atualizar `quickstart.md`, `CHANGELOG.md` e canon de
   arquitetura para o smoke dos fluxos de criacao/edicao
 
+## Phase 11: Correcoes do Smoke S21
+
+- [x] T039 [US4] Truncar cards de nota na timeline e aba Notas para preview de
+  duas linhas, mantendo leitura completa apenas no Reader
+- [x] T040 [US3] Adicionar `Eco inicial` ao fluxo de criacao de nota, criando
+  nota primeiro e eco manual em seguida com feedback quando apenas o eco falhar
+- [x] T041 [US3] Separar visualmente conteudo da nota e secao `Ecos` no Reader
+- [x] T042 [US4] Mover tabs para bottom bar persistente com icones e manter
+  `testID`s `day-tab-*`
+- [x] T043 [US1] Trocar seletor mensal modal por calendario mensal inline
+  expandivel/recolhivel no header
+- [x] T044 [US4] Colapsar header/calendario e botao `+` durante scroll vertical
+  da timeline/listas e restaurar ao repouso
+- [x] T045 [US5] Expandir cobertura unit/integracao e atualizar
+  `quickstart.md`, `CHANGELOG.md` e canon de arquitetura para o novo smoke S21
+
 ## Dependencias
 
 - Fase 2 bloqueia Fases 3 e 4.
 - Fase 5 depende da feature `002-note-echo-flows` ja expor dados de relacao no Reader.
 - Fase 8 deve ser repetida apos cada lote de implementacao, inclusive apos a
-  Fase 9 e a Fase 10.
+  Fase 9, a Fase 10 e a Fase 11.

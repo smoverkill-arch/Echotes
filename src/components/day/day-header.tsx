@@ -1,8 +1,7 @@
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { CalendarMode } from "../../stores/calendar-store";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
-import type { DayTab } from "../../types/timeline";
 import {
   addMonthsToDayKey,
   addWeeksToDayKey,
@@ -19,20 +18,12 @@ interface DayHeaderProps {
   date: string;
   clockDate: string;
   email: string;
-  activeTab: DayTab;
   calendarMode: CalendarMode;
   isSigningOut: boolean;
   onDateChange: (date: string) => void;
   onCalendarModeChange: (mode: CalendarMode) => void;
-  onTabChange: (tab: DayTab) => void;
   onSignOut: () => Promise<void> | void;
 }
-
-const TAB_LABELS: Record<DayTab, string> = {
-  timeline: "Timeline",
-  tasks: "Tarefas",
-  notes: "Notas",
-};
 
 const WEEKDAY_HEADERS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
@@ -40,12 +31,10 @@ export function DayHeader({
   date,
   clockDate,
   email,
-  activeTab,
   calendarMode,
   isSigningOut,
   onDateChange,
   onCalendarModeChange,
-  onTabChange,
   onSignOut,
 }: DayHeaderProps) {
   const formattedDate = formatDisplayDay(date);
@@ -104,7 +93,11 @@ export function DayHeader({
           </Pressable>
 
           <Pressable
-            accessibilityLabel={`Abrir seletor mensal de ${formatMonthYear(date)}`}
+            accessibilityLabel={
+              calendarMode === "month"
+                ? `Recolher calendario mensal de ${formatMonthYear(date)}`
+                : `Expandir calendario mensal de ${formatMonthYear(date)}`
+            }
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.monthButton,
@@ -215,46 +208,8 @@ export function DayHeader({
             </Text>
           </Pressable>
         </View>
-      </View>
 
-      <View style={styles.tabsRow}>
-        {(["timeline", "tasks", "notes"] as const).map((tab) => (
-          <Pressable
-            key={tab}
-            accessibilityLabel={`Ver ${TAB_LABELS[tab]} do dia selecionado`}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: activeTab === tab }}
-            style={({ pressed }) => [
-              styles.tabButton,
-              activeTab === tab ? styles.tabButtonActive : null,
-              pressed ? styles.tabButtonPressed : null,
-            ]}
-            testID={`day-tab-${tab}`}
-            onPress={() => {
-              onTabChange(tab);
-            }}
-          >
-            <Text
-              style={[
-                styles.tabLabel,
-                activeTab === tab ? styles.tabLabelActive : null,
-              ]}
-            >
-              {TAB_LABELS[tab]}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <Modal
-        animationType="slide"
-        transparent
-        visible={calendarMode === "month"}
-        onRequestClose={() => {
-          onCalendarModeChange("week");
-        }}
-      >
-        <View style={styles.modalBackdrop}>
+        {calendarMode === "month" ? (
           <View style={styles.monthSheet} testID="day-calendar-month-sheet">
             <View style={styles.monthSheetHeader}>
               <Pressable
@@ -350,11 +305,11 @@ export function DayHeader({
                 onCalendarModeChange("week");
               }}
             >
-              <Text style={styles.closeMonthLabel}>Fechar</Text>
+              <Text style={styles.closeMonthLabel}>Recolher</Text>
             </Pressable>
           </View>
-        </View>
-      </Modal>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -535,46 +490,12 @@ const styles = StyleSheet.create({
   todayButtonLabelDisabled: {
     color: colors.textSubtle,
   },
-  tabsRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  tabButton: {
-    flex: 1,
-    minHeight: touchTarget.min,
-    borderRadius: radius.md,
+  monthSheet: {
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: spacing.sm,
-  },
-  tabButtonActive: {
-    borderColor: colors.text,
-    backgroundColor: colors.text,
-  },
-  tabButtonPressed: {
-    backgroundColor: colors.surfacePressed,
-  },
-  tabLabel: {
-    fontSize: typography.caption,
-    fontWeight: "800",
-    color: colors.textMuted,
-  },
-  tabLabelActive: {
-    color: colors.white,
-  },
-  modalBackdrop: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(23, 33, 27, 0.42)",
-  },
-  monthSheet: {
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
+    padding: spacing.md,
     gap: spacing.md,
   },
   monthSheetHeader: {

@@ -1,4 +1,13 @@
+import { useCallback, useState } from "react";
+import type { LayoutChangeEvent } from "react-native";
 import { StyleSheet, View } from "react-native";
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { AuthErrorBanner } from "../auth/auth-error-banner";
 import type {
@@ -24,6 +33,15 @@ import { NoteEchoPicker } from "../reader/note-echo-picker";
 import { NoteReader } from "../reader/note-reader";
 import { TaskReader } from "../reader/task-reader";
 import { TimelineView } from "../timeline/timeline-view";
+import { DayBottomTabs } from "./day-bottom-tabs";
+
+export interface DayShellSavedOptions {
+  openReader?: {
+    kind: TimelineItemKind;
+    id: string;
+  };
+  echoFeedbackMessage?: string | null;
+}
 
 interface DayShellProps {
   date: string;
@@ -70,7 +88,7 @@ interface DayShellProps {
   onReturnToSource: () => void;
   onCloseReader: () => void;
   onCloseEditor: () => void;
-  onSaved: () => Promise<void> | void;
+  onSaved: (options?: DayShellSavedOptions) => Promise<void> | void;
 }
 
 export function DayShell({
@@ -120,30 +138,71 @@ export function DayShell({
   onCloseEditor,
   onSaved,
 }: DayShellProps) {
+  const chromeVisibility = useSharedValue(1);
+  const [isChromeVisible, setIsChromeVisible] = useState(true);
+  const [chromeHeight, setChromeHeight] = useState(0);
+
+  const showChrome = useCallback(() => {
+    setIsChromeVisible(true);
+    chromeVisibility.value = withTiming(1, {
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [chromeVisibility]);
+
+  const hideChrome = useCallback(() => {
+    setIsChromeVisible(false);
+    chromeVisibility.value = withTiming(0, {
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [chromeVisibility]);
+
+  const handleChromeLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextHeight = event.nativeEvent.layout.height;
+
+    setChromeHeight((currentHeight) =>
+      Math.abs(currentHeight - nextHeight) > 1 ? nextHeight : currentHeight,
+    );
+  }, []);
+
+  const chromeAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: chromeVisibility.value,
+    transform: [
+      {
+        translateY: interpolate(chromeVisibility.value, [0, 1], [-32, 0]),
+      },
+    ],
+  }));
+
   return (
     <View style={styles.container}>
       <AuthErrorBanner status={authStatus} message={authErrorMessage} />
 
-      <DayHeader
-        date={date}
-        clockDate={clockDate}
-        email={email}
-        activeTab={activeTab}
-        calendarMode={calendarMode}
-        isSigningOut={isSigningOut}
-        onDateChange={onDateChange}
-        onCalendarModeChange={onCalendarModeChange}
-        onTabChange={onTabChange}
-        onSignOut={onSignOut}
-      />
-
-      {temporalNavigationContext ? (
-        <BreadcrumbBar
-          sourceDate={temporalNavigationContext.sourceDate}
-          destinationDate={temporalNavigationContext.destinationDate}
-          onReturn={onReturnToSource}
+      <Animated.View
+        pointerEvents={isChromeVisible ? "auto" : "none"}
+        style={[styles.chromeOverlay, chromeAnimatedStyle]}
+        onLayout={handleChromeLayout}
+      >
+        <DayHeader
+          date={date}
+          clockDate={clockDate}
+          email={email}
+          calendarMode={calendarMode}
+          isSigningOut={isSigningOut}
+          onDateChange={onDateChange}
+          onCalendarModeChange={onCalendarModeChange}
+          onSignOut={onSignOut}
         />
-      ) : null}
+
+        {temporalNavigationContext ? (
+          <BreadcrumbBar
+            sourceDate={temporalNavigationContext.sourceDate}
+            destinationDate={temporalNavigationContext.destinationDate}
+            onReturn={onReturnToSource}
+          />
+        ) : null}
+      </Animated.View>
 
       <TimelineView
         activeTab={activeTab}
@@ -155,7 +214,13 @@ export function DayShell({
         onOpenReader={onOpenReader}
         onOpenEditor={onOpenEditor}
         onNavigateToTask={onNavigateToTask}
+        onScrollInteractionEnd={showChrome}
+        onScrollInteractionStart={hideChrome}
+        isChromeVisible={isChromeVisible}
+        contentTopInset={chromeHeight + spacing.md}
       />
+
+      <DayBottomTabs activeTab={activeTab} onTabChange={onTabChange} />
 
       <NoteReader
         visible={readerState.isOpen && readerState.kind === "note"}
@@ -216,8 +281,13 @@ export function DayShell({
         selectedDay={date}
         note={editorState.mode === "edit" ? activeNote : null}
         onClose={onCloseEditor}
-        onSaved={async () => {
-          await onSaved();
+        onSaved={async (savedNote, options) => {
+          await onSaved({
+            openReader: options?.openReader
+              ? { kind: "note", id: savedNote.id }
+              : undefined,
+            echoFeedbackMessage: options?.feedbackMessage ?? null,
+          });
         }}
       />
 
@@ -247,5 +317,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.xl,
     backgroundColor: colors.background,
+  },
+  chromeOverlay: {
+    position: "absolute",
+    top: spacing.xl,
+    left: spacing.xl,
+    right: spacing.xl,
+    zIndex: 3,
+    gap: spacing.md,
   },
 });

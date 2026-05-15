@@ -138,7 +138,7 @@ const renderReadyDayRoute = async () => {
   render(<ProtectedDayRoute />);
   await flushMicrotasks();
 
-  expect(screen.getByText("Timeline do dia")).toBeTruthy();
+  expect(screen.getByTestId("day-tab-timeline")).toBeTruthy();
   expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
 
   const plusButton = screen.getByTestId("timeline-plus-button");
@@ -286,9 +286,12 @@ describe("US2 same-day day surface", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Nota do dia")).toBeTruthy();
+      expect(
+        screen.getByTestId("note-card-real-10000000-0000-4000-8000-000000000001"),
+      ).toBeTruthy();
     });
-    expect(screen.getByTestId("note-card-real-10000000-0000-4000-8000-000000000001")).toBeTruthy();
+    expect(await screen.findByText("Reader de nota")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("note-reader-close-button"));
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("timeline-plus-button"));
@@ -460,8 +463,11 @@ describe("US2 same-day day surface", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Nota com offset")).toBeTruthy();
+      expect(
+        screen.getByTestId("note-card-real-10000000-0000-4000-8000-000000000001"),
+      ).toBeTruthy();
     });
+    fireEvent.press(screen.getByTestId("note-reader-close-button"));
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("timeline-plus-button"));

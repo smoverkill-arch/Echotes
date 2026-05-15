@@ -154,7 +154,7 @@ describe("US1 auth session flow", () => {
     render(<ProtectedDayRoute />);
 
     expect(screen.getByText("/sign-in")).toBeTruthy();
-    expect(screen.queryByText("Timeline do dia")).toBeNull();
+    expect(screen.queryByTestId("day-tab-timeline")).toBeNull();
   });
 
   // @req FR-006
@@ -169,7 +169,7 @@ describe("US1 auth session flow", () => {
     expect(screen.getByText("Echotes")).toBeTruthy();
     expect(screen.getByTestId("day-calendar-month-toggle")).toBeTruthy();
     expect(screen.getByTestId("day-calendar-week-day-2026-04-18")).toBeTruthy();
-    expect(screen.getByText("Timeline do dia")).toBeTruthy();
+    expect(screen.getByTestId("day-tab-timeline")).toBeTruthy();
     expect(screen.getByText("18-04-2026")).toBeTruthy();
     expect(screen.getByText("pessoa@echotes.app")).toBeTruthy();
     expect(screen.queryByText("/sign-in")).toBeNull();

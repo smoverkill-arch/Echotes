@@ -68,6 +68,8 @@ describe("NoteReader note echo relations", () => {
     );
 
     expect(screen.getByText("Ecos")).toBeTruthy();
+    expect(screen.getByTestId("note-reader-echo-section-divider")).toBeTruthy();
+    expect(screen.getByTestId("note-reader-echo-section")).toBeTruthy();
     expect(screen.queryByText("Adicionar eco")).toBeNull();
     expect(screen.queryByText("Continuar desta nota")).toBeNull();
     expect(screen.getByText("Nota conectada")).toBeTruthy();

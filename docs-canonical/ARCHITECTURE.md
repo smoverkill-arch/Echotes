@@ -29,6 +29,8 @@ O repo tambem guarda regressao automatizada.
 - `app/(auth)/sign-in.tsx` e `app/(auth)/sign-up.tsx` formam o fluxo publico.
 - `app/day/[date].tsx` entrega a rota protegida do dia.
 - `src/components/day/day-shell.tsx` compoe a superficie diaria.
+- `src/components/day/day-bottom-tabs.tsx` mantem as lentes do dia na bottom
+  bar persistente.
 - `src/components/timeline/*` renderiza eixo, wrappers e acao principal.
 - `src/components/cards/*` renderiza cards reais, marker e ghost.
 - `src/components/reader/*` abre overlays de leitura.
@@ -92,6 +94,8 @@ A orientacao esquerda ou direita pertence apenas a camada de renderizacao.
 - Guarda `calendarMode`.
 - Em modo semanal, a semana sempre comeca aos domingos.
 - A strip semanal acompanha a semana que contem `selectedDate`.
+- O modo mensal expande o grid do mes inline no proprio header e recolhe ao
+  selecionar um dia.
 - Uma troca de data fora da semana recalcula a faixa visivel.
 - A interface deve distinguir o dia real do relogio e o dia selecionado pelo
   usuario.
@@ -170,6 +174,11 @@ Eles nao viram rotas proprias.
 - o Reader tambem oferece botao de editar.
 - nota e tarefa compartilham a ideia de sheet mobile sobre a superficie do dia.
 - cada dominio usa formulario e leitura proprios.
+- o header/calendario vivem como overlay sobre a timeline/listas: recolhem
+  visualmente durante scroll vertical, deixam o conteudo rolar por tras e
+  voltam quando a rolagem entra em repouso sem reocupar altura de layout.
+- as lentes `TIME LINE`, `TAREFAS` e `NOTAS` ficam na bottom bar persistente,
+  separadas do calendario.
 
 ## Creation and Editing Flows
 
@@ -198,11 +207,17 @@ por `002-note-echo-flows`.
 
 - `useDayEntries` carrega ecos ligados as notas do dia.
 - A timeline deriva badge pela contagem de ecos diretos.
+- Cards de nota em timeline e aba Notas exibem titulo, indicadores e preview
+  curto; conteudo completo pertence ao Reader.
 - O Reader mostra notas conectadas e degrada detalhes inacessiveis sem quebrar
   a relacao.
+- O Reader separa o corpo da nota da secao `Ecos` por bloco visual proprio.
 - `Adicionar eco` usa lista paginada de candidatas e desabilita notas ja
   conectadas. A superficie visual e um sheet mobile acionado pelo Reader, com
   origem explicita, chip de mesmo dia/outro dia e feedback de erro/vazio.
+- Criacao de nota tambem oferece `Eco inicial`, listando candidatas antes do
+  save. O app cria a nota primeiro, tenta criar o eco manual em seguida, abre o
+  Reader da nota criada e preserva a nota se apenas o eco falhar.
 - Criacao manual usa `kind = manual_link`.
 - Remocao exige confirmacao e apaga somente a relacao selecionada.
 - Notas conectadas de outro dia navegam para `/day/[date]` e usam
@@ -293,6 +308,9 @@ flowchart TD
 
 ## Revision History
 
+- 2026-05-13 - Correcoes do smoke S21 em `003-mobile-day-shell-ux`: bottom bar,
+  calendario mensal inline, chrome colapsavel, preview de notas e eco inicial
+  na criacao de nota.
 - 2026-05-12 - Criacao, edicao de nota/tarefa e Reader de tarefa em
   `003-mobile-day-shell-ux` atualizados para sheets mobile com tokens.
 - 2026-05-12 - Fluxos abertos pelo Reader em `003-mobile-day-shell-ux`

@@ -6,12 +6,10 @@ const baseProps = {
   date: "2026-04-18",
   clockDate: "2026-04-18",
   email: "pessoa@echotes.app",
-  activeTab: "timeline" as const,
   calendarMode: "week" as const,
   isSigningOut: false,
   onDateChange: jest.fn(),
   onCalendarModeChange: jest.fn(),
-  onTabChange: jest.fn(),
   onSignOut: jest.fn(),
 };
 
@@ -63,7 +61,7 @@ describe("DayHeader calendar shell", () => {
   });
 
   // @req 003-mobile-day-shell-ux:FR-006
-  it("abre seletor mensal e escolhe uma data", () => {
+  it("expande mes inline e escolhe uma data", () => {
     render(<DayHeader {...baseProps} calendarMode="month" />);
 
     expect(screen.getByTestId("day-calendar-month-sheet")).toBeTruthy();
@@ -72,15 +70,5 @@ describe("DayHeader calendar shell", () => {
 
     expect(baseProps.onCalendarModeChange).toHaveBeenCalledWith("week");
     expect(baseProps.onDateChange).toHaveBeenCalledWith("2026-04-30");
-  });
-
-  // @req 003-mobile-day-shell-ux:FR-008
-  it("mantem tabs como lentes do dia selecionado", () => {
-    render(<DayHeader {...baseProps} />);
-
-    fireEvent.press(screen.getByTestId("day-tab-notes"));
-
-    expect(baseProps.onTabChange).toHaveBeenCalledWith("notes");
-    expect(baseProps.onDateChange).not.toHaveBeenCalled();
   });
 });

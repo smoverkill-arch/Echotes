@@ -88,6 +88,13 @@ versioned releases when they start to exist.
   sheets, shared tokens, contextual day chips and clearer feedback states
 - day-surface creation, note editing, task editing and task Reader surfaces now
   use mobile sheets, shared tokens, clearer metadata chips and guided date controls
+- S21 smoke findings in `003-mobile-day-shell-ux` now drive a denser day shell:
+  note cards show short previews, the note Reader separates body from echoes,
+  tabs live in a persistent bottom bar, the monthly calendar expands inline and
+  the header plus `+` action collapse during vertical scroll
+- note creation now supports a required `Eco inicial` selection area and opens
+  the created note Reader after save, preserving the note if only initial echo
+  creation fails
 
 ### Fixed
 
