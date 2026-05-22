@@ -27,20 +27,32 @@ if (-not (Test-Path $configFile)) {
 
 # Read configuration values
 
-# Extract a YAML value for a key from a file using only built-in tools.
+# Extract a YAML value scoped to the 'report:' section of a file.
+# Iterates line-by-line so the same key name in other sections cannot
+# produce a false match.
 function Get-YamlValue {
     param([string]$Key, [string]$File)
     $lines = Get-Content $File -ErrorAction SilentlyContinue
     if (-not $lines) { return '' }
-    $match = $lines | Select-String -Pattern "^\s*${Key}:" | Select-Object -Last 1
-    if (-not $match) { return '' }
-    $raw = $match.Line -replace '^[^:]*:', ''
-    $raw = $raw.Trim()
-    # Strip surrounding double quotes
-    if ($raw.Length -ge 2 -and $raw.StartsWith('"') -and $raw.EndsWith('"')) {
-        $raw = $raw.Substring(1, $raw.Length - 2)
+    $inSection = $false
+    foreach ($line in $lines) {
+        if ($line -match '^\s*report\s*:') {
+            $inSection = $true
+            continue
+        }
+        # A non-indented, non-comment key line signals exit from the section
+        if ($inSection -and $line -match '^[^\s#].*:') {
+            $inSection = $false
+        }
+        if ($inSection -and $line -match "^\s+${Key}\s*:(.*)$") {
+            $raw = $Matches[1].Trim()
+            if ($raw.Length -ge 2 -and $raw.StartsWith('"') -and $raw.EndsWith('"')) {
+                $raw = $raw.Substring(1, $raw.Length - 2)
+            }
+            return $raw
+        }
     }
-    return $raw
+    return ''
 }
 
 if ($usingDefaults) {

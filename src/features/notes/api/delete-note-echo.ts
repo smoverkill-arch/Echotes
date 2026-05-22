@@ -96,6 +96,27 @@ export const deleteNoteEcho = async (
       };
     }
 
+    // When echoId was supplied but nothing was deleted (removedRows === 0),
+    // the echo may still exist under a different note pair — meaning the
+    // caller passed a mismatched echoId. Verify existence by ID before
+    // concluding already_removed, otherwise we'd silently do nothing.
+    if (parsedInput.data.echoId !== undefined && removedRows === 0) {
+      const { data: echoCheck } = await getSupabaseClient()
+        .from("note_echoes")
+        .select("id")
+        .eq("id", parsedInput.data.echoId)
+        .limit(1);
+
+      if (echoCheck && echoCheck.length > 0) {
+        return {
+          ok: false,
+          status: "invalid_input",
+          errorMessage:
+            "O echoId informado nao pertence ao par de notas indicado.",
+        };
+      }
+    }
+
     return {
       ok: true,
       status: removedRows > 0 ? "deleted" : "already_removed",

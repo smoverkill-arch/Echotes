@@ -7,6 +7,24 @@ versioned releases when they start to exist.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`delete-note-echo.ts`**: lógica de falso positivo `already_removed` quando
+  `echoId` não pertencia ao par `noteIdA/noteIdB`; adicionada verificação
+  secundária por ID antes de concluir sucesso (Copilot review finding)
+- **`ghost-navigation.test.tsx`** e **`day-surface-regression.test.tsx`**: mock
+  de `note_echoes` usava `source_note_id`/`target_note_id`; corrigido para
+  `from_note_id`/`to_note_id` alinhando com o schema real (Copilot review)
+- **`landing.csv`**: linhas 27–30 malformadas (aspas não fechadas e campos
+  fora de ordem); CSV restaurado à estrutura canônica de 8 colunas (Gemini
+  critical finding)
+- **`core.py` (BM25 tokenizer)**: filtro `len(w) > 2` excluía os termos "UI"
+  e "UX"; corrigido para `len(w) >= 2` (Gemini high finding)
+- **`load-config.sh`** e **`load-config.ps1`**: parsing de YAML via grep/tail
+  era frágil quando a chave `max_findings` aparecia em mais de uma seção;
+  substituído por awk/loop com escopo restrito ao bloco `report:` (Gemini
+  medium findings)
+
 ### Added
 
 - root canon for Echotes with operational CDD documents

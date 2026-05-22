@@ -28,17 +28,24 @@ fi
 
 # Read configuration values
 
-# Extract a YAML value for a key from a file using only built-in tools.
-# Finds the last occurrence of the key (handles nested sections) and
-# strips surrounding whitespace and double quotes.
+# Extract a YAML value scoped to the 'report:' section of a file.
+# Uses awk to enter the section on 'report:' and exit on the next
+# top-level key, preventing false matches when the same key name
+# appears in other sections.
 yaml_value() {
   local key="$1" file="$2"
   local raw
-  raw=$(grep -E "^[[:space:]]*${key}:" "$file" | tail -n 1 | sed "s/^[^:]*://")
-  # Trim leading/trailing whitespace
-  raw=$(echo "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-  # Strip surrounding double quotes
-  raw=$(echo "$raw" | sed 's/^"\(.*\)"$/\1/')
+  raw=$(awk -v key="$key" '
+    /^report[[:space:]]*:/ { in_section=1; next }
+    in_section && /^[^[:space:]#]/ { in_section=0 }
+    in_section && $0 ~ ("^[[:space:]]+" key "[[:space:]]*:") {
+      sub(/^[^:]*:/, "")
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "")
+      gsub(/^"|"$/, "")
+      print
+      exit
+    }
+  ' "$file")
   echo "$raw"
 }
 

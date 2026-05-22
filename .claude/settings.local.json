@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(python3 -c ' *)",
+      "Bash(corepack pnpm *)",
+      "Bash(git stash *)"
+    ]
+  }
+}

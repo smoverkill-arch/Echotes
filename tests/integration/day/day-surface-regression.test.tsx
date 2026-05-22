@@ -86,8 +86,8 @@ jest.mock("../../../src/lib/supabase", () => {
             }
 
             return (
-              relatedNoteIds.has(String(row.source_note_id)) ||
-              relatedNoteIds.has(String(row.target_note_id))
+              relatedNoteIds.has(String(row.from_note_id)) ||
+              relatedNoteIds.has(String(row.to_note_id))
             );
           })
           .sort((left, right) => {
