@@ -47,6 +47,52 @@
 - `FR-023` O layout da timeline deve manter notas a direita e itens de tarefa a
   esquerda, sem introduzir `side` no `TimelineNode`.
 
+### `002-note-echo-flows`
+
+- `002-note-echo-flows:FR-001` O dia deve carregar notas com contagem direta de
+  ecos.
+- `002-note-echo-flows:FR-002` A timeline deve renderizar badge discreto para
+  nota com eco direto.
+- `002-note-echo-flows:FR-003` A contagem de ecos deve considerar apenas
+  relacoes diretas da nota.
+- `002-note-echo-flows:FR-004` O Reader de nota deve listar notas conectadas
+  diretamente.
+- `002-note-echo-flows:FR-005` Ecos devem ser relacoes nao hierarquicas entre
+  duas notas.
+- `002-note-echo-flows:FR-006` O Reader deve permitir adicionar eco manual.
+- `002-note-echo-flows:FR-007` Criar eco manual deve persistir `kind =
+  manual_link`.
+- `002-note-echo-flows:FR-008` Criar eco manual deve bloquear duplicidade do par
+  semantico.
+- `002-note-echo-flows:FR-009` Remover eco deve exigir confirmacao e apagar
+  apenas a relacao escolhida.
+- `002-note-echo-flows:FR-010` Falha de detalhe por acesso deve degradar a
+  relacao para estado indisponivel, sem perder identidade.
+- `002-note-echo-flows:FR-011` Nota conectada de outro dia deve navegar para o
+  dia dela e abrir o Reader contextual.
+- `002-note-echo-flows:FR-012` A abertura contextual apos navegacao deve ser
+  one-shot.
+- `002-note-echo-flows:FR-013` Apos criar ou remover eco, o dia deve recarregar
+  dados e feedback.
+- `002-note-echo-flows:FR-014` O Reader deve permitir `Continuar desta nota`.
+- `002-note-echo-flows:FR-015` A continuacao deve criar uma nova nota no dia
+  escolhido.
+- `002-note-echo-flows:FR-016` A nova nota deve nascer ligada a nota de origem
+  por eco `continue_note`.
+- `002-note-echo-flows:FR-017` A continuacao deve gerar briefing inicial
+  editavel.
+- `002-note-echo-flows:FR-018` A continuacao deve ser atomica no banco.
+- `002-note-echo-flows:FR-019` Clique simples em nota segue abrindo Reader.
+- `002-note-echo-flows:FR-020` Double tap em nota segue abrindo Editor.
+- `002-note-echo-flows:FR-021` O Reader deve comunicar relacao indisponivel sem
+  quebrar a tela.
+- `002-note-echo-flows:FR-022` A busca de candidatas deve paginar em lotes de
+  50 notas.
+- `002-note-echo-flows:FR-023` Candidatas ja conectadas devem aparecer
+  desabilitadas.
+- `002-note-echo-flows:FR-024` A feature nao deve introduzir semantica inline
+  `@nota`; isso permanece fora do corte entregue.
+
 ## Task Domain Rules
 
 - `T-001` Tarefa e item acionavel de um dia.
@@ -93,8 +139,8 @@
 - `N-006` Eco e conexao direta, nao hierarquica.
 - `N-010` As conexoes entre notas formam grafo de continuidade conceitual ao
   longo do tempo.
-- `N-011` O dominio fechado admite tres entradas de eco no MVP: mencao no
-  conteudo, `Adicionar eco` e `Continuar desta nota`.
+- `N-011` O dominio entregue admite `Adicionar eco` e `Continuar desta nota`.
+  Mencao no conteudo com `@nota` segue fora do corte entregue.
 - `N-014` `Continuar desta nota` cria uma nova nota.
 - `N-015` A nova nota ja nasce ligada por eco a nota de origem.
 - `N-017` A nota criada por continuacao nasce com briefing/preview automatico.
@@ -164,6 +210,18 @@
   breadcrumb funcional.
 - `SC-005` `doc:guard`, `lint`, `test` e `typecheck` formam o gate minimo do
   repo.
+- `002-note-echo-flows:SC-001` Abrir um dia com notas conectadas mostra badge de
+  eco direto e Reader com relacoes.
+- `002-note-echo-flows:SC-002` Criar eco manual conecta duas notas sem duplicar
+  par semantico.
+- `002-note-echo-flows:SC-003` Remover eco apaga apenas a relacao selecionada e
+  preserva outras relacoes da familia.
+- `002-note-echo-flows:SC-004` A busca de candidatas pagina resultados e
+  bloqueia candidatas ja conectadas.
+- `002-note-echo-flows:SC-005` Continuar nota cria nota e eco `continue_note`
+  atomicamente.
+- `002-note-echo-flows:SC-006` Fluxos de eco e continuacao preservam Reader,
+  Editor, orientacao visual e separacao entre nota e tarefa.
 
 ## User Scenarios
 
@@ -190,8 +248,11 @@ retornar ao contexto original sem perder o vinculo temporal.
 | Same-day notes/tasks | `src/features/notes/*`, `src/features/tasks/*`, `src/components/forms/*`, `src/components/reader/*` | `tests/integration/day/day-surface-same-day.test.tsx` |
 | Projected tasks + breadcrumb | `src/features/timeline/utils/derive-timeline-nodes.ts`, `src/stores/navigation-store.ts`, `src/components/day/breadcrumb-bar.tsx` | `tests/integration/day/ghost-navigation.test.tsx`, `tests/integration/day/day-surface-regression.test.tsx` |
 | Timeline derivation + render axis | `src/features/day/hooks/*`, `src/components/timeline/*` | `tests/unit/timeline/*`, `tests/unit/day/use-day-entries.test.tsx` |
+| Note echo flows | `src/features/notes/api/*`, `src/features/notes/utils/*`, `src/components/reader/note-reader.tsx`, `src/components/forms/continue-note-editor.tsx`, `supabase/migrations/004_note_echo_flows.sql` | `tests/unit/notes/*`, `tests/integration/day/note-echo-*.test.tsx`, `tests/integration/day/continue-note-flow.test.tsx` |
 
 ## Revision History
 
+- 2026-05-11 - `002-note-echo-flows` registrado como entrega ativa para ecos
+  manuais e `continue_note`; mencoes inline permanecem fora do corte.
 - 2026-04-26 - Requisitos ampliados com regras estruturais, dominio fechado de
   tarefas/notas e postura honesta de canon em consolidacao

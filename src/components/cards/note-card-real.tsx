@@ -1,18 +1,30 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import { colors, radius, spacing, typography } from "../../theme/tokens";
 import type { Note } from "../../types/note";
 
 interface NoteCardRealProps {
   note: Note;
+  directEchoCount?: number;
 }
 
-export function NoteCardReal({ note }: NoteCardRealProps) {
+export function NoteCardReal({ note, directEchoCount = 0 }: NoteCardRealProps) {
+  const previewText = note.content?.trim() || note.brief?.trim() || "";
+
   return (
     <View style={styles.card} testID={`note-card-real-${note.id}`}>
       <Text style={styles.eyebrow}>Nota</Text>
       <Text style={styles.title}>{note.title}</Text>
-      {note.content ? <Text style={styles.body}>{note.content}</Text> : null}
-      {note.brief ? <Text style={styles.brief}>{note.brief}</Text> : null}
+      {directEchoCount > 0 ? (
+        <View style={styles.echoBadge} testID={`note-echo-badge-${note.id}`}>
+          <Text style={styles.echoBadgeText}>Ecos {directEchoCount}</Text>
+        </View>
+      ) : null}
+      {previewText ? (
+        <Text numberOfLines={2} style={styles.preview}>
+          {previewText}
+        </Text>
+      ) : null}
       <Text style={styles.footer}>Criada no dia em foco</Text>
     </View>
   );
@@ -20,40 +32,47 @@ export function NoteCardReal({ note }: NoteCardRealProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#dbeafe",
-    backgroundColor: "#eff6ff",
-    padding: 16,
+    borderColor: colors.noteSoft,
+    backgroundColor: colors.noteSoft,
+    padding: spacing.lg,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: typography.caption,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#1d4ed8",
+    letterSpacing: 0,
+    color: colors.note,
   },
   title: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0f172a",
+    marginTop: spacing.sm,
+    fontSize: typography.bodyLarge,
+    fontWeight: "800",
+    color: colors.text,
   },
-  body: {
-    marginTop: 8,
-    fontSize: 14,
+  echoBadge: {
+    alignSelf: "flex-start",
+    marginTop: spacing.sm,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  echoBadgeText: {
+    fontSize: typography.caption,
+    fontWeight: "800",
+    color: colors.note,
+  },
+  preview: {
+    marginTop: spacing.sm,
+    fontSize: typography.body,
     lineHeight: 20,
-    color: "#1e293b",
-  },
-  brief: {
-    marginTop: 8,
-    fontSize: 13,
-    lineHeight: 18,
-    color: "#475569",
+    color: colors.textMuted,
   },
   footer: {
-    marginTop: 10,
-    fontSize: 12,
-    color: "#475569",
+    marginTop: spacing.sm,
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
 });

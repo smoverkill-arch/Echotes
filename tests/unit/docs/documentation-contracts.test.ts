@@ -6,8 +6,11 @@ const root = process.cwd();
 const readJson = <T>(relativePath: string) =>
   JSON.parse(readFileSync(resolve(root, relativePath), "utf8")) as T;
 
+// @req 002-note-echo-flows:FR-016
+// @req 002-note-echo-flows:FR-018
+// @req 002-note-echo-flows:SC-005
 describe("documentation contracts", () => {
-  // @req SC-005
+  // @req 002-note-echo-flows:SC-005
   // @req NFR-005
   it("mantem o gate minimo e o mapa canonico do DocGuard alinhados ao repo", () => {
     const packageJson = readJson<{
@@ -68,6 +71,23 @@ describe("documentation contracts", () => {
       resolve(root, "supabase/migrations/001_auth_day_surface.sql"),
       "utf8",
     );
+    const ownerDefaultSql = readFileSync(
+      resolve(root, "supabase/migrations/002_note_echo_owner_default.sql"),
+      "utf8",
+    );
+    const hardeningSql = readFileSync(
+      resolve(root, "supabase/migrations/003_harden_note_echo_surface.sql"),
+      "utf8",
+    );
+    const noteEchoFlowsSql = readFileSync(
+      resolve(root, "supabase/migrations/004_note_echo_flows.sql"),
+      "utf8",
+    );
+    const advisorHardeningSql = readFileSync(
+      resolve(root, "supabase/migrations/005_supabase_advisor_hardening.sql"),
+      "utf8",
+    );
+    const runbooks = readFileSync(resolve(root, "RUNBOOKS.md"), "utf8");
 
     expect(sql).toContain("alter table public.tags enable row level security;");
     expect(sql).toContain("alter table public.tasks enable row level security;");
@@ -80,5 +100,39 @@ describe("documentation contracts", () => {
     expect(sql).toContain('create policy "tasks_select_own"');
     expect(sql).toContain('create policy "notes_select_own"');
     expect(sql).toContain('create policy "note_echoes_select_own"');
+    expect(sql).toContain(
+      "created_by_user_id uuid not null default auth.uid()",
+    );
+    expect(sql).toContain("created_by_user_id = auth.uid()");
+    expect(ownerDefaultSql).toContain("alter table public.note_echoes");
+    expect(ownerDefaultSql).toContain(
+      "alter column created_by_user_id set default auth.uid()",
+    );
+    expect(hardeningSql).toContain("revoke all on table public.notes from anon");
+    expect(hardeningSql).toContain(
+      'alter policy "notes_select_own" on public.notes to authenticated',
+    );
+    expect(hardeningSql).toContain("set search_path = public");
+    expect(hardeningSql).toContain("drop extension if exists pg_graphql cascade");
+    expect(noteEchoFlowsSql).toContain("public.continue_note(");
+    expect(noteEchoFlowsSql).toContain("security definer");
+    expect(noteEchoFlowsSql).toContain("set search_path = public");
+    expect(noteEchoFlowsSql).toContain("current_user_id uuid := auth.uid()");
+    expect(noteEchoFlowsSql).toContain("insert into public.notes");
+    expect(noteEchoFlowsSql).toContain("insert into public.note_echoes");
+    expect(noteEchoFlowsSql).toContain("'continue_note'");
+    expect(noteEchoFlowsSql).toContain("source_note.day");
+    expect(noteEchoFlowsSql).toContain(
+      "grant execute on function public.continue_note",
+    );
+    expect(noteEchoFlowsSql).not.toContain("service_role");
+    expect(advisorHardeningSql).toContain("idx_tasks_tag_id");
+    expect(advisorHardeningSql).toContain("idx_notes_tag_id");
+    expect(advisorHardeningSql).toContain("idx_note_echoes_context_note_id");
+    expect(advisorHardeningSql).toContain("(select auth.uid())");
+    expect(runbooks).toContain("003_harden_note_echo_surface.sql");
+    expect(runbooks).toContain("004_note_echo_flows.sql");
+    expect(runbooks).toContain("005_supabase_advisor_hardening.sql");
+    expect(runbooks).toContain("supabase migration repair <version> --status applied");
   });
 });

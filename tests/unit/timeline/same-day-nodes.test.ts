@@ -38,7 +38,7 @@ const buildTask = (overrides: Partial<Task> = {}): Task => ({
 });
 
 describe("same-day timeline nodes", () => {
-  // @req FR-009
+  // @req 002-note-echo-flows:FR-009
   it("transforma uma nota do dia em node do tipo note", () => {
     const nodes = deriveTimelineNodes({
       selectedDay,
@@ -54,7 +54,7 @@ describe("same-day timeline nodes", () => {
     });
   });
 
-  // @req FR-013
+  // @req 002-note-echo-flows:FR-013
   it("transforma uma tarefa sem horario em node task_untimed", () => {
     const nodes = deriveTimelineNodes({
       selectedDay,
@@ -70,7 +70,7 @@ describe("same-day timeline nodes", () => {
     });
   });
 
-  // @req FR-014
+  // @req 002-note-echo-flows:FR-014
   it("gera marker de criacao e item real para tarefa com horario no mesmo dia", () => {
     const nodes = deriveTimelineNodes({
       selectedDay,

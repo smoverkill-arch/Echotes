@@ -46,9 +46,95 @@ export const noteEchoSchema = z
     path: ["to_note_id"],
   });
 
+export const persistedNoteEchoSchema = noteEchoSchema.safeExtend({
+  id: z.string().uuid(),
+  created_by_user_id: z.string().uuid(),
+  created_at: z.string().datetime({ offset: true }),
+});
+
+export const createNoteEchoInputSchema = z
+  .object({
+    from_note_id: z.string().uuid(),
+    to_note_id: z.string().uuid(),
+    context_note_id: z.string().uuid().nullable().optional().default(null),
+    context_day: dateStringSchema.nullable().optional().default(null),
+    kind: noteEchoKindSchema.default("manual_link"),
+    metadata: z.record(z.string(), z.unknown()).nullable().optional().default(null),
+  })
+  .refine((echo) => echo.from_note_id !== echo.to_note_id, {
+    message: "Uma nota nao pode criar eco com ela mesma.",
+    path: ["to_note_id"],
+  });
+
+export const deleteNoteEchoInputSchema = z
+  .object({
+    echoId: z.string().uuid().optional(),
+    noteIdA: z.string().uuid(),
+    noteIdB: z.string().uuid(),
+  })
+  .refine((input) => input.noteIdA !== input.noteIdB, {
+    message: "Uma nota nao pode remover eco com ela mesma.",
+    path: ["noteIdB"],
+  });
+
+export const relatedNoteAvailabilitySchema = z.enum([
+  "available",
+  "transient_unavailable",
+  "stale_detail",
+]);
+
+const relatedAvailableNoteSchema = z.object({
+  id: z.string().uuid(),
+  day: dateStringSchema,
+  title: z.string(),
+  brief: z.string().nullable(),
+  created_at: z.string().datetime({ offset: true }),
+  kind: noteEchoKindSchema,
+  echoId: z.string().uuid(),
+  availability: z.literal("available"),
+});
+
+const relatedUnavailableNoteSchema = z.object({
+  id: z.string().uuid(),
+  day: z.null(),
+  title: z.null(),
+  brief: z.null(),
+  created_at: z.null(),
+  kind: noteEchoKindSchema,
+  echoId: z.string().uuid(),
+  availability: z.enum(["transient_unavailable", "stale_detail"]),
+});
+
+export const relatedNoteSchema = z.discriminatedUnion("availability", [
+  relatedAvailableNoteSchema,
+  relatedUnavailableNoteSchema,
+]);
+
+export const noteEchoCandidateCursorSchema = z.object({
+  isSelectedDayGroup: z.boolean(),
+  day: dateStringSchema,
+  created_at: z.string().datetime({ offset: true }),
+  id: z.string().uuid(),
+});
+
+export const noteEchoCandidateSchema = z.object({
+  id: z.string().uuid(),
+  day: dateStringSchema,
+  title: z.string().trim().min(1, "Titulo e obrigatorio."),
+  brief: z.string().nullable(),
+  created_at: z.string().datetime({ offset: true }),
+  isAlreadyConnected: z.boolean(),
+});
+
+export const noteEchoCandidatePageSchema = z.object({
+  items: noteEchoCandidateSchema.array(),
+  nextCursor: noteEchoCandidateCursorSchema.nullable(),
+});
+
 export const continueNoteInputSchema = z.object({
   sourceNoteId: z.string().uuid(),
-  targetDay: dateStringSchema,
+  newNoteDay: dateStringSchema,
+  title: z.string().trim().min(1, "Titulo e obrigatorio."),
   generatedBrief: z.string().trim().min(1, "Briefing gerado e obrigatorio."),
-  title: z.string().trim().optional(),
+  content: z.string().optional().default(""),
 });

@@ -4,6 +4,7 @@ import { noteSchema } from "../../../schemas/note.schema";
 import { taskSchema } from "../../../schemas/task.schema";
 import { useAuthStore } from "../../../stores/auth-store";
 import type { DayEntries } from "../../../types/timeline";
+import { listNoteEchoes } from "../../notes/api/list-note-echoes";
 import {
   getSupabaseClient,
   getSupabaseConfigurationError,
@@ -119,6 +120,13 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
         throw new Error(parsedTasks.error.issues[0]?.message ?? "Falha ao validar tarefas.");
       }
 
+      const noteIds = parsedNotes.data.map((note) => note.id);
+      const echoesResult = await listNoteEchoes(noteIds);
+
+      if (!echoesResult.ok) {
+        throw new Error(echoesResult.errorMessage);
+      }
+
       if (!isCurrentRequest()) {
         return;
       }
@@ -126,7 +134,7 @@ export const useDayEntries = (selectedDay: string): UseDayEntriesResult => {
       setEntries({
         notes: parsedNotes.data,
         tasks: parsedTasks.data,
-        echoes: [],
+        echoes: echoesResult.echoes,
       });
     } catch (error) {
       const message =

@@ -14,8 +14,12 @@ export const deriveTimelineNodes = ({
   selectedDay,
   tasks,
   notes,
+  directEchoCounts = [],
 }: DayTimelineInput): TimelineNode[] => {
   const nodes: TimelineNode[] = [];
+  const directEchoCountByNoteId = new Map(
+    directEchoCounts.map((count) => [count.noteId, count.directCount]),
+  );
 
   for (const note of notes) {
     if (note.day !== selectedDay) {
@@ -31,6 +35,7 @@ export const deriveTimelineNodes = ({
       createdAt: note.created_at,
       scheduledAt: null,
       data: note,
+      directEchoCount: directEchoCountByNoteId.get(note.id) ?? 0,
     });
   }
 

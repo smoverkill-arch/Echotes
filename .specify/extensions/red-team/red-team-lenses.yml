@@ -1,0 +1,67 @@
+# Red Team Lens Catalog for Echotes
+#
+# Project-specific adversarial lenses used by /speckit.red-team.run.
+# Keep the trigger_match values within the extension's supported categories:
+# money_path, regulatory_path, ai_llm, immutability_audit, multi_party, contracts.
+
+version: "v1"
+
+defaults:
+  finding_bound: 5
+  severity_weight: 5
+
+lenses:
+  - name: "Domain-Boundary Adversary"
+    description: "Attacks domain separation, especially day-first navigation, note/task boundaries, ghost cards, and visible versus internal relation semantics."
+    core_questions:
+      - "Where could notes accidentally inherit task behavior, ghost cards, source_day, target_day, or scheduling semantics?"
+      - "Where could a relation between notes be exposed as a hierarchy, graph, note subtype, or separate module instead of an Eco?"
+      - "Which user path could break the day surface as the sovereign context?"
+      - "Where does the spec permit UI terminology that drifts away from Criar nota, Adicionar eco, Continuar desta nota, Criar tarefa, Ecos, or ghost card?"
+    trigger_match: [contracts, multi_party]
+    severity_weight: 8
+    finding_bound: 5
+
+  - name: "Atomicity and Recovery Adversary"
+    description: "Attacks persistence boundaries, partial-success states, retries, stale reloads, and recovery behavior around Supabase, note_echoes, and RPC flows."
+    core_questions:
+      - "Where can a note be created without its required note_echo relation, or a relation be created without visible recovery?"
+      - "Which failure path can leave the UI showing success before both writes are confirmed?"
+      - "Where can stale day or Reader state survive a failed reload, cross-day navigation, or duplicate relation attempt?"
+      - "Which rollback, retry, or idempotency assumptions are implied but not specified?"
+    trigger_match: [contracts, immutability_audit]
+    severity_weight: 9
+    finding_bound: 5
+
+  - name: "Ownership and Trust-Boundary Adversary"
+    description: "Attacks authentication, RLS, ownership, inaccessible connected notes, and trust assumptions between client code and Supabase."
+    core_questions:
+      - "Which action could read, create, or remove a relation involving a note the authenticated user no longer owns or can access?"
+      - "Where does the client trust local state instead of revalidating ownership through Supabase/RLS/RPC?"
+      - "Where could service_role or elevated privileges leak into client-facing behavior or documentation?"
+      - "How does the UX degrade when the session expires during Adicionar eco, Remover eco, or Continuar desta nota?"
+    trigger_match: [multi_party, contracts]
+    severity_weight: 9
+    finding_bound: 5
+
+  - name: "Temporal Navigation Adversary"
+    description: "Attacks cross-day navigation, selected-day versus real-day confusion, ordering rules, and Reader reopening after day transitions."
+    core_questions:
+      - "Where can selectedDay, targetDay, context_day, or note.day be confused and send the user to the wrong daily surface?"
+      - "Which flow can reopen the wrong Reader, fail to reopen a Reader, or create a breadcrumb-like navigation state?"
+      - "Where can same-day and future-day continuation behave differently without being tested?"
+      - "Which ordering rule can make connected notes, candidates, or timeline badges appear inconsistent after reload?"
+    trigger_match: [contracts, multi_party]
+    severity_weight: 8
+    finding_bound: 5
+
+  - name: "Traceability and Gate Adversary"
+    description: "Attacks task/spec/canon traceability, DocGuard closure, and claims that a phase is complete without the promised evidence."
+    core_questions:
+      - "Which task can be marked complete while its promised contract, migration, test, or canonical update is still absent?"
+      - "Where do spec, plan, tasks, blueprint, and canon disagree about order of work or authority?"
+      - "Which verification gate could pass while the feature remains semantically incomplete?"
+      - "Where should CHANGELOG, DRIFT-LOG, CANON-MIGRATION-COVERAGE, or docs-canonical be updated to avoid hiding drift?"
+    trigger_match: [immutability_audit, contracts, multi_party]
+    severity_weight: 7
+    finding_bound: 5

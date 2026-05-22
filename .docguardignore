@@ -1,0 +1,4 @@
+# DocGuard-generated local assistant artifacts.
+commands/**
+commands*
+.agent/**

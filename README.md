@@ -3,6 +3,8 @@
 Echotes e um app Expo/React Native centrado em cada dia.
 O produto organiza notas e tarefas em uma timeline diaria.
 O baseline entregue hoje e `001-auth-day-surface`.
+O pacote `002-note-echo-flows` entrega os fluxos de ecos e continuacao de nota
+sobre esse baseline.
 
 ## Baseline Atual
 
@@ -12,6 +14,8 @@ O corte atual entrega:
 - rota protegida do dia em `app/day/[date].tsx`.
 - criacao e edicao basica de notas e tarefas do mesmo dia.
 - tarefas projected com ghost card, navegacao ao destino e breadcrumb.
+- leitura de ecos diretos, Reader com notas conectadas, `Adicionar eco`,
+  remocao confirmada e `Continuar desta nota`.
 - derivacao da timeline a partir do estado real do dia.
 - regressao automatizada para auth, timeline, navegacao temporal e contratos temporais.
 
@@ -19,10 +23,14 @@ O corte atual entrega:
 
 O repo usa dois grupos principais de documentos.
 
-- `docs-canonical/` guarda os seis canones usados pelo DocGuard.
+- `docs-canonical/` guarda os seis canones executaveis usados pelo DocGuard.
 - a raiz guarda governanca, status, operacao e historico do repo.
 - `docs/` segue como acervo historico.
 - `specs/001-auth-day-surface/` preserva a feature que definiu o baseline.
+
+Ordem de autoridade: `.specify/memory/constitution.md`, depois os seis canones
+em `docs-canonical/`, depois o pacote ativo em `specs/<feature>/`, e por fim o
+codigo e os testes como estado executavel atual.
 
 ## Canones do DocGuard
 
@@ -52,7 +60,7 @@ O repo usa dois grupos principais de documentos.
 2. Crie `.env` a partir de `.env.example`.
 3. Preencha `EXPO_PUBLIC_SUPABASE_URL`.
 4. Preencha `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-5. Aplique `supabase/migrations/001_auth_day_surface.sql`.
+5. Aplique as migrations em `supabase/migrations/` na ordem numerica.
 6. Inicie o app com `corepack pnpm expo start`.
 
 `pnpm` direto tambem funciona quando ja estiver disponivel.
@@ -88,8 +96,14 @@ O gate local usa estes comandos:
 ## Arquivos Operacionais
 
 - `.docguard.json` define validadores e arquivos obrigatorios.
+- `.docguardignore` exclui artefatos locais gerados pelo DocGuard, como
+  `commands/`, das metricas documentais.
 - `.agents/` guarda skills do projeto.
 - `.agent/` e `commands/` podem surgir por automacao.
+- `.codex/` guarda artefatos locais auxiliares do Codex neste workspace, como
+  skills ou caches de execucao gerados durante desenvolvimento assistido.
+- `.clinerules`, `.cursor/`, `.gemini/` e `.windsurfrules` registram regras
+  para ferramentas auxiliares de desenvolvimento usadas esporadicamente.
 - `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` definem o bootstrap do app.
 - `eslint.config.js` e `jest.config.js` definem os gates tecnicos.
 - `.expo/` guarda estado local do Expo durante desenvolvimento.

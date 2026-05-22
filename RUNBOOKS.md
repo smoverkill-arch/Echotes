@@ -6,8 +6,62 @@
 2. create `.env` from `.env.example`
 3. fill `EXPO_PUBLIC_SUPABASE_URL`
 4. fill `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-5. apply `supabase/migrations/001_auth_day_surface.sql`
-6. `corepack pnpm expo start`
+5. start the local Supabase stack with `corepack pnpm run supabase:start`
+6. confirm local migrations with `corepack pnpm run db:migrations`
+7. `corepack pnpm expo start`
+
+## Run Supabase Locally with Docker
+
+1. start Docker Desktop
+2. run `corepack pnpm run supabase:start`
+3. open Supabase Studio at `http://127.0.0.1:55423`
+4. use the local API URL `http://127.0.0.1:55421` when testing against the
+   local stack
+5. run `corepack pnpm run supabase:doctor` to inspect ports, containers and
+   restart policies
+6. run `corepack pnpm run supabase:stop` when the local stack is no longer
+   needed
+
+The local Postgres port is `55422`, with shadow DB on `55420`. The wrapper used
+by `supabase:start` applies `docker update --restart=no` to Echotes Supabase
+containers after the Supabase CLI starts them. Docker Desktop should not start
+the Echotes stack automatically after this policy is applied.
+
+The wrapper also requests the dedicated Docker network
+`echotes_supabase_localhost`, configured to bind published ports to
+`127.0.0.1`. Docker Desktop can still publish Supabase CLI ports on
+`0.0.0.0`; when that happens, `supabase:doctor` reports the ports as `UNSAFE`.
+If the network already exists with a different host binding, fix the Docker
+network manually before starting the stack; the wrapper will not remove it.
+On Windows, also run `scripts/apply-echotes-supabase-firewall.ps1` from an
+Administrator PowerShell to block inbound LAN access to `55420..55429` while
+preserving localhost access.
+
+The local database is rebuilt from versioned files in `supabase/migrations/`.
+Current local migrations are:
+
+- `001_auth_day_surface.sql`
+- `002_note_echo_owner_default.sql`
+- `003_harden_note_echo_surface.sql`
+- `004_note_echo_flows.sql`
+- `005_supabase_advisor_hardening.sql`
+
+## Apply Supabase Migrations Remotely
+
+1. authenticate locally with the Supabase CLI
+2. link the project with `corepack pnpm exec supabase link --project-ref <ref>`
+3. export the database password variable requested by the Supabase CLI in the
+   current shell when remote Postgres access is required
+4. inspect pending remote changes with `corepack pnpm run db:remote:dry-run`
+5. apply with `corepack pnpm run db:remote:push` only when the dry run is
+   expected
+
+If a migration will be applied manually in the Supabase web console, use the
+exact SQL from `supabase/migrations/`, then record that version in Supabase CLI
+history with `corepack pnpm exec supabase migration repair <version> --status applied`.
+Afterward, verify with `corepack pnpm run db:migrations` and run
+`corepack pnpm run db:remote:dry-run`; the dry run should not propose the
+manually applied migration again.
 
 ## Validate the Repository Before Merge
 
@@ -44,4 +98,31 @@ If the app reports invalid environment configuration:
 1. verify `.env` exists
 2. verify the two public Supabase variables are filled
 3. re-open the shell so the environment is reloaded if needed
-4. confirm the migration has already been applied in Supabase
+4. confirm migrations with `corepack pnpm run db:migrations`
+
+## Recover from Supabase Local Autostart or Port Conflicts
+
+If Docker Desktop starts Echotes containers without an explicit command:
+
+1. run `corepack pnpm run supabase:doctor`
+2. confirm each Echotes Supabase container reports `restart=no`
+3. confirm published ports show `127.0.0.1:<port>` and not `0.0.0.0:<port>`
+4. run `corepack pnpm run supabase:stop`
+5. reopen Docker Desktop and confirm the Echotes stack stays stopped
+
+If Supabase fails to bind a local port, keep the dedicated range in
+`supabase/config.toml`: `55420..55429`. Do not move the Echotes stack back to
+the default `54320..54329` range unless the Windows/Docker port reservation has
+been verified clear.
+
+## Apply Windows Firewall Containment
+
+1. open PowerShell as Administrator
+2. run `.\scripts\apply-echotes-supabase-firewall.ps1`
+3. verify the rule `Echotes Supabase local ports - block inbound LAN` is
+   enabled for TCP `55420-55429`
+4. confirm Studio and API still respond through `127.0.0.1`
+
+This rule is intentionally independent from Docker. Docker Desktop may still
+display published ports as `0.0.0.0`; the Windows Firewall rule is the host
+containment layer for inbound LAN traffic.

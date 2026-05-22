@@ -20,8 +20,6 @@ import { TimelineItemWrapper } from "./timeline-item-wrapper";
 import { TimelinePlusButton } from "./timeline-plus-button";
 
 interface TimelineFeedbackCopy {
-  instructionsTitle: string;
-  instructionsBody: string;
   loadingTitle: string;
   loadingLabel: string;
   errorTitle: string;
@@ -31,9 +29,6 @@ interface TimelineFeedbackCopy {
 
 const feedbackCopyByTab: Record<DayTab, TimelineFeedbackCopy> = {
   timeline: {
-    instructionsTitle: "Timeline do dia",
-    instructionsBody:
-      "Toque uma vez para abrir o Reader. Toque duas vezes para editar. O ghost card leva ao dia de destino.",
     loadingTitle: "Carregando o dia...",
     loadingLabel: "Carregando a timeline do dia.",
     errorTitle: "Falha ao carregar a timeline",
@@ -42,9 +37,6 @@ const feedbackCopyByTab: Record<DayTab, TimelineFeedbackCopy> = {
       "Use o botao + para criar uma nota, uma tarefa deste dia ou uma tarefa projetada para outro dia.",
   },
   tasks: {
-    instructionsTitle: "Tarefas do dia",
-    instructionsBody:
-      "Toque uma vez para abrir o Reader. Toque duas vezes para editar. Quando houver ghost card, ele indica o destino da tarefa.",
     loadingTitle: "Carregando as tarefas...",
     loadingLabel: "Carregando as tarefas do dia.",
     errorTitle: "Falha ao carregar as tarefas",
@@ -53,9 +45,6 @@ const feedbackCopyByTab: Record<DayTab, TimelineFeedbackCopy> = {
       "Use o botao + para criar uma tarefa deste dia ou uma tarefa projetada para outro dia.",
   },
   notes: {
-    instructionsTitle: "Notas do dia",
-    instructionsBody:
-      "Toque uma vez para abrir o Reader. Toque duas vezes para editar.",
     loadingTitle: "Carregando as notas...",
     loadingLabel: "Carregando as notas do dia.",
     errorTitle: "Falha ao carregar as notas",
@@ -74,6 +63,10 @@ interface TimelineViewProps {
   onOpenReader: (kind: TimelineItemKind, id: string) => void;
   onOpenEditor: (kind: TimelineItemKind, id: string) => void;
   onNavigateToTask: (task: Task) => void;
+  onScrollInteractionStart?: () => void;
+  onScrollInteractionEnd?: () => void;
+  isChromeVisible?: boolean;
+  contentTopInset?: number;
 }
 
 export function TimelineView({
@@ -86,6 +79,10 @@ export function TimelineView({
   onOpenReader,
   onOpenEditor,
   onNavigateToTask,
+  onScrollInteractionStart,
+  onScrollInteractionEnd,
+  isChromeVisible = true,
+  contentTopInset = 0,
 }: TimelineViewProps) {
   const pendingPressRef = useRef<{
     id: string;
@@ -148,7 +145,12 @@ export function TimelineView({
 
   const renderNodeCard = (node: TimelineNode) => {
     if (node.type === "note") {
-      return <NoteCardReal note={node.data as Note} />;
+      return (
+        <NoteCardReal
+          note={node.data as Note}
+          directEchoCount={node.directEchoCount}
+        />
+      );
     }
 
     if (node.type === "task_untimed") {
@@ -182,15 +184,6 @@ export function TimelineView({
 
   return (
     <View style={styles.container}>
-      <View
-        accessible
-        accessibilityLabel={`${copy.instructionsTitle}. ${copy.instructionsBody}`}
-        style={styles.instructions}
-      >
-        <Text style={styles.instructionsTitle}>{copy.instructionsTitle}</Text>
-        <Text style={styles.instructionsBody}>{copy.instructionsBody}</Text>
-      </View>
-
       <View style={styles.contentArea}>
         {isLoading ? (
           <View
@@ -222,7 +215,15 @@ export function TimelineView({
 
         {!isLoading && !errorMessage ? (
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              contentTopInset > 0 ? { paddingTop: contentTopInset } : null,
+            ]}
+            onMomentumScrollBegin={onScrollInteractionStart}
+            onMomentumScrollEnd={onScrollInteractionEnd}
+            onScrollBeginDrag={onScrollInteractionStart}
+            onScrollEndDrag={onScrollInteractionEnd}
+            scrollEventThrottle={16}
             style={styles.scrollView}
             testID="timeline-view"
           >
@@ -288,6 +289,7 @@ export function TimelineView({
           onCreateNote={handleOpenNoteEditor}
           onCreateTask={handleOpenTaskEditor}
           isDisabled={isLoading}
+          isChromeVisible={isChromeVisible}
         />
       </View>
     </View>
@@ -297,26 +299,6 @@ export function TimelineView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 10,
-  },
-  instructions: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  instructionsTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  instructionsBody: {
-    marginTop: 4,
-    fontSize: 13,
-    lineHeight: 18,
-    color: "#4b5563",
   },
   contentArea: {
     flex: 1,

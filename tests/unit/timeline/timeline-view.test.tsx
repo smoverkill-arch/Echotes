@@ -5,6 +5,12 @@ import type { Note } from "../../../src/types/note";
 import type { Task } from "../../../src/types/task";
 import type { TimelineNode } from "../../../src/types/timeline";
 
+// @req 002-note-echo-flows:FR-002
+// @req 002-note-echo-flows:FR-003
+// @req 002-note-echo-flows:FR-019
+// @req 002-note-echo-flows:FR-020
+// @req 002-note-echo-flows:SC-001
+// @req 002-note-echo-flows:SC-006
 const noteA: Note = {
   id: "30000000-0000-4000-8000-000000000001",
   user_id: "f3b86608-11f6-4df4-b902-3bc0b1d5b8bc",
@@ -65,6 +71,11 @@ const noteNodeB: TimelineNode = {
   data: noteB,
 };
 
+const noteNodeWithEchoes: TimelineNode = {
+  ...noteNodeA,
+  directEchoCount: 2,
+};
+
 const ghostNode: TimelineNode = {
   id: `${timedTask.id}:task_ghost`,
   type: "task_ghost",
@@ -76,7 +87,10 @@ const ghostNode: TimelineNode = {
   data: timedTask,
 };
 
-const renderTimelineView = (nodes: TimelineNode[]) => {
+const renderTimelineView = (
+  nodes: TimelineNode[],
+  overrides: Partial<Parameters<typeof TimelineView>[0]> = {},
+) => {
   const onCreateNote = jest.fn();
   const onCreateTask = jest.fn();
   const onOpenReader = jest.fn();
@@ -94,6 +108,7 @@ const renderTimelineView = (nodes: TimelineNode[]) => {
       onOpenReader={onOpenReader}
       onOpenEditor={onOpenEditor}
       onNavigateToTask={onNavigateToTask}
+      {...overrides}
     />,
   );
 
@@ -101,6 +116,8 @@ const renderTimelineView = (nodes: TimelineNode[]) => {
     onOpenReader,
     onOpenEditor,
     onNavigateToTask,
+    onScrollInteractionStart: overrides.onScrollInteractionStart,
+    onScrollInteractionEnd: overrides.onScrollInteractionEnd,
   };
 };
 
@@ -114,7 +131,7 @@ describe("timeline view pending press handling", () => {
     jest.useRealTimers();
   });
 
-  // @req FR-019
+  // @req 002-note-echo-flows:FR-019
   it("abre o reader no single tap", async () => {
     const { onOpenReader, onOpenEditor } = renderTimelineView([noteNodeA]);
 
@@ -128,7 +145,7 @@ describe("timeline view pending press handling", () => {
     expect(onOpenEditor).not.toHaveBeenCalled();
   });
 
-  // @req FR-020
+  // @req 002-note-echo-flows:FR-020
   it("abre o editor no double tap do mesmo item", () => {
     const { onOpenReader, onOpenEditor } = renderTimelineView([noteNodeA]);
 
@@ -174,5 +191,30 @@ describe("timeline view pending press handling", () => {
     });
 
     expect(onOpenReader).not.toHaveBeenCalled();
+  });
+
+  it("exibe badge Ecos apenas quando a contagem direta e maior que zero", () => {
+    renderTimelineView([noteNodeWithEchoes, noteNodeB]);
+
+    expect(screen.getByTestId(`note-echo-badge-${noteA.id}`)).toBeTruthy();
+    expect(screen.getByText("Ecos 2")).toBeTruthy();
+    expect(screen.queryByTestId(`note-echo-badge-${noteB.id}`)).toBeNull();
+  });
+
+  // @req 003-mobile-day-shell-ux:FR-008
+  it("dispara callbacks de esconder e restaurar chrome durante scroll", () => {
+    const onScrollInteractionStart = jest.fn();
+    const onScrollInteractionEnd = jest.fn();
+
+    renderTimelineView([noteNodeA], {
+      onScrollInteractionStart,
+      onScrollInteractionEnd,
+    });
+
+    fireEvent(screen.getByTestId("timeline-view"), "scrollBeginDrag");
+    fireEvent(screen.getByTestId("timeline-view"), "scrollEndDrag");
+
+    expect(onScrollInteractionStart).toHaveBeenCalledTimes(1);
+    expect(onScrollInteractionEnd).toHaveBeenCalledTimes(1);
   });
 });

@@ -10,7 +10,8 @@ Essa escolha preserva clareza de dominio.
 - eco vive em tabela propria.
 
 `note_echoes` ja existe em schema e modelagem.
-Os fluxos completos de eco ainda pertencem a fases futuras do app.
+Os fluxos CRUD de eco (criar, listar, remover, candidatas) e a continuacao
+atomica por RPC `continue_note` estao implementados em `002-note-echo-flows`.
 
 ## Entities
 
@@ -84,6 +85,38 @@ Regras principais:
 
 - `from_note_id` e `to_note_id` sempre apontam para notas diferentes.
 - o par de notas preserva unicidade semantica.
+- `created_by_user_id` e derivado no banco por `default auth.uid()` em inserts
+  autenticados; o cliente nao envia user id nem `created_by_user_id` para criar
+  eco manual.
+- `kind = manual_link` representa eco criado pela acao explicita de adicionar
+  eco.
+- `kind = continue_note` representa eco criado pela continuacao de uma nota.
+- `context_day` registra o dia em que a relacao foi criada ou continuada.
+- `metadata` pode guardar provenance auxiliar, mas nao substitui a relacao.
+
+### RPC `continue_note`
+
+`public.continue_note` cria nova nota e eco `continue_note` na mesma transacao.
+
+Entrada:
+
+- nota de origem.
+- dia da nova nota.
+- titulo.
+- conteudo.
+- briefing inicial.
+
+Saida:
+
+- nova nota.
+- eco criado.
+
+Regras:
+
+- a origem precisa pertencer ao usuario autenticado.
+- a nova nota nasce com `user_id = auth.uid()`.
+- o eco nasce com `created_by_user_id = auth.uid()`.
+- falha em qualquer etapa impede persistencia parcial.
 
 ## Relationships
 
@@ -118,6 +151,13 @@ A migration base preserva:
 
 O SQL executavel vive em `supabase/migrations/001_auth_day_surface.sql`.
 Esse arquivo e a fonte operacional para o banco.
+O default de ownership para projetos existentes vive em
+`supabase/migrations/002_note_echo_owner_default.sql`.
+Hardening incremental de grants, policies, funcao auxiliar e GraphQL vive em
+`supabase/migrations/003_harden_note_echo_surface.sql`.
+O fluxo de continuacao vive em `supabase/migrations/004_note_echo_flows.sql`.
+Hardening de advisors Supabase vive em
+`supabase/migrations/005_supabase_advisor_hardening.sql`.
 Este canon descreve o contrato que novas migrations devem manter.
 
 ## Indexes
@@ -133,6 +173,8 @@ O baseline cria indexes para:
 - ecos por `from_note_id`.
 - ecos por `to_note_id`.
 - par semantico de `note_echoes`.
+- FKs usadas por tags, contexto de eco e autoria de eco para reduzir alertas de
+  performance do Supabase Advisor.
 
 ## Day Queries
 
@@ -236,11 +278,16 @@ Helpers canonicos usados pelo repo:
 O schema atual nasce de:
 
 - `supabase/migrations/001_auth_day_surface.sql`.
+- `supabase/migrations/002_note_echo_owner_default.sql`.
+- `supabase/migrations/003_harden_note_echo_surface.sql`.
+- `supabase/migrations/004_note_echo_flows.sql`.
+- `supabase/migrations/005_supabase_advisor_hardening.sql`.
 
 Novas migrations devem preservar:
 
 - separacao entre tarefas e notas.
 - ownership via RLS.
+- superficie de cliente limitada a sessoes autenticadas e grants minimos.
 - ghost card como representacao derivada.
 - `note_echoes` como relacao dedicada.
 
@@ -265,14 +312,21 @@ Checklist canonico ativo:
 4. Criar schemas Zod.
 5. Criar CRUD de tasks.
 6. Criar CRUD de notes.
-7. Criar CRUD de note_echoes quando ecos virarem entrega ativa.
+7. Criar CRUD de note_echoes.
 8. Implementar `deriveTimelineNodes`.
-9. Implementar contagem de ecos diretos quando ecos virarem entrega ativa.
-10. Implementar fluxo de continuar nota quando essa capacidade virar parte do corte.
+9. Implementar contagem de ecos diretos.
+10. Implementar fluxo de continuar nota.
 11. Validar `scheduled_at > created_at`.
 12. Renderizar timeline unificada.
 
 ## Revision History
 
+- 2026-05-12 - Reordenada migration de `continue_note` para versao unica `004`
+  e registrado hardening de advisors Supabase em `005`.
+- 2026-05-11 - Registrado `continue_note` atomico, `manual_link` e
+  `continue_note` como provenance entregue por `002-note-echo-flows`.
+- 2026-05-06 - Atualizado status dos fluxos de eco: CRUD implementado em `002-note-echo-flows`.
+- 2026-05-06 - Contrato de hardening Supabase documentado para grants,
+  policies, funcao auxiliar e GraphQL.
 - 2026-05-01 - Texto simplificado e secoes reorganizadas para leitura rapida.
 - 2026-04-26 - Modelo ampliado com estrategia de modelagem, RLS, queries, regras de composicao e diferenciacao temporal por dominio.

@@ -1,9 +1,9 @@
 <!--
 Relatório de sincronização
-Mudança de versão: 1.0.0 -> 2.0.0
+Mudança de versão: 2.0.0 -> 2.1.0
 Princípios modificados:
-- I. Domínio Canônico Primeiro: fonte vigente agora é o canon da raiz; docs/ é acervo histórico
-- Governança: checagem de conformidade passa a citar canon da raiz, não /docs como autoridade
+- I. Domínio Canônico Primeiro: fonte vigente agora distingue canones executáveis em docs-canonical/ e docs de governança/status na raiz; docs/ é acervo histórico
+- Governança: checagem de conformidade passa a citar constituição, docs-canonical/ e docs de governança da raiz, não /docs como autoridade
 Seções adicionadas:
 - Nenhuma
 Seções removidas:
@@ -13,8 +13,8 @@ Templates que exigiram atualização:
 - ✅ .specify/templates/spec-template.md
 - ✅ .specify/templates/tasks-template.md
 Textos de apoio:
-- ✅ CHANGELOG.md
-- ✅ AGENTS.md, README.md e CURRENT-STATE.md verificados sem patch
+- ✅ AGENTS.md, README.md, CANON-MIGRATION-COVERAGE.md e CHANGELOG.md
+- ✅ specs/002-note-echo-flows/plan.md e tasks.md
 Pendências:
 - Nenhuma
 -->
@@ -24,20 +24,22 @@ Pendências:
 
 ### I. Domínio Canônico Primeiro
 Todo trabalho de produto, design, engenharia e planejamento DEVE partir dos
-documentos canônicos vigentes na raiz do repositório, depois desta
-constituição. As decisões materialmente absorvidas em `README.md`,
-`ARCHITECTURE.md`, `DATA-MODEL.md`, `SECURITY.md`, `TEST-SPEC.md`,
-`ENVIRONMENT.md`, `REQUIREMENTS.md`, `CURRENT-STATE.md`, `ROADMAP.md`,
-`DEPLOYMENT.md`, `RUNBOOKS.md`, `TROUBLESHOOTING.md`, `KNOWN-GOTCHAS.md`,
-`CHANGELOG.md`, `DRIFT-LOG.md` e `CANON-MIGRATION-COVERAGE.md` não podem ser
+documentos canônicos vigentes depois desta constituição. Os seis canones
+executáveis usados pelo DocGuard vivem em `docs-canonical/`: `REQUIREMENTS.md`,
+`ARCHITECTURE.md`, `DATA-MODEL.md`, `SECURITY.md`, `TEST-SPEC.md` e
+`ENVIRONMENT.md`. A raiz mantém os documentos de governança, status, operação e
+histórico: `README.md`, `CURRENT-STATE.md`, `ROADMAP.md`, `DEPLOYMENT.md`,
+`RUNBOOKS.md`, `TROUBLESHOOTING.md`, `KNOWN-GOTCHAS.md`, `CHANGELOG.md`,
+`DRIFT-LOG.md` e `CANON-MIGRATION-COVERAGE.md`. Essas decisões não podem ser
 reabertas localmente por conveniência de implementação. `docs/` permanece como
-acervo histórico; contradições entre `docs/` e a raiz DEVEM ser tratadas como
-achado de auditoria documental, não como autoridade automática.
+acervo histórico; contradições entre `docs/` e o canon vigente DEVEM ser
+tratadas como achado de auditoria documental, não como autoridade automática.
 
 Justificativa: o Echotes depende de um domínio não trivial, com regras
 temporais e conceituais que se degradam rapidamente quando cada camada improvisa
 sua própria interpretação. A raiz é o ponto vigente de consolidação do canon,
-enquanto `docs/` preserva proveniência histórica.
+enquanto `docs-canonical/` abriga os seis canones executáveis e `docs/`
+preserva proveniência histórica.
 
 ### II. Integridade do Produto Centrado no Dia
 O dia DEVE ser tratado como unidade principal do produto. Cada feature que toca
@@ -104,8 +106,8 @@ divergência operacional entre planejamento e implementação.
 - Toda feature DEVE nascer em branch numerada do Spec Kit e ter seu diretório
   persistido em `.specify/feature.json`.
 - `spec.md` DEVE focar em comportamento e valor ao usuário; `plan.md` DEVE
-  traduzir o corte para implementação técnica sem contradizer os canones da
-  raiz.
+  traduzir o corte para implementação técnica sem contradizer os canones
+  vigentes.
 - Antes de iniciar implementação, o plano DEVE fechar: contratos essenciais,
   estratégia de dados, variáveis de ambiente, critérios de aceite e cenários de
   verificação.
@@ -124,7 +126,8 @@ impactados e o tipo de incremento de versão:
 
 Toda revisão de spec, plan, tasks ou código DEVE checar conformidade com:
 
-- aderência à constituição e aos canones vigentes da raiz;
+- aderência à constituição, aos canones executáveis em `docs-canonical/` e aos
+  documentos de governança/status da raiz;
 - preservação de `docs/` como acervo histórico, sem reabrir decisões absorvidas
   sem decisão explícita;
 - preservação do modelo diário e da separação entre notas e tarefas;
@@ -135,4 +138,4 @@ Toda revisão de spec, plan, tasks ou código DEVE checar conformidade com:
 Não há placeholders em aberto nesta versão. Quando um artefato violar esta
 constituição, o trabalho DEVE parar para correção ou emenda explícita.
 
-**Versão**: 2.0.0 | **Ratificada em**: 2026-04-15 | **Última emenda**: 2026-04-30
+**Versão**: 2.1.0 | **Ratificada em**: 2026-04-15 | **Última emenda**: 2026-05-11

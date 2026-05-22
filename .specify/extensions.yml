@@ -18,6 +18,13 @@ hooks:
     prompt: Execute speckit.git.feature?
     description: Create feature branch before specification
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before specification
+    condition: null
   before_clarify:
   - extension: git
     command: speckit.git.commit
@@ -26,6 +33,13 @@ hooks:
     prompt: Commit outstanding changes before clarification?
     description: Auto-commit before spec clarification
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before clarification
+    condition: null
   before_plan:
   - extension: git
     command: speckit.git.commit
@@ -33,6 +47,21 @@ hooks:
     optional: true
     prompt: Commit outstanding changes before planning?
     description: Auto-commit before implementation planning
+    condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before planning
+    condition: null
+  - extension: red-team
+    command: speckit.red-team.gate
+    enabled: true
+    optional: false
+    prompt: Running red team gate check on the current feature spec...
+    description: Red Team Gate (Principle VIII) - blocks /speckit.plan if the spec
+      triggers a red team category and no findings report exists.
     condition: null
   before_tasks:
   - extension: git
@@ -49,6 +78,13 @@ hooks:
     prompt: Review documentation consistency before generating tasks?
     description: ''
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before task generation
+    condition: null
   before_implement:
   - extension: git
     command: speckit.git.commit
@@ -56,6 +92,13 @@ hooks:
     optional: true
     prompt: Commit outstanding changes before implementation?
     description: Auto-commit before implementation
+    condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before implementation
     condition: null
   before_checklist:
   - extension: git
@@ -65,6 +108,13 @@ hooks:
     prompt: Commit outstanding changes before checklist?
     description: Auto-commit before checklist generation
     condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before checklist generation
+    condition: null
   before_analyze:
   - extension: git
     command: speckit.git.commit
@@ -72,6 +122,13 @@ hooks:
     optional: true
     prompt: Commit outstanding changes before analysis?
     description: Auto-commit before analysis
+    condition: null
+  - extension: memory-loader
+    command: speckit.memory-loader.load
+    enabled: true
+    optional: false
+    prompt: Execute speckit.memory-loader.load?
+    description: Load project memory files before analysis
     condition: null
   before_taskstoissues:
   - extension: git
@@ -156,6 +213,41 @@ hooks:
     optional: true
     prompt: Run DocGuard validation after implementation?
     description: Quality gate â€” ensures docs stay in sync with code
+    condition: null
+  - extension: review
+    command: speckit.review.run
+    enabled: true
+    optional: true
+    prompt: Run PR review on implemented changes?
+    description: Comprehensive review after implementation
+    condition: null
+  - extension: cleanup
+    command: speckit.cleanup.run
+    enabled: true
+    optional: true
+    prompt: Run cleanup to review implementation changes and identify tech debt?
+    description: Post-implementation quality gate
+    condition: null
+  - extension: verify
+    command: speckit.verify.run
+    enabled: true
+    optional: true
+    prompt: Run verify to validate implementation against specification?
+    description: Post-implementation verification gate
+    condition: null
+  - extension: fix-findings
+    command: speckit.fix-findings.run
+    enabled: true
+    optional: true
+    prompt: Run fix-findings to analyze and resolve spec findings automatically?
+    description: Post-implementation automated finding resolution
+    condition: null
+  - extension: learn
+    command: speckit.learn.review
+    enabled: true
+    optional: true
+    prompt: Generate a learning guide from this implementation?
+    description: ''
     condition: null
   after_checklist:
   - extension: git

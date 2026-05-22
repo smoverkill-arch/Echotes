@@ -106,6 +106,145 @@
       },
       "registered_skills": [],
       "installed_at": "2026-04-26T02:58:42.745678+00:00"
+    },
+    "memory-loader": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:d1caef45965accd4316d8aede0a4ac67f910017ea3c501814cfc7e2d8177ab0b",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.memory-loader.load"
+        ],
+        "codex": [
+          "speckit.memory-loader.load"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-05T20:35:56.353898+00:00"
+    },
+    "red-team": {
+      "version": "1.0.2",
+      "source": "local",
+      "manifest_hash": "sha256:5bdd672fbde76cd960fb794b4544d49bd0b8bcdca053e04d85c405538e0b7c75",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.red-team.run",
+          "speckit.red-team.gate"
+        ],
+        "codex": [
+          "speckit.red-team.run",
+          "speckit.red-team.gate"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-06T01:55:54.353521+00:00"
+    },
+    "review": {
+      "version": "1.0.1",
+      "source": "local",
+      "manifest_hash": "sha256:3f9eedfc8079662edfb8d1f9c07a161be4e66111ea57621061f1658e91710d83",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "codex": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-06T04:04:39.485863+00:00"
+    },
+    "cleanup": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:b15a5e3b4e5b43f867c093d962492f502b01503d0ec174611d0797854b017578",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.cleanup.run",
+          "speckit.cleanup"
+        ],
+        "codex": [
+          "speckit.cleanup.run",
+          "speckit.cleanup"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-06T04:26:26.112670+00:00"
+    },
+    "verify": {
+      "version": "1.0.3",
+      "source": "local",
+      "manifest_hash": "sha256:74202b2c3bb17058b10787838cdf30c9ebe11e8793fc1de04bee75d5f111949a",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.verify.run"
+        ],
+        "codex": [
+          "speckit.verify.run"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-09T19:53:51.268671+00:00"
+    },
+    "fix-findings": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:bc06144e0f8d1bb18b8920cd1a438b3ccf182f1166c42c5c20ba86858c4e4129",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.fix-findings.run",
+          "speckit.fix-findings"
+        ],
+        "codex": [
+          "speckit.fix-findings.run",
+          "speckit.fix-findings"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-09T21:53:36.015091+00:00"
+    },
+    "learn": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:88e5b334106c25aa5ee1e0564e8f684b39a33b799d35f4ff5a3567189ea94607",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.learn.review",
+          "speckit.learn.clarify"
+        ],
+        "codex": [
+          "speckit.learn.review",
+          "speckit.learn.clarify"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-09T21:59:13.372132+00:00"
     }
   }
 }

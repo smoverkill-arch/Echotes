@@ -1,15 +1,25 @@
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { AuthErrorBanner } from "../../src/components/auth/auth-error-banner";
-import { DayShell } from "../../src/components/day/day-shell";
+import { DayShell, type DayShellSavedOptions } from "../../src/components/day/day-shell";
 import { signOut } from "../../src/features/auth/api/sign-out";
 import { useAuthSession } from "../../src/features/auth/hooks/use-auth-session";
+import { continueNote } from "../../src/features/notes/api/continue-note";
+import { createNoteEcho } from "../../src/features/notes/api/create-note-echo";
+import { deleteNoteEcho } from "../../src/features/notes/api/delete-note-echo";
+import { listRelatedNoteDetails } from "../../src/features/notes/api/list-note-echoes";
+import { getRelatedNoteId } from "../../src/features/notes/utils/note-echo-relations";
 import { useCalendarStore } from "../../src/stores/calendar-store";
 import { useDayTimeline } from "../../src/features/day/hooks/use-day-timeline";
 import { useNavigationStore } from "../../src/stores/navigation-store";
 import { useUIStore } from "../../src/stores/ui-store";
+import type {
+  ContinueNoteInput,
+  NoteEchoCandidate,
+  RelatedNote,
+} from "../../src/types/note";
 import { parseDayKey } from "../../src/utils/date";
 
 const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,8 +46,11 @@ export default function ProtectedDayRoute() {
   const router = useRouter();
   const params = useLocalSearchParams<{ date?: string | string[] }>();
   const setSelectedDate = useCalendarStore((state) => state.setSelectedDate);
+  const calendarMode = useCalendarStore((state) => state.calendarMode);
+  const setCalendarMode = useCalendarStore((state) => state.setCalendarMode);
   const {
     authStatus,
+    clockDate,
     errorMessage,
     isAuthenticated,
     isBootstrapping,
@@ -66,18 +79,77 @@ export default function ProtectedDayRoute() {
   const clearTemporalNavigationContext = useNavigationStore(
     (state) => state.clearTemporalNavigationContext,
   );
+  const pendingReaderOpen = useNavigationStore((state) => state.pendingReaderOpen);
+  const setPendingReaderOpen = useNavigationStore(
+    (state) => state.setPendingReaderOpen,
+  );
+  const consumePendingReaderOpen = useNavigationStore(
+    (state) => state.consumePendingReaderOpen,
+  );
+  const clearPendingReaderOpen = useNavigationStore(
+    (state) => state.clearPendingReaderOpen,
+  );
+  const [relatedNotes, setRelatedNotes] = useState<RelatedNote[]>([]);
+  const [isEchoPickerVisible, setIsEchoPickerVisible] = useState(false);
+  const [isContinueNoteEditorVisible, setIsContinueNoteEditorVisible] =
+    useState(false);
+  const [isContinuingNote, setIsContinuingNote] = useState(false);
+  const [continueNoteErrorMessage, setContinueNoteErrorMessage] = useState<
+    string | null
+  >(null);
+  const [echoFeedbackMessage, setEchoFeedbackMessage] = useState<string | null>(
+    null,
+  );
+  const relatedNotesCountRef = useRef(0);
+  const pendingReaderNavigationTargetRef = useRef<string | null>(null);
+  const replaceRelatedNotes = useCallback((nextRelatedNotes: RelatedNote[]) => {
+    relatedNotesCountRef.current = nextRelatedNotes.length;
+    setRelatedNotes(nextRelatedNotes);
+  }, []);
+  const clearRelatedNotes = useCallback(() => {
+    if (relatedNotesCountRef.current === 0) {
+      return;
+    }
+
+    relatedNotesCountRef.current = 0;
+    setRelatedNotes([]);
+  }, []);
   const isSigningOut = authStatus === "signing_out";
 
   const { resolved: resolvedDate, needsRedirect: dateParamNeedsRedirect } =
     resolveDateParam(params.date, selectedDate);
   const {
     notes,
+    echoes,
     taskLookup,
     timelineNodes,
     isLoading: isTimelineLoading,
     errorMessage: timelineErrorMessage,
     reload,
   } = useDayTimeline(resolvedDate, activeTab);
+  const handleDateChange = useCallback(
+    (nextDate: string) => {
+      if (nextDate === resolvedDate) {
+        return;
+      }
+
+      closeReader();
+      closeEditor();
+      clearPendingReaderOpen();
+      clearTemporalNavigationContext();
+      setSelectedDate(nextDate);
+      router.push(`/day/${nextDate}`);
+    },
+    [
+      clearPendingReaderOpen,
+      clearTemporalNavigationContext,
+      closeEditor,
+      closeReader,
+      resolvedDate,
+      router,
+      setSelectedDate,
+    ],
+  );
   const activeItemId = readerState.id ?? editorState.id;
   const activeNote = useMemo(
     () =>
@@ -97,10 +169,163 @@ export default function ProtectedDayRoute() {
     temporalNavigationContext?.destinationDate === resolvedDate
       ? temporalNavigationContext
       : null;
+  const notesById = useMemo(
+    () => new Map(notes.map((note) => [note.id, note])),
+    [notes],
+  );
+  const activeNoteEchoes = useMemo(() => {
+    if (!activeNote) {
+      return [];
+    }
+
+    return echoes.filter((echo) => getRelatedNoteId(echo, activeNote.id));
+  }, [activeNote, echoes]);
+  const loadRelatedNotes = useCallback(async () => {
+    if (!activeNote || !readerState.isOpen || readerState.kind !== "note") {
+      clearRelatedNotes();
+      return;
+    }
+
+    const result = await listRelatedNoteDetails(activeNote, activeNoteEchoes);
+
+    if (result.ok) {
+      replaceRelatedNotes(result.relatedNotes);
+      return;
+    }
+
+    clearRelatedNotes();
+  }, [
+    activeNote,
+    activeNoteEchoes,
+    clearRelatedNotes,
+    readerState.isOpen,
+    readerState.kind,
+    replaceRelatedNotes,
+  ]);
+  const closeEchoPicker = useCallback(() => {
+    setIsEchoPickerVisible(false);
+  }, []);
+  const handleSelectEchoCandidate = useCallback(
+    async (candidate: NoteEchoCandidate) => {
+      if (!activeNote) {
+        return;
+      }
+
+      const result = await createNoteEcho({
+        from_note_id: activeNote.id,
+        to_note_id: candidate.id,
+        context_note_id: activeNote.id,
+        context_day: resolvedDate,
+        kind: "manual_link",
+        metadata: null,
+      });
+
+      if (!result.ok) {
+        setEchoFeedbackMessage(result.errorMessage);
+        return;
+      }
+
+      setEchoFeedbackMessage(
+        result.status === "already_exists" ? "Eco ja existe" : "Eco adicionado.",
+      );
+      setIsEchoPickerVisible(false);
+      await reload();
+    },
+    [activeNote, reload, resolvedDate],
+  );
+  const handleRemoveEcho = useCallback(
+    async (relatedNote: RelatedNote) => {
+      if (!activeNote || relatedNote.availability !== "available") {
+        return;
+      }
+
+      const result = await deleteNoteEcho({
+        echoId: relatedNote.echoId,
+        noteIdA: activeNote.id,
+        noteIdB: relatedNote.id,
+      });
+
+      if (!result.ok) {
+        setEchoFeedbackMessage(result.errorMessage);
+        return;
+      }
+
+      setEchoFeedbackMessage(
+        result.status === "already_removed" ? "Eco ja removido." : "Eco removido.",
+      );
+      replaceRelatedNotes(
+        relatedNotes.filter((note) => note.echoId !== relatedNote.echoId),
+      );
+      await reload();
+    },
+    [activeNote, relatedNotes, reload, replaceRelatedNotes],
+  );
+  const handleContinueNote = useCallback(
+    async (draft: ContinueNoteInput) => {
+      if (!activeNote || !session?.userId) {
+        return;
+      }
+
+      setIsContinuingNote(true);
+      setContinueNoteErrorMessage(null);
+
+      try {
+        const result = await continueNote(draft);
+
+        if (!result.ok) {
+          setContinueNoteErrorMessage(result.errorMessage);
+          return;
+        }
+
+        setIsContinueNoteEditorVisible(false);
+        setEchoFeedbackMessage("Nota continuada.");
+        setPendingReaderOpen({
+          noteId: result.newNote.id,
+          noteDay: result.newNote.day,
+          requestId: `${result.newNote.id}:${Date.now()}`,
+          sessionUserId: session.userId,
+          actionOrigin: "continue_note_created",
+        });
+
+        if (result.newNote.day === resolvedDate) {
+          await reload();
+          return;
+        }
+
+        closeReader();
+        closeEditor();
+        pendingReaderNavigationTargetRef.current = result.newNote.day;
+        router.push(`/day/${result.newNote.day}`);
+      } finally {
+        setIsContinuingNote(false);
+      }
+    },
+    [
+      activeNote,
+      closeEditor,
+      closeReader,
+      reload,
+      resolvedDate,
+      router,
+      session?.userId,
+      setPendingReaderOpen,
+    ],
+  );
 
   useEffect(() => {
     setSelectedDate(resolvedDate);
   }, [resolvedDate, setSelectedDate]);
+
+  useEffect(() => {
+    setIsEchoPickerVisible(false);
+    setIsContinueNoteEditorVisible(false);
+    setContinueNoteErrorMessage(null);
+    setEchoFeedbackMessage(null);
+  }, [activeNote?.id, resolvedDate]);
+
+  useEffect(() => {
+    void loadRelatedNotes();
+  }, [loadRelatedNotes]);
 
   useEffect(() => {
     if (!destinationTemporalContext?.pendingOpenTaskId) {
@@ -126,6 +351,65 @@ export default function ProtectedDayRoute() {
     openReader,
     resolvedDate,
     taskLookup,
+    timelineErrorMessage,
+  ]);
+
+  useEffect(() => {
+    if (!pendingReaderOpen) {
+      return;
+    }
+
+    if (pendingReaderOpen.sessionUserId !== session?.userId) {
+      clearPendingReaderOpen();
+      return;
+    }
+
+    if (pendingReaderOpen.noteDay !== resolvedDate) {
+      if (pendingReaderNavigationTargetRef.current === pendingReaderOpen.noteDay) {
+        return;
+      }
+
+      clearPendingReaderOpen();
+      return;
+    }
+
+    if (pendingReaderNavigationTargetRef.current === resolvedDate) {
+      pendingReaderNavigationTargetRef.current = null;
+    }
+
+    if (isTimelineLoading) {
+      return;
+    }
+
+    if (timelineErrorMessage) {
+      clearPendingReaderOpen();
+      return;
+    }
+
+    // During cross-day navigation the route can update before day entries finish reloading.
+    if (notes.some((note) => note.day !== resolvedDate)) {
+      return;
+    }
+
+    const noteToOpen = notesById.get(pendingReaderOpen.noteId);
+
+    if (!noteToOpen || noteToOpen.day !== pendingReaderOpen.noteDay) {
+      clearPendingReaderOpen();
+      return;
+    }
+
+    openReader("note", pendingReaderOpen.noteId);
+    consumePendingReaderOpen(pendingReaderOpen.requestId);
+  }, [
+    clearPendingReaderOpen,
+    consumePendingReaderOpen,
+    isTimelineLoading,
+    notes,
+    notesById,
+    openReader,
+    pendingReaderOpen,
+    resolvedDate,
+    session?.userId,
     timelineErrorMessage,
   ]);
 
@@ -197,11 +481,13 @@ export default function ProtectedDayRoute() {
   return (
     <DayShell
       date={resolvedDate}
+      clockDate={clockDate}
       email={session.email}
       isSigningOut={isSigningOut}
       authStatus={authStatus}
       authErrorMessage={errorMessage}
       activeTab={activeTab}
+      calendarMode={calendarMode}
       readerState={readerState}
       editorState={editorState}
       timelineNodes={timelineNodes}
@@ -210,9 +496,18 @@ export default function ProtectedDayRoute() {
       temporalNavigationContext={destinationTemporalContext}
       activeNote={activeNote}
       activeTask={activeTask}
+      relatedNotes={relatedNotes}
+      activeNoteEchoes={activeNoteEchoes}
+      isEchoPickerVisible={isEchoPickerVisible}
+      isContinueNoteEditorVisible={isContinueNoteEditorVisible}
+      isContinuingNote={isContinuingNote}
+      continueNoteErrorMessage={continueNoteErrorMessage}
+      echoFeedbackMessage={echoFeedbackMessage}
       onSignOut={async () => {
         await signOut();
       }}
+      onDateChange={handleDateChange}
+      onCalendarModeChange={setCalendarMode}
       onTabChange={setActiveTab}
       onCreateNote={() => {
         openEditor({ mode: "create", kind: "note" });
@@ -235,6 +530,46 @@ export default function ProtectedDayRoute() {
         });
         router.push(`/day/${task.target_day}`);
       }}
+      onOpenRelatedNote={(relatedNote) => {
+        if (relatedNote.availability !== "available") {
+          return;
+        }
+
+        if (relatedNote.day === resolvedDate) {
+          openReader("note", relatedNote.id);
+          return;
+        }
+
+        closeReader();
+        closeEditor();
+        setPendingReaderOpen({
+          noteId: relatedNote.id,
+          noteDay: relatedNote.day,
+          requestId: `${relatedNote.id}:${Date.now()}`,
+          sessionUserId: session.userId,
+          actionOrigin: "connected_note_tap",
+        });
+        pendingReaderNavigationTargetRef.current = relatedNote.day;
+        router.push(`/day/${relatedNote.day}`);
+      }}
+      onReloadRelatedNote={async () => {
+        await loadRelatedNotes();
+      }}
+      onAddEcho={() => {
+        setEchoFeedbackMessage(null);
+        setIsEchoPickerVisible(true);
+      }}
+      onCloseEchoPicker={closeEchoPicker}
+      onSelectEchoCandidate={handleSelectEchoCandidate}
+      onRemoveEcho={handleRemoveEcho}
+      onContinueNote={() => {
+        setContinueNoteErrorMessage(null);
+        setIsContinueNoteEditorVisible(true);
+      }}
+      onCloseContinueNoteEditor={() => {
+        setIsContinueNoteEditorVisible(false);
+      }}
+      onSubmitContinueNote={handleContinueNote}
       onReturnToSource={() => {
         if (!destinationTemporalContext) {
           return;
@@ -247,10 +582,18 @@ export default function ProtectedDayRoute() {
       }}
       onCloseReader={closeReader}
       onCloseEditor={closeEditor}
-      onSaved={async () => {
+      onSaved={async (options?: DayShellSavedOptions) => {
         await reload();
         closeEditor();
         closeReader();
+
+        if (options?.echoFeedbackMessage) {
+          setEchoFeedbackMessage(options.echoFeedbackMessage);
+        }
+
+        if (options?.openReader) {
+          openReader(options.openReader.kind, options.openReader.id);
+        }
       }}
     />
   );

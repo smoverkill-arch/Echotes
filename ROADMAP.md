@@ -10,6 +10,7 @@ This baseline covers:
 - protected day surface
 - same-day notes and tasks
 - projected tasks with ghost navigation
+- delivered note echo flows from `002-note-echo-flows`
 
 ## Documentation Migration Track
 
@@ -24,7 +25,7 @@ Current migration goals:
 The following areas remain outside the current baseline and should not be
 assumed delivered:
 
-- operational use of `note_echoes`
+- inline mention semantics beyond the delivered `note_echoes` lifecycle
 - broader calendar behaviors beyond the current day-surface cut
 - automated product workflows
 - release and deployment automation for production mobile delivery
@@ -42,6 +43,13 @@ The original MVP technical spec ordered work as:
 
 This order is retained as historical guidance. Future commitments still require
 a new Spec Kit feature.
+
+## Delivered Outside Future Backlog
+
+Do not reopen the delivered `note_echoes` lifecycle as roadmap backlog. Manual
+echo creation, direct echo count, Reader relations, confirmed removal and
+`continue_note` belong to `002-note-echo-flows`. Inline `@nota`, map/network
+views and release automation remain future candidates.
 
 ## Planning Rule
 

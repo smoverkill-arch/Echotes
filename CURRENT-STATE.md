@@ -14,10 +14,27 @@ Entregue hoje:
 - tarefa projected com ghost navigation e breadcrumb
 - cobertura automatizada do corte
 
+## Delivered Feature 002
+
+`002-note-echo-flows` tem US1, US2 e US3 implementadas. A Phase 6 fecha apenas
+documentacao, rastreabilidade e gates; ela nao adiciona nova capacidade de
+produto.
+
+Entregue pela feature:
+
+- contagem direta de ecos em notas do dia
+- Reader com notas conectadas e degradacao de detalhe inacessivel
+- navegacao contextual para nota conectada de outro dia
+- criacao manual de eco `manual_link` com bloqueio de duplicidade
+- busca paginada de candidatas e candidatas ja conectadas desabilitadas
+- remocao confirmada de eco selecionado
+- continuacao atomica por RPC `continue_note`
+
 ## Canon Status
 
-O canon vigente vive na raiz do repositorio. A absorcao material dos tres
-arquivos antigos de `docs/` esta registrada em `CANON-MIGRATION-COVERAGE.md`.
+Os seis canones executaveis vivem em `docs-canonical/`. A raiz guarda
+governanca, status, operacao e historico. A absorcao material dos tres arquivos
+antigos de `docs/` esta registrada em `CANON-MIGRATION-COVERAGE.md`.
 
 Hoje:
 
@@ -37,8 +54,6 @@ Hoje:
 
 Ainda nao consolidados como entrega do baseline:
 
-- fluxos completos de ecos de nota
-- `continue_note`
 - mencoes inline persistidas com semantica completa
 - deploy e release de producao
 
