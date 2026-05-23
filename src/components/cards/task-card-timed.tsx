@@ -1,5 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  colors,
+  fontFamily,
+  letterSpacing,
+  lineHeight,
+  radius,
+  shadow,
+  spacing,
+  typography,
+} from "../../theme/tokens";
 import type { Task } from "../../types/task";
 import { extractTimePart } from "../../utils/date";
 
@@ -18,7 +28,7 @@ export function TaskCardTimed({ task }: TaskCardTimedProps) {
       <Text style={styles.title}>{task.title}</Text>
       {task.content ? <Text style={styles.body}>{task.content}</Text> : null}
       <Text style={styles.footer}>
-        {scheduledTime ? `Horario real: ${scheduledTime}` : "Horario nao disponivel"}
+        {scheduledTime ? `Horário: ${scheduledTime}` : "Horário não disponível"}
       </Text>
     </View>
   );
@@ -26,34 +36,38 @@ export function TaskCardTimed({ task }: TaskCardTimedProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: "#bbf7d0",
-    backgroundColor: "#f0fdf4",
-    padding: 16,
+    borderColor: colors.taskTimedBorder,
+    backgroundColor: colors.taskTimedSoft,
+    padding: spacing.lg,
+    ...shadow.sm,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyExtraBold,
+    fontSize: typography.eyebrow,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#15803d",
+    letterSpacing: letterSpacing.wider,
+    color: colors.taskTimed,
   },
   title: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0f172a",
+    fontFamily: fontFamily.displayBold,
+    marginTop: spacing.sm,
+    fontSize: typography.bodyLarge,
+    lineHeight: typography.bodyLarge * lineHeight.snug,
+    color: colors.text,
   },
   body: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#1e293b",
+    fontFamily: fontFamily.bodyRegular,
+    marginTop: spacing.sm,
+    fontSize: typography.body,
+    lineHeight: typography.body * lineHeight.normal,
+    color: colors.textMuted,
   },
   footer: {
-    marginTop: 10,
-    fontSize: 12,
-    color: "#166534",
+    fontFamily: fontFamily.bodyMedium,
+    marginTop: spacing.sm,
+    fontSize: typography.caption,
+    color: colors.taskTimed,
   },
 });

@@ -1,7 +1,18 @@
+import { ChevronLeft, ChevronRight, LogOut } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { CalendarMode } from "../../stores/calendar-store";
-import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
+import {
+  colors,
+  fontFamily,
+  letterSpacing,
+  lineHeight,
+  radius,
+  shadow,
+  spacing,
+  touchTarget,
+  typography,
+} from "../../theme/tokens";
 import {
   addMonthsToDayKey,
   addWeeksToDayKey,
@@ -69,9 +80,11 @@ export function DayHeader({
             void onSignOut();
           }}
         >
-          <Text style={styles.signOutLabel}>
-            {isSigningOut ? "Saindo..." : "Sair"}
-          </Text>
+          {isSigningOut ? (
+            <Text style={styles.signOutLabel}>Saindo…</Text>
+          ) : (
+            <LogOut color={colors.white} size={16} strokeWidth={2} />
+          )}
         </Pressable>
       </View>
 
@@ -89,14 +102,14 @@ export function DayHeader({
               onDateChange(addWeeksToDayKey(date, -1));
             }}
           >
-            <Text style={styles.iconButtonLabel}>{"<"}</Text>
+            <ChevronLeft color={colors.text} size={18} strokeWidth={2.5} />
           </Pressable>
 
           <Pressable
             accessibilityLabel={
               calendarMode === "month"
-                ? `Recolher calendario mensal de ${formatMonthYear(date)}`
-                : `Expandir calendario mensal de ${formatMonthYear(date)}`
+                ? `Recolher calendário mensal de ${formatMonthYear(date)}`
+                : `Expandir calendário mensal de ${formatMonthYear(date)}`
             }
             accessibilityRole="button"
             style={({ pressed }) => [
@@ -120,7 +133,7 @@ export function DayHeader({
           </Pressable>
 
           <Pressable
-            accessibilityLabel="Proxima semana"
+            accessibilityLabel="Próxima semana"
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.iconButton,
@@ -131,7 +144,7 @@ export function DayHeader({
               onDateChange(addWeeksToDayKey(date, 1));
             }}
           >
-            <Text style={styles.iconButtonLabel}>{">"}</Text>
+            <ChevronRight color={colors.text} size={18} strokeWidth={2.5} />
           </Pressable>
         </View>
 
@@ -182,7 +195,7 @@ export function DayHeader({
 
         <View style={styles.calendarFooter}>
           <Text style={styles.calendarHint}>
-            {date === clockDate ? "Voce esta em hoje" : "Dia selecionado fora de hoje"}
+            {date === clockDate ? "Você está em hoje" : "Dia selecionado fora de hoje"}
           </Text>
           <Pressable
             accessibilityLabel="Voltar para hoje"
@@ -213,7 +226,7 @@ export function DayHeader({
           <View style={styles.monthSheet} testID="day-calendar-month-sheet">
             <View style={styles.monthSheetHeader}>
               <Pressable
-                accessibilityLabel="Mes anterior"
+                accessibilityLabel="Mês anterior"
                 accessibilityRole="button"
                 style={({ pressed }) => [
                   styles.iconButton,
@@ -224,13 +237,13 @@ export function DayHeader({
                   onDateChange(addMonthsToDayKey(date, -1));
                 }}
               >
-                <Text style={styles.iconButtonLabel}>{"<"}</Text>
+                <ChevronLeft color={colors.text} size={18} strokeWidth={2.5} />
               </Pressable>
 
               <Text style={styles.monthSheetTitle}>{formatMonthYear(date)}</Text>
 
               <Pressable
-                accessibilityLabel="Proximo mes"
+                accessibilityLabel="Próximo mês"
                 accessibilityRole="button"
                 style={({ pressed }) => [
                   styles.iconButton,
@@ -241,7 +254,7 @@ export function DayHeader({
                   onDateChange(addMonthsToDayKey(date, 1));
                 }}
               >
-                <Text style={styles.iconButtonLabel}>{">"}</Text>
+                <ChevronRight color={colors.text} size={18} strokeWidth={2.5} />
               </Pressable>
             </View>
 
@@ -328,30 +341,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eyebrow: {
+    fontFamily: fontFamily.bodyExtraBold,
     fontSize: typography.eyebrow,
-    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: letterSpacing.widest,
     color: colors.primary,
   },
   title: {
+    fontFamily: fontFamily.displayBold,
     marginTop: spacing.xs,
     fontSize: typography.title,
-    fontWeight: "800",
+    lineHeight: typography.title * lineHeight.tight,
     color: colors.text,
   },
   subtitle: {
+    fontFamily: fontFamily.bodyRegular,
     marginTop: spacing.xs,
     fontSize: typography.caption,
     color: colors.textMuted,
   },
   signOutButton: {
+    minWidth: touchTarget.min,
     minHeight: touchTarget.min,
     borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.text,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
   },
   signOutButtonDisabled: {
     backgroundColor: colors.disabled,
@@ -360,8 +376,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryPressed,
   },
   signOutLabel: {
+    fontFamily: fontFamily.bodyBold,
     fontSize: typography.caption,
-    fontWeight: "800",
     color: colors.white,
   },
   calendarPanel: {
@@ -371,6 +387,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     padding: spacing.md,
     gap: spacing.md,
+    ...shadow.sm,
   },
   calendarToolbar: {
     flexDirection: "row",
@@ -387,11 +404,6 @@ const styles = StyleSheet.create({
   },
   iconButtonPressed: {
     backgroundColor: colors.surfacePressed,
-  },
-  iconButtonLabel: {
-    fontSize: typography.bodyLarge,
-    fontWeight: "800",
-    color: colors.text,
   },
   monthButton: {
     flex: 1,
@@ -412,8 +424,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfacePressed,
   },
   monthButtonLabel: {
+    fontFamily: fontFamily.bodyBold,
     fontSize: typography.body,
-    fontWeight: "800",
     color: colors.text,
   },
   monthButtonLabelActive: {
@@ -445,13 +457,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfacePressed,
   },
   weekDayName: {
+    fontFamily: fontFamily.bodyExtraBold,
     fontSize: typography.eyebrow,
-    fontWeight: "800",
     color: colors.textMuted,
   },
   weekDayNumber: {
+    fontFamily: fontFamily.displaySemiBold,
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
     color: colors.text,
   },
   weekDayTextSelected: {
@@ -464,6 +476,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   calendarHint: {
+    fontFamily: fontFamily.bodyRegular,
     flex: 1,
     fontSize: typography.caption,
     color: colors.textMuted,
@@ -483,8 +496,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryPressed,
   },
   todayButtonLabel: {
+    fontFamily: fontFamily.bodyBold,
     fontSize: typography.caption,
-    fontWeight: "800",
     color: colors.white,
   },
   todayButtonLabelDisabled: {
@@ -504,20 +517,20 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   monthSheetTitle: {
+    fontFamily: fontFamily.bodyBold,
     flex: 1,
     textAlign: "center",
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
     color: colors.text,
   },
   monthWeekHeader: {
     flexDirection: "row",
   },
   monthWeekLabel: {
+    fontFamily: fontFamily.bodyExtraBold,
     flex: 1,
     textAlign: "center",
     fontSize: typography.caption,
-    fontWeight: "800",
     color: colors.textSubtle,
   },
   monthGrid: {
@@ -549,8 +562,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfacePressed,
   },
   monthDayLabel: {
+    fontFamily: fontFamily.bodyBold,
     fontSize: typography.body,
-    fontWeight: "800",
     color: colors.text,
   },
   monthDayLabelOutside: {
@@ -570,8 +583,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryPressed,
   },
   closeMonthLabel: {
+    fontFamily: fontFamily.bodyBold,
     fontSize: typography.body,
-    fontWeight: "800",
     color: colors.white,
   },
 });

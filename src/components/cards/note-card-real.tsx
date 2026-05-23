@@ -1,6 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, radius, spacing, typography } from "../../theme/tokens";
+import {
+  colors,
+  fontFamily,
+  letterSpacing,
+  lineHeight,
+  radius,
+  shadow,
+  spacing,
+  typography,
+} from "../../theme/tokens";
 import type { Note } from "../../types/note";
 
 interface NoteCardRealProps {
@@ -17,7 +26,9 @@ export function NoteCardReal({ note, directEchoCount = 0 }: NoteCardRealProps) {
       <Text style={styles.title}>{note.title}</Text>
       {directEchoCount > 0 ? (
         <View style={styles.echoBadge} testID={`note-echo-badge-${note.id}`}>
-          <Text style={styles.echoBadgeText}>Ecos {directEchoCount}</Text>
+          <Text style={styles.echoBadgeText}>
+            {directEchoCount === 1 ? "1 eco" : `${directEchoCount} ecos`}
+          </Text>
         </View>
       ) : null}
       {previewText ? (
@@ -32,23 +43,25 @@ export function NoteCardReal({ note, directEchoCount = 0 }: NoteCardRealProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.lg,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: colors.noteSoft,
+    borderColor: colors.noteBorder,
     backgroundColor: colors.noteSoft,
     padding: spacing.lg,
+    ...shadow.sm,
   },
   eyebrow: {
-    fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyExtraBold,
+    fontSize: typography.eyebrow,
     textTransform: "uppercase",
-    letterSpacing: 0,
+    letterSpacing: letterSpacing.wider,
     color: colors.note,
   },
   title: {
+    fontFamily: fontFamily.displayBold,
     marginTop: spacing.sm,
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    lineHeight: typography.bodyLarge * lineHeight.snug,
     color: colors.text,
   },
   echoBadge: {
@@ -57,22 +70,24 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.xxs,
   },
   echoBadgeText: {
+    fontFamily: fontFamily.bodySemiBold,
     fontSize: typography.caption,
-    fontWeight: "800",
     color: colors.note,
   },
   preview: {
+    fontFamily: fontFamily.bodyRegular,
     marginTop: spacing.sm,
     fontSize: typography.body,
-    lineHeight: 20,
+    lineHeight: typography.body * lineHeight.normal,
     color: colors.textMuted,
   },
   footer: {
+    fontFamily: fontFamily.bodyMedium,
     marginTop: spacing.sm,
     fontSize: typography.caption,
-    color: colors.textMuted,
+    color: colors.note,
   },
 });

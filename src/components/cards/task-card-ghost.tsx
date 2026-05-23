@@ -1,5 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  colors,
+  fontFamily,
+  letterSpacing,
+  lineHeight,
+  radius,
+  spacing,
+  typography,
+} from "../../theme/tokens";
 import type { Task } from "../../types/task";
 import { extractTimePart, formatDisplayDay } from "../../utils/date";
 
@@ -14,12 +23,12 @@ export function TaskCardGhost({ task }: TaskCardGhostProps) {
 
   return (
     <View style={styles.card} testID={`task-card-ghost-${task.id}`}>
-      <Text style={styles.eyebrow}>Ghost card</Text>
+      <Text style={styles.eyebrow}>Projetada</Text>
       <Text style={styles.title}>{task.title}</Text>
       {task.content ? <Text style={styles.body}>{task.content}</Text> : null}
       <Text style={styles.footer}>
-        Vai para {formatDisplayDay(task.target_day)}
-        {scheduledTime ? ` as ${scheduledTime}` : ""}
+        → {formatDisplayDay(task.target_day)}
+        {scheduledTime ? ` às ${scheduledTime}` : ""}
       </Text>
     </View>
   );
@@ -27,35 +36,38 @@ export function TaskCardGhost({ task }: TaskCardGhostProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    borderRadius: radius.xl,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: "#f59e0b",
-    backgroundColor: "#fff7ed",
-    padding: 16,
+    borderColor: colors.taskGhostBorder,
+    backgroundColor: colors.taskGhostSoft,
+    padding: spacing.lg,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyExtraBold,
+    fontSize: typography.eyebrow,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#c2410c",
+    letterSpacing: letterSpacing.wider,
+    color: colors.taskGhost,
   },
   title: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#7c2d12",
+    fontFamily: fontFamily.displayBold,
+    marginTop: spacing.sm,
+    fontSize: typography.bodyLarge,
+    lineHeight: typography.bodyLarge * lineHeight.snug,
+    color: colors.taskGhost,
   },
   body: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#9a3412",
+    fontFamily: fontFamily.bodyRegular,
+    marginTop: spacing.sm,
+    fontSize: typography.body,
+    lineHeight: typography.body * lineHeight.normal,
+    color: colors.taskGhost,
   },
   footer: {
-    marginTop: 10,
-    fontSize: 12,
-    color: "#b45309",
+    fontFamily: fontFamily.bodyMedium,
+    marginTop: spacing.sm,
+    fontSize: typography.caption,
+    color: colors.taskGhost,
   },
 });

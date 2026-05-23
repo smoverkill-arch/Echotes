@@ -1,7 +1,16 @@
 import { Clock3, ListTodo, StickyNote } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
+import {
+  colors,
+  fontFamily,
+  letterSpacing,
+  radius,
+  shadow,
+  spacing,
+  touchTarget,
+  typography,
+} from "../../theme/tokens";
 import type { DayTab } from "../../types/timeline";
 
 interface DayBottomTabsProps {
@@ -10,9 +19,9 @@ interface DayBottomTabsProps {
 }
 
 const TAB_ITEMS = [
-  { id: "timeline", label: "TIME LINE", Icon: Clock3 },
-  { id: "tasks", label: "TAREFAS", Icon: ListTodo },
-  { id: "notes", label: "NOTAS", Icon: StickyNote },
+  { id: "timeline", label: "Timeline", Icon: Clock3 },
+  { id: "tasks", label: "Tarefas", Icon: ListTodo },
+  { id: "notes", label: "Notas", Icon: StickyNote },
 ] as const;
 
 export function DayBottomTabs({ activeTab, onTabChange }: DayBottomTabsProps) {
@@ -39,8 +48,8 @@ export function DayBottomTabs({ activeTab, onTabChange }: DayBottomTabsProps) {
           >
             <Icon
               color={isSelected ? colors.primary : colors.textMuted}
-              size={20}
-              strokeWidth={2.4}
+              size={18}
+              strokeWidth={isSelected ? 2.5 : 2}
             />
             <Text style={[styles.label, isSelected ? styles.labelSelected : null]}>
               {label}
@@ -62,6 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: spacing.xs,
     gap: spacing.xs,
+    ...shadow.sm,
   },
   tab: {
     flex: 1,
@@ -78,11 +88,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfacePressed,
   },
   label: {
+    fontFamily: fontFamily.bodyBold,
     fontSize: typography.eyebrow,
-    fontWeight: "800",
+    letterSpacing: letterSpacing.normal,
     color: colors.textMuted,
   },
   labelSelected: {
+    fontFamily: fontFamily.bodyExtraBold,
     color: colors.primary,
   },
 });

@@ -7,7 +7,75 @@ versioned releases when they start to exist.
 
 ## [Unreleased]
 
+### Added — Frente A: Design System Foundation (UI/UX Upgrade)
+
+- **`src/theme/tokens.ts`**: expansão completa do sistema de design tokens.
+  Adicionados `colorsDark` (paleta dark mode Editorial Orgânica completa),
+  `fontFamily` (Lora serif + Inter sans-serif), `shadow` (sm/md/lg),
+  `lineHeight`, `letterSpacing`, `radius.xl/xxl`, `spacing.xxxl` e tokens
+  semânticos faltantes: `noteBorder`, `taskBorder`, `taskTimed*`, `taskGhost*`,
+  `dangerBorder`, `overlay`.
+
+- **`app/_layout.tsx`**: carregamento de fontes customizadas via `useFonts`.
+  Fontes registradas: `Lora_600SemiBold`, `Lora_700Bold`, `Inter_400Regular`,
+  `Inter_500Medium`, `Inter_600SemiBold`, `Inter_700Bold`, `Inter_800ExtraBold`.
+  `SplashScreen.preventAutoHideAsync()` mantém splash visível até fontes prontas.
+
+- **`package.json`**: dependências adicionadas — `expo-font ~14.0.0`,
+  `expo-splash-screen ~0.29.0`, `@expo-google-fonts/lora ^0.3.0`,
+  `@expo-google-fonts/inter ^0.3.0`. Executar `corepack pnpm install`.
+
+### Changed — Frente A: Design System Foundation (UI/UX Upgrade)
+
+- **`src/components/cards/task-card-real.tsx`**: migrado de hardcodes para
+  tokens (`colors.taskBorder`, `colors.taskSoft`, `fontFamily`, `shadow.sm`,
+  `radius.xl`, `lineHeight`, `letterSpacing`). Copy corrigido: "Sem horário
+  agendado".
+
+- **`src/components/cards/task-card-timed.tsx`**: migrado para tokens
+  `taskTimedBorder`, `taskTimedSoft`, `taskTimed`. Copy corrigido: "Horário:
+  HH:MM".
+
+- **`src/components/cards/task-card-ghost.tsx`**: migrado para tokens
+  `taskGhostBorder`, `taskGhostSoft`, `taskGhost`. Eyebrow corrigido de **"Ghost
+  card"** para **"Projetada"** (terminologia interna removida). Footer com "→"
+  e acentuação correta.
+
+- **`src/components/cards/note-card-real.tsx`**: aplicados `fontFamily`,
+  `shadow.sm`, `radius.xl`, `noteBorder`, `lineHeight`, `letterSpacing`.
+  Badge de eco com copy condicional singular/plural.
+
+- **`src/components/timeline/timeline-item-wrapper.tsx`**: axis dot migrado
+  de cor fixa `#94a3b8` para cor semântica por tipo de nó (`colors.note`,
+  `colors.task`, `colors.taskTimed`, `colors.taskGhost`). Padding do eixo e
+  `borderRadius` via tokens.
+
+- **`src/components/timeline/timeline-view.tsx`**: todos os hardcodes de cor
+  nos estados loading/error/empty e no axis rail migrados para tokens. Tipografia
+  com `fontFamily` e `lineHeight`. Copy dos empty states reescrito.
+
+- **`src/components/day/day-header.tsx`**: ícones `ChevronLeft`/`ChevronRight`
+  do Lucide substituem os caracteres `"<"` e `">"`. Botão sign-out recebe ícone
+  `LogOut` em lugar de texto. Tipografia completa com `fontFamily` (Lora no
+  título do dia, Inter nas labels). Textos com acentuação correta.
+
+- **`src/components/day/day-bottom-tabs.tsx`**: label "TIME LINE" corrigido
+  para "Timeline". Ícones com `strokeWidth` dinâmico por estado ativo. Sombra
+  `shadow.sm`. `fontFamily` com variação regular/extraBold por estado.
+
+- **`src/components/day/breadcrumb-bar.tsx`**: migrado inteiramente para tokens.
+  Estilo harmonizado com nota (usa `noteSoft`/`noteBorder`). Botão de retorno
+  com `fontFamily.bodyBold`.
+
+- **`src/components/timeline/timeline-plus-button.tsx`**: FAB com ícone `<Plus
+  />` do Lucide substituindo o caractere `"+"`. Sheet redesenhada com ícones
+  `StickyNote`/`CheckSquare` por opção, botão `<X />` de fechar no header,
+  `shadow.md` no FAB, `borderRadius` `radius.xxl` no topo do sheet, overlay
+  via `colors.overlay`.
+
 ### Fixed
+
+
 
 - **`delete-note-echo.ts`**: lógica de falso positivo `already_removed` quando
   `echoId` não pertencia ao par `noteIdA/noteIdB`; adicionada verificação

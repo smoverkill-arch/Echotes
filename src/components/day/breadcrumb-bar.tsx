@@ -1,4 +1,15 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import {
+  colors,
+  fontFamily,
+  letterSpacing,
+  lineHeight,
+  radius,
+  spacing,
+  touchTarget,
+  typography,
+} from "../../theme/tokens";
 import { formatDisplayDay } from "../../utils/date";
 
 interface BreadcrumbBarProps {
@@ -32,7 +43,7 @@ export function BreadcrumbBar({
         testID="breadcrumb-return-button"
         onPress={onReturn}
       >
-        <Text style={styles.buttonLabel}>Voltar para {formattedSourceDate}</Text>
+        <Text style={styles.buttonLabel}>← {formattedSourceDate}</Text>
       </Pressable>
     </View>
   );
@@ -43,48 +54,50 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 16,
-    borderRadius: 18,
+    gap: spacing.lg,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: "#dbeafe",
-    backgroundColor: "#eff6ff",
-    padding: 16,
+    borderColor: colors.noteBorder,
+    backgroundColor: colors.noteSoft,
+    padding: spacing.lg,
   },
   copyBlock: {
     flex: 1,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyExtraBold,
+    fontSize: typography.eyebrow,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#1d4ed8",
+    letterSpacing: letterSpacing.wider,
+    color: colors.note,
   },
   title: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
+    fontFamily: fontFamily.displaySemiBold,
+    marginTop: spacing.sm,
+    fontSize: typography.bodyLarge,
+    lineHeight: typography.bodyLarge * lineHeight.snug,
+    color: colors.text,
   },
   body: {
-    marginTop: 6,
-    fontSize: 14,
-    color: "#475569",
+    fontFamily: fontFamily.bodyRegular,
+    marginTop: spacing.xs,
+    fontSize: typography.caption,
+    color: colors.textMuted,
   },
   button: {
-    minHeight: 44,
-    borderRadius: 12,
+    minHeight: touchTarget.min,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#111827",
-    paddingHorizontal: 16,
+    backgroundColor: colors.text,
+    paddingHorizontal: spacing.lg,
   },
   buttonPressed: {
-    opacity: 0.92,
+    opacity: 0.88,
   },
   buttonLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#ffffff",
+    fontFamily: fontFamily.bodyBold,
+    fontSize: typography.caption,
+    color: colors.white,
   },
 });

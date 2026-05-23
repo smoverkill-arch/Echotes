@@ -8,6 +8,14 @@ import {
   View,
 } from "react-native";
 
+import {
+  colors,
+  fontFamily,
+  lineHeight,
+  radius,
+  spacing,
+  typography,
+} from "../../theme/tokens";
 import type { Note } from "../../types/note";
 import type { Task } from "../../types/task";
 import type { DayTab, TimelineItemKind, TimelineNode } from "../../types/timeline";
@@ -32,24 +40,24 @@ const feedbackCopyByTab: Record<DayTab, TimelineFeedbackCopy> = {
     loadingTitle: "Carregando o dia...",
     loadingLabel: "Carregando a timeline do dia.",
     errorTitle: "Falha ao carregar a timeline",
-    emptyTitle: "Nada registrado neste dia ainda.",
+    emptyTitle: "Hoje ainda em branco.",
     emptyBody:
-      "Use o botao + para criar uma nota, uma tarefa deste dia ou uma tarefa projetada para outro dia.",
+      "Use o + para criar uma nota, uma tarefa deste dia ou projetar uma tarefa para outro dia.",
   },
   tasks: {
     loadingTitle: "Carregando as tarefas...",
     loadingLabel: "Carregando as tarefas do dia.",
     errorTitle: "Falha ao carregar as tarefas",
-    emptyTitle: "Nenhuma tarefa neste recorte ainda.",
+    emptyTitle: "Nenhuma tarefa neste recorte.",
     emptyBody:
-      "Use o botao + para criar uma tarefa deste dia ou uma tarefa projetada para outro dia.",
+      "Use o + para criar uma tarefa deste dia ou projetar uma para outro dia.",
   },
   notes: {
     loadingTitle: "Carregando as notas...",
     loadingLabel: "Carregando as notas do dia.",
     errorTitle: "Falha ao carregar as notas",
-    emptyTitle: "Nenhuma nota neste recorte ainda.",
-    emptyBody: "Use o botao + para criar uma nota deste dia.",
+    emptyTitle: "Nenhuma nota neste recorte.",
+    emptyBody: "Use o + para registrar uma ideia ou pensamento do dia.",
   },
 };
 
@@ -194,7 +202,7 @@ export function TimelineView({
             style={styles.loadingCard}
             testID="timeline-loading-state"
           >
-            <ActivityIndicator color="#475569" size="small" />
+            <ActivityIndicator color={colors.textMuted} size="small" />
             <Text style={styles.loadingTitle}>{copy.loadingTitle}</Text>
           </View>
         ) : null}
@@ -307,38 +315,39 @@ const styles = StyleSheet.create({
   loadingCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    borderRadius: 16,
+    gap: spacing.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#dbe4ee",
-    backgroundColor: "#ffffff",
-    padding: 16,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
   },
   loadingTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#334155",
+    fontFamily: fontFamily.bodyMedium,
+    fontSize: typography.body,
+    color: colors.textMuted,
   },
   feedbackCard: {
-    borderRadius: 16,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#fecaca",
-    backgroundColor: "#fef2f2",
-    padding: 16,
+    borderColor: colors.dangerBorder,
+    backgroundColor: colors.dangerSoft,
+    padding: spacing.lg,
   },
   feedbackTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#991b1b",
+    fontFamily: fontFamily.bodyBold,
+    fontSize: typography.body,
+    color: colors.danger,
   },
   feedbackBody: {
-    marginTop: 6,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#7f1d1d",
+    fontFamily: fontFamily.bodyRegular,
+    marginTop: spacing.xs,
+    fontSize: typography.body,
+    lineHeight: typography.body * lineHeight.normal,
+    color: colors.danger,
   },
   scrollContent: {
-    gap: 12,
+    gap: spacing.md,
     paddingBottom: 96,
   },
   scrollView: {
@@ -346,10 +355,10 @@ const styles = StyleSheet.create({
   },
   timelineFrame: {
     position: "relative",
-    gap: 10,
+    gap: spacing.sm,
   },
   linearList: {
-    gap: 12,
+    gap: spacing.md,
   },
   listCardButton: {
     width: "100%",
@@ -364,24 +373,25 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -1,
     width: 2,
-    backgroundColor: "#cbd5e1",
+    backgroundColor: colors.border,
   },
   emptyState: {
-    borderRadius: 16,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#ffffff",
-    padding: 18,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
   },
   emptyTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
+    fontFamily: fontFamily.displaySemiBold,
+    fontSize: typography.bodyLarge,
+    color: colors.text,
   },
   emptyBody: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#4b5563",
+    fontFamily: fontFamily.bodyRegular,
+    marginTop: spacing.sm,
+    fontSize: typography.body,
+    lineHeight: typography.body * lineHeight.normal,
+    color: colors.textMuted,
   },
 });

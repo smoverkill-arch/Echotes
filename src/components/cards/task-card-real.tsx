@@ -1,5 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  colors,
+  fontFamily,
+  letterSpacing,
+  lineHeight,
+  radius,
+  shadow,
+  spacing,
+  typography,
+} from "../../theme/tokens";
 import type { Task } from "../../types/task";
 
 interface TaskCardRealProps {
@@ -12,41 +22,45 @@ export function TaskCardReal({ task }: TaskCardRealProps) {
       <Text style={styles.eyebrow}>Tarefa</Text>
       <Text style={styles.title}>{task.title}</Text>
       {task.content ? <Text style={styles.body}>{task.content}</Text> : null}
-      <Text style={styles.footer}>Sem horario agendado</Text>
+      <Text style={styles.footer}>Sem horário agendado</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: "#fde68a",
-    backgroundColor: "#fffbeb",
-    padding: 16,
+    borderColor: colors.taskBorder,
+    backgroundColor: colors.taskSoft,
+    padding: spacing.lg,
+    ...shadow.sm,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyExtraBold,
+    fontSize: typography.eyebrow,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#b45309",
+    letterSpacing: letterSpacing.wider,
+    color: colors.task,
   },
   title: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0f172a",
+    fontFamily: fontFamily.displayBold,
+    marginTop: spacing.sm,
+    fontSize: typography.bodyLarge,
+    lineHeight: typography.bodyLarge * lineHeight.snug,
+    color: colors.text,
   },
   body: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#1e293b",
+    fontFamily: fontFamily.bodyRegular,
+    marginTop: spacing.sm,
+    fontSize: typography.body,
+    lineHeight: typography.body * lineHeight.normal,
+    color: colors.textMuted,
   },
   footer: {
-    marginTop: 10,
-    fontSize: 12,
-    color: "#92400e",
+    fontFamily: fontFamily.bodyMedium,
+    marginTop: spacing.sm,
+    fontSize: typography.caption,
+    color: colors.task,
   },
 });
