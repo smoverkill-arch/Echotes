@@ -9,8 +9,8 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }} />
+      <StatusBar style="dark" translucent backgroundColor="transparent" />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { flex: 1 } }} />
     </SafeAreaProvider>
   );
 }
