@@ -33,6 +33,16 @@ versioned releases when they start to exist.
 
 ### Fixed
 
+- **Android dev build**: configurado pnpm com `node-linker=isolated`,
+  `public-hoist-pattern[]=*`, `virtual-store-dir=.p` e
+  `virtual-store-dir-max-length=40` para encurtar caminhos fisicos de modulos
+  nativos no Windows e evitar falha de CMake/Ninja em `app:assembleDebug`.
+- **Android local run**: `pnpm run android` agora exporta o SDK definido em
+  `android/local.properties` antes de chamar o Expo, garantindo que `adb` seja
+  encontrado quando o SDK nao esta no caminho padrao do Windows.
+- **Android dev runtime**: alinhadas as versões nativas esperadas pelo Expo SDK
+  54 (`expo`, `expo-linking`, `expo-system-ui`, `react-native-pager-view` e
+  `react-native-svg`) para evitar `NoClassDefFoundError` ao abrir a dev build.
 - **`delete-note-echo.ts`**: lógica de falso positivo `already_removed` quando
   `echoId` não pertencia ao par `noteIdA/noteIdB`; adicionada verificação
   secundária por ID antes de concluir sucesso (Copilot review finding)

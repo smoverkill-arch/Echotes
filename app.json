@@ -16,7 +16,8 @@
     },
     "android": {
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.aramak7773.echotes"
     },
     "web": {
       "bundler": "metro",
