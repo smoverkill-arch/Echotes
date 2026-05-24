@@ -138,10 +138,10 @@ const renderReadyDayRoute = async () => {
   render(<ProtectedDayRoute />);
   await flushMicrotasks();
 
-  expect(screen.getByTestId("day-tab-timeline")).toBeTruthy();
+  expect(screen.getByTestId("day-tab-tasks")).toBeTruthy();
   expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
 
-  const plusButton = screen.getByTestId("timeline-plus-button");
+  const plusButton = screen.getByTestId("day-fab-button");
   const isDisabled =
     plusButton.props.disabled ?? plusButton.props.accessibilityState?.disabled ?? false;
 
@@ -200,7 +200,7 @@ beforeEach(() => {
     clockDate: "2026-04-18",
   });
   useUIStore.setState({
-    activeTab: "timeline",
+    activeTab: "tasks",
     readerState: { kind: null, id: null, isOpen: false },
     editorState: { mode: null, kind: null, id: null, isOpen: false },
   });
@@ -225,22 +225,22 @@ describe("US2 same-day day surface", () => {
   it("mantem o botao + fechado por padrao, abre o bottom sheet e fecha ao cancelar", async () => {
     await renderReadyDayRoute();
 
-    expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
-    expect(screen.queryByTestId("timeline-create-note-button")).toBeNull();
+    expect(screen.queryByTestId("day-fab-sheet")).toBeNull();
+    expect(screen.queryByTestId("fab-create-note-button")).toBeNull();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
 
-    expect(await screen.findByTestId("timeline-plus-sheet")).toBeTruthy();
-    expect(screen.getByTestId("timeline-plus-cancel-button")).toBeTruthy();
+    expect(await screen.findByTestId("day-fab-sheet")).toBeTruthy();
+    expect(screen.getByTestId("fab-cancel-button")).toBeTruthy();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-cancel-button"));
+      fireEvent.press(screen.getByTestId("fab-cancel-button"));
     });
 
     await waitFor(() => {
-      expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
+      expect(screen.queryByTestId("day-fab-sheet")).toBeNull();
     });
   });
 
@@ -248,12 +248,12 @@ describe("US2 same-day day surface", () => {
     await renderReadyDayRoute();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-note-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-note-button"));
 
     await waitFor(() => {
-      expect(screen.queryByTestId("timeline-plus-sheet")).toBeNull();
+      expect(screen.queryByTestId("day-fab-sheet")).toBeNull();
     });
     expect(await screen.findByTestId("note-editor-submit-button")).toBeTruthy();
   });
@@ -268,9 +268,9 @@ describe("US2 same-day day surface", () => {
     expect(screen.getByText("18-04-2026")).toBeTruthy();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-note-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-note-button"));
 
     fireEvent.changeText(
       await screen.findByTestId("note-editor-title-input"),
@@ -294,9 +294,9 @@ describe("US2 same-day day surface", () => {
     fireEvent.press(screen.getByTestId("note-reader-close-button"));
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-task-button"));
 
     fireEvent.changeText(
       await screen.findByTestId("task-editor-title-input"),
@@ -313,9 +313,9 @@ describe("US2 same-day day surface", () => {
     expect(screen.getByTestId("task-card-real-20000000-0000-4000-8000-000000000001")).toBeTruthy();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-task-button"));
 
     fireEvent.changeText(
       await screen.findByTestId("task-editor-title-input"),
@@ -367,9 +367,9 @@ describe("US2 same-day day surface", () => {
     await renderReadyDayRoute();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-task-button"));
 
     expect(screen.getByPlaceholderText("DD-MM-AAAA")).toBeTruthy();
     expect(await screen.findByDisplayValue("18-04-2026")).toBeTruthy();
@@ -401,9 +401,9 @@ describe("US2 same-day day surface", () => {
     await renderReadyDayRoute();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-task-button"));
 
     fireEvent.changeText(
       await screen.findByTestId("task-editor-title-input"),
@@ -425,9 +425,9 @@ describe("US2 same-day day surface", () => {
     );
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-task-button"));
 
     fireEvent.changeText(
       await screen.findByTestId("task-editor-title-input"),
@@ -449,9 +449,9 @@ describe("US2 same-day day surface", () => {
     await renderReadyDayRoute();
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-note-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-note-button"));
 
     fireEvent.changeText(
       await screen.findByTestId("note-editor-title-input"),
@@ -470,9 +470,9 @@ describe("US2 same-day day surface", () => {
     fireEvent.press(screen.getByTestId("note-reader-close-button"));
 
     await act(async () => {
-      fireEvent.press(screen.getByTestId("timeline-plus-button"));
+      fireEvent.press(screen.getByTestId("day-fab-button"));
     });
-    fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+    fireEvent.press(await screen.findByTestId("fab-create-task-button"));
 
     fireEvent.changeText(
       await screen.findByTestId("task-editor-title-input"),

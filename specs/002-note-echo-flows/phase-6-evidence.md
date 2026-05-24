@@ -128,7 +128,7 @@ Exit code: 0.
 Result:
 
 ```text
-PASS — All 176 checks passed
+PASS — All 178 checks passed
 Badge: CDD_Guard-172/177_passed
 ```
 

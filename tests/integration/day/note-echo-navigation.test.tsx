@@ -124,7 +124,7 @@ const renderReadyDayRoute = async () => {
   render(<ProtectedDayRoute />);
   await flushMicrotasks();
 
-  expect(screen.getByTestId("day-tab-timeline")).toBeTruthy();
+  expect(screen.getByTestId("day-tab-tasks")).toBeTruthy();
   expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
 };
 
@@ -154,7 +154,7 @@ beforeEach(() => {
     pendingReaderOpen: null,
   });
   useUIStore.setState({
-    activeTab: "timeline",
+    activeTab: "tasks",
     readerState: { kind: null, id: null, isOpen: false },
     editorState: { mode: null, kind: null, id: null, isOpen: false },
   });

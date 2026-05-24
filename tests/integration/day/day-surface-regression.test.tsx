@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { cleanup, render, screen, waitFor } from "@testing-library/react-native";
 
 import ProtectedDayRoute from "../../../app/day/[date]";
 import { useAuthStore } from "../../../src/stores/auth-store";
@@ -157,7 +157,7 @@ beforeEach(() => {
     temporalNavigationContext: null,
   });
   useUIStore.setState({
-    activeTab: "timeline",
+    activeTab: "tasks",
     readerState: { kind: null, id: null, isOpen: false },
     editorState: { mode: null, kind: null, id: null, isOpen: false },
   });
@@ -174,11 +174,11 @@ describe("day surface regressions", () => {
   it("mantem estado vazio alinhado com US3 no dia protegido", async () => {
     render(<ProtectedDayRoute />);
 
-    expect(await screen.findByTestId("day-tab-timeline")).toBeTruthy();
-    expect(await screen.findByText("Nada registrado neste dia ainda.")).toBeTruthy();
+    expect(await screen.findByTestId("day-tab-tasks")).toBeTruthy();
+    expect(await screen.findByText("Nenhuma tarefa neste dia ainda.")).toBeTruthy();
     expect(
       screen.getByText(
-        "Use o botao + para criar uma nota, uma tarefa deste dia ou uma tarefa projetada para outro dia.",
+        "Use o botao + para criar uma tarefa deste dia ou projetada para outro dia.",
       ),
     ).toBeTruthy();
     expect(screen.queryByTestId("redirect-target")).toBeNull();
@@ -202,10 +202,8 @@ describe("day surface regressions", () => {
 
     render(<ProtectedDayRoute />);
 
-    expect(await screen.findByText("Falha ao carregar a timeline")).toBeTruthy();
-    expect(
-      screen.getByText("Nao foi possivel carregar o dia. Falha simulada"),
-    ).toBeTruthy();
+    expect(await screen.findByText("Falha ao carregar as tarefas")).toBeTruthy();
+    expect(screen.getAllByText("Nao foi possivel carregar o dia. Falha simulada").length).toBeGreaterThan(0);
     expect(screen.queryByText("Nota que nao deve aparecer")).toBeNull();
   });
 
@@ -262,7 +260,7 @@ describe("day surface regressions", () => {
     render(<ProtectedDayRoute />);
 
     expect(screen.getByText("/sign-in")).toBeTruthy();
-    expect(screen.queryByTestId("day-tab-timeline")).toBeNull();
+    expect(screen.queryByTestId("day-tab-tasks")).toBeNull();
 
     await waitFor(() => {
       expect(screen.getByTestId("redirect-target")).toBeTruthy();
@@ -280,7 +278,7 @@ describe("day surface regressions", () => {
     expect(screen.queryByText("31-02-2026")).toBeNull();
   });
 
-  it("renderiza listas filtradas em largura util sem eixo central fora da aba timeline", async () => {
+  it("renderiza paginas de timeline filtradas por tipo com cards em largura total", async () => {
     mockNotesTable.push({
       id: "30000000-0000-4000-8000-000000000001",
       user_id: authenticatedSession.userId,
@@ -313,25 +311,19 @@ describe("day surface regressions", () => {
 
     render(<ProtectedDayRoute />);
 
-    expect(await screen.findByTestId("timeline-axis-rail")).toBeTruthy();
-
-    fireEvent.press(screen.getByTestId("day-tab-tasks"));
-
-    expect(await screen.findByTestId("tasks-list-view")).toBeTruthy();
-    expect(screen.queryByTestId("timeline-axis-rail")).toBeNull();
+    // Task timeline page: same-day timed task produces both timed card and creation marker
+    expect(await screen.findByTestId("task-timeline-page")).toBeTruthy();
     expect(
       screen.getByTestId("task-card-timed-20000000-0000-4000-8000-000000000002"),
     ).toBeTruthy();
     expect(
-      screen.queryByTestId(
+      screen.getByTestId(
         "task-creation-marker-20000000-0000-4000-8000-000000000002",
       ),
-    ).toBeNull();
+    ).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId("day-tab-notes"));
-
-    expect(await screen.findByTestId("notes-list-view")).toBeTruthy();
-    expect(screen.queryByTestId("timeline-axis-rail")).toBeNull();
+    // Note timeline page: note present (both pages always rendered by PagerView mock)
+    expect(await screen.findByTestId("note-timeline-page")).toBeTruthy();
     expect(
       screen.getByTestId("note-card-real-30000000-0000-4000-8000-000000000001"),
     ).toBeTruthy();

@@ -52,7 +52,9 @@ jest.mock("../../../src/features/day/hooks/use-day-timeline", () => ({
     notes: [],
     tasks: [],
     echoes: [],
-    timelineNodes: [],
+    taskLookup: new Map(),
+    taskNodes: [],
+    noteNodes: [],
     isLoading: false,
     errorMessage: null,
     reload: jest.fn(async () => undefined),
@@ -154,7 +156,7 @@ describe("US1 auth session flow", () => {
     render(<ProtectedDayRoute />);
 
     expect(screen.getByText("/sign-in")).toBeTruthy();
-    expect(screen.queryByTestId("day-tab-timeline")).toBeNull();
+    expect(screen.queryByTestId("day-tab-tasks")).toBeNull();
   });
 
   // @req FR-006
@@ -169,7 +171,7 @@ describe("US1 auth session flow", () => {
     expect(screen.getByText("Echotes")).toBeTruthy();
     expect(screen.getByTestId("day-calendar-month-toggle")).toBeTruthy();
     expect(screen.getByTestId("day-calendar-week-day-2026-04-18")).toBeTruthy();
-    expect(screen.getByTestId("day-tab-timeline")).toBeTruthy();
+    expect(screen.getByTestId("day-tab-tasks")).toBeTruthy();
     expect(screen.getByText("18-04-2026")).toBeTruthy();
     expect(screen.getByText("pessoa@echotes.app")).toBeTruthy();
     expect(screen.queryByText("/sign-in")).toBeNull();

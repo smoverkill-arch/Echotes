@@ -4,12 +4,21 @@ import { DayBottomTabs } from "../../../src/components/day/day-bottom-tabs";
 
 describe("DayBottomTabs", () => {
   // @req 003-mobile-day-shell-ux:FR-008
-  it("mantem tabs como lentes do dia selecionado na bottom bar", () => {
+  it("marca a tab ativa corretamente e dispara onTabChange ao pressionar", () => {
     const onTabChange = jest.fn();
+    const onCreateNote = jest.fn();
+    const onCreateTask = jest.fn();
 
-    render(<DayBottomTabs activeTab="timeline" onTabChange={onTabChange} />);
+    render(
+      <DayBottomTabs
+        activeTab="tasks"
+        onTabChange={onTabChange}
+        onCreateNote={onCreateNote}
+        onCreateTask={onCreateTask}
+      />,
+    );
 
-    expect(screen.getByTestId("day-tab-timeline").props.accessibilityState).toEqual({
+    expect(screen.getByTestId("day-tab-tasks").props.accessibilityState).toEqual({
       selected: true,
     });
 

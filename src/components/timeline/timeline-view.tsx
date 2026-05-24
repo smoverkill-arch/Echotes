@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -17,7 +17,6 @@ import { TaskCardReal } from "../cards/task-card-real";
 import { TaskCardTimed } from "../cards/task-card-timed";
 import { TaskCreationMarker } from "../cards/task-creation-marker";
 import { TimelineItemWrapper } from "./timeline-item-wrapper";
-import { TimelinePlusButton } from "./timeline-plus-button";
 
 interface TimelineFeedbackCopy {
   loadingTitle: string;
@@ -58,14 +57,11 @@ interface TimelineViewProps {
   nodes: TimelineNode[];
   isLoading: boolean;
   errorMessage: string | null;
-  onCreateNote: () => void;
-  onCreateTask: () => void;
   onOpenReader: (kind: TimelineItemKind, id: string) => void;
   onOpenEditor: (kind: TimelineItemKind, id: string) => void;
   onNavigateToTask: (task: Task) => void;
   onScrollInteractionStart?: () => void;
   onScrollInteractionEnd?: () => void;
-  isChromeVisible?: boolean;
   contentTopInset?: number;
 }
 
@@ -74,21 +70,17 @@ export function TimelineView({
   nodes,
   isLoading,
   errorMessage,
-  onCreateNote,
-  onCreateTask,
   onOpenReader,
   onOpenEditor,
   onNavigateToTask,
   onScrollInteractionStart,
   onScrollInteractionEnd,
-  isChromeVisible = true,
   contentTopInset = 0,
 }: TimelineViewProps) {
   const pendingPressRef = useRef<{
     id: string;
     timeoutId: ReturnType<typeof setTimeout>;
   } | null>(null);
-  const [isPlusSheetOpen, setIsPlusSheetOpen] = useState(false);
   const copy = feedbackCopyByTab[activeTab];
   const isTimelineTab = activeTab === "timeline";
 
@@ -97,12 +89,6 @@ export function TimelineView({
       clearPendingPress();
     };
   }, []);
-
-  useEffect(() => {
-    if (isLoading) {
-      setIsPlusSheetOpen(false);
-    }
-  }, [isLoading]);
 
   const clearPendingPress = () => {
     if (!pendingPressRef.current) {
@@ -170,16 +156,6 @@ export function TimelineView({
     }
 
     return null;
-  };
-
-  const handleOpenNoteEditor = () => {
-    setIsPlusSheetOpen(false);
-    onCreateNote();
-  };
-
-  const handleOpenTaskEditor = () => {
-    setIsPlusSheetOpen(false);
-    onCreateTask();
   };
 
   return (
@@ -278,19 +254,6 @@ export function TimelineView({
           </ScrollView>
         ) : null}
 
-        <TimelinePlusButton
-          isSheetOpen={isPlusSheetOpen}
-          onOpenSheet={() => {
-            setIsPlusSheetOpen(true);
-          }}
-          onCloseSheet={() => {
-            setIsPlusSheetOpen(false);
-          }}
-          onCreateNote={handleOpenNoteEditor}
-          onCreateTask={handleOpenTaskEditor}
-          isDisabled={isLoading}
-          isChromeVisible={isChromeVisible}
-        />
       </View>
     </View>
   );

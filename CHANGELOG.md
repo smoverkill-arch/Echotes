@@ -7,6 +7,30 @@ versioned releases when they start to exist.
 
 ## [Unreleased]
 
+### Added (004-dual-timeline-nav)
+
+- **Dual-timeline navigation**: a superfície do dia agora entrega duas páginas
+  separadas por tipo — Task Timeline (eixo à esquerda, tarefas) e Note Timeline
+  (eixo à direita, notas) — com swipe horizontal via `react-native-pager-view`
+  (ViewPager2 equivalente).
+- **`TimelinePageItem`** e **`TimelinePageView`**: novos componentes de
+  renderização para páginas de timeline de tipo único; cards com `flex: 1`
+  (largura total real) sem coluna central.
+- **`DayBottomTabs` redesenhado**: layout de três colunas `[Tarefas] [FAB] [Notas]`;
+  FAB central de 56 × 56 px com `elevation: 6` perfurando a borda da bar; ícone
+  ativo reflete a página visível; FAB sempre abre sheet de escolha (nota ou tarefa);
+  após criação o app muda para a página do tipo criado quando o usuário está em
+  outra página.
+- **SafeArea integrado**: `useSafeAreaInsets` em `DayShell` elimina a
+  "moldura invisível" que impedia aproveitamento do espaço de tela.
+- **`useDayTimeline`** retorna `taskNodes` e `noteNodes` separados; o
+  parâmetro `activeTab` foi removido.
+- **Auto-switch de página**: após criação de nota enquanto na página de tarefas
+  (e vice-versa), o PagerView navega automaticamente para a página do item criado.
+- Mocks de teste adicionados: `__mocks__/react-native-pager-view.js` (renders
+  all pages simultaneously) e `__mocks__/react-native-safe-area-context.js`
+  (zero insets); ambos registrados em `jest.config.js`.
+
 ### Fixed
 
 - **`delete-note-echo.ts`**: lógica de falso positivo `already_removed` quando

@@ -122,11 +122,12 @@ export default function ProtectedDayRoute() {
     notes,
     echoes,
     taskLookup,
-    timelineNodes,
+    taskNodes,
+    noteNodes,
     isLoading: isTimelineLoading,
     errorMessage: timelineErrorMessage,
     reload,
-  } = useDayTimeline(resolvedDate, activeTab);
+  } = useDayTimeline(resolvedDate);
   const handleDateChange = useCallback(
     (nextDate: string) => {
       if (nextDate === resolvedDate) {
@@ -490,7 +491,8 @@ export default function ProtectedDayRoute() {
       calendarMode={calendarMode}
       readerState={readerState}
       editorState={editorState}
-      timelineNodes={timelineNodes}
+      taskNodes={taskNodes}
+      noteNodes={noteNodes}
       isTimelineLoading={isTimelineLoading}
       timelineErrorMessage={timelineErrorMessage}
       temporalNavigationContext={destinationTemporalContext}
@@ -583,9 +585,18 @@ export default function ProtectedDayRoute() {
       onCloseReader={closeReader}
       onCloseEditor={closeEditor}
       onSaved={async (options?: DayShellSavedOptions) => {
+        // Capture before closeEditor clears the state
+        const createdKind = editorState.kind;
         await reload();
         closeEditor();
         closeReader();
+
+        // Auto-switch to the page matching the created item type
+        if (createdKind === "note" && activeTab !== "notes") {
+          setActiveTab("notes");
+        } else if (createdKind === "task" && activeTab !== "tasks") {
+          setActiveTab("tasks");
+        }
 
         if (options?.echoFeedbackMessage) {
           setEchoFeedbackMessage(options.echoFeedbackMessage);

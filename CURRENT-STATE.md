@@ -30,6 +30,21 @@ Entregue pela feature:
 - remocao confirmada de eco selecionado
 - continuacao atomica por RPC `continue_note`
 
+## Delivered Feature 004
+
+`004-dual-timeline-nav` divide a superfície diária em duas páginas de timeline
+por tipo, com navegação horizontal por swipe.
+
+Entregue pela feature:
+
+- Task Timeline: eixo à esquerda, cards de tarefa em largura total
+- Note Timeline: eixo à direita, cards de nota em largura total
+- Navegação por swipe horizontal (`react-native-pager-view`) e bottom bar
+- FAB central Material 3 (56 px, elevation 6) perfurando a borda da bar
+- FAB sempre abre sheet de escolha; auto-switch de página após criação
+- `useSafeAreaInsets` integrado — elimina a "moldura invisível" de tela
+- `useDayTimeline` retorna `taskNodes` e `noteNodes` separados
+
 ## Canon Status
 
 Os seis canones executaveis vivem em `docs-canonical/`. A raiz guarda

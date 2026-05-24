@@ -243,15 +243,15 @@ const renderReadyDayRoute = async () => {
   render(<ProtectedDayRoute />);
   await flushMicrotasks();
 
-  expect(screen.getByTestId("day-tab-timeline")).toBeTruthy();
+  expect(screen.getByTestId("day-tab-tasks")).toBeTruthy();
   expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
 };
 
 const createProjectedTaskFromOrigin = async () => {
   await act(async () => {
-    fireEvent.press(screen.getByTestId("timeline-plus-button"));
+    fireEvent.press(screen.getByTestId("day-fab-button"));
   });
-  fireEvent.press(await screen.findByTestId("timeline-create-task-button"));
+  fireEvent.press(await screen.findByTestId("fab-create-task-button"));
 
   fireEvent.changeText(
     await screen.findByTestId("task-editor-title-input"),
@@ -307,7 +307,7 @@ beforeEach(() => {
     temporalNavigationContext: null,
   });
   useUIStore.setState({
-    activeTab: "timeline",
+    activeTab: "tasks",
     readerState: { kind: null, id: null, isOpen: false },
     editorState: { mode: null, kind: null, id: null, isOpen: false },
   });
@@ -336,7 +336,7 @@ describe("US3 ghost navigation", () => {
     expect(screen.getByTestId("timeline-axis-rail")).toBeTruthy();
     expect(
       screen.getByTestId(
-        "timeline-item-wrapper-right-30000000-0000-4000-8000-000000000001:note",
+        "timeline-page-item-right-30000000-0000-4000-8000-000000000001:note",
       ),
     ).toBeTruthy();
   });
@@ -360,12 +360,12 @@ describe("US3 ghost navigation", () => {
     ).toBeNull();
     expect(
       screen.getByTestId(
-        "timeline-item-wrapper-right-30000000-0000-4000-8000-000000000001:note",
+        "timeline-page-item-right-30000000-0000-4000-8000-000000000001:note",
       ),
     ).toBeTruthy();
     expect(
       screen.getByTestId(
-        "timeline-item-wrapper-left-20000000-0000-4000-8000-000000000001:task_ghost",
+        "timeline-page-item-left-20000000-0000-4000-8000-000000000001:task_ghost",
       ),
     ).toBeTruthy();
 

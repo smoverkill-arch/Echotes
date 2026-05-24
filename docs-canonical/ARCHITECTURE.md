@@ -17,7 +17,10 @@ O repo tambem guarda regressao automatizada.
 ## Product Truths
 
 - O dia e a unidade principal do produto.
-- A timeline mistura notas e tarefas em um eixo temporal unico.
+- Cada dia expoe duas paginas de timeline separadas por tipo: Task Timeline
+  (tarefas, eixo a esquerda) e Note Timeline (notas, eixo a direita).
+- As duas paginas sao navegaveis por swipe horizontal (react-native-pager-view)
+  e pela bottom bar; o icone ativo reflete a pagina visivel.
 - `created_at` define a posicao intradiaria base.
 - `scheduled_at` cria um segundo ponto real para tarefas com horario.
 - Tarefas usam projecao temporal.
@@ -31,7 +34,9 @@ O repo tambem guarda regressao automatizada.
 - `src/components/day/day-shell.tsx` compoe a superficie diaria.
 - `src/components/day/day-bottom-tabs.tsx` mantem as lentes do dia na bottom
   bar persistente.
-- `src/components/timeline/*` renderiza eixo, wrappers e acao principal.
+- `src/components/timeline/*` renderiza eixo, wrappers de pagina e acao
+  principal. `TimelinePageView` e `TimelinePageItem` encapsulam o layout
+  de tipo unico (eixo esquerdo ou direito, card full-width).
 - `src/components/cards/*` renderiza cards reais, marker e ghost.
 - `src/components/reader/*` abre overlays de leitura.
   O Reader de nota organiza acao primaria, acoes secundarias e acao destrutiva
