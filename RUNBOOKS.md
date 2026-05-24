@@ -115,6 +115,64 @@ If Supabase fails to bind a local port, keep the dedicated range in
 the default `54320..54329` range unless the Windows/Docker port reservation has
 been verified clear.
 
+## Build Android Dev Client (Local — sem EAS)
+
+### Pré-requisitos
+
+- JDK 17 instalado (Microsoft OpenJDK 17 confirmado nesta máquina)
+- Android SDK em `C:\Users\smove\AppData\Local\Android\Sdk`
+  (build-tools 34–36, platforms android-34–36)
+- Windows Long Paths habilitado:
+  ```powershell
+  # PowerShell como Administrador — já executado
+  reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+  ```
+  Requer reinicialização do Windows para ter efeito.
+
+### Estado atual do repo (branch `004-dual-timeline-nav`)
+
+- `expo-dev-client@6.0.21` instalado
+- `eas.json` criado com perfil `development` (APK, internal)
+- `android/` gerado via `expo prebuild --platform android --clean`
+- `android/local.properties` criado apontando para o SDK local
+
+O build local falhou antes do long paths ser ativado por limite de caminho do
+CMake/Ninja (250 chars max para object files). O path do pnpm store com hash
+longo (`expo-modules-core@3.0.29_re_608eee6e418ac022011475ab34711ee7`) excedia
+o limite. Long Paths resolve isso.
+
+### Rodar o build após reiniciar
+
+```powershell
+cd E:\PROJETOS-SMCR\Echotes\android
+./gradlew assembleDebug
+```
+
+APK gerado em:
+```
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Instalar no device
+
+```powershell
+adb install E:/PROJETOS-SMCR/Echotes/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Iniciar Metro e conectar
+
+```powershell
+corepack pnpm expo start --dev-client
+```
+
+Abrir o app **Echotes** no device (não o Expo Go). Ele se conecta ao Metro na
+mesma rede Wi-Fi. Shake abre o developer menu.
+
+### Se o build falhar mesmo com Long Paths
+
+Alternativa sem cloud: mover o projeto para um caminho mais curto (ex: `E:\ec`)
+e repetir o `expo prebuild --platform android --clean` + `gradlew assembleDebug`.
+
 ## Apply Windows Firewall Containment
 
 1. open PowerShell as Administrator
