@@ -6,8 +6,10 @@ import { AuthErrorBanner } from "../../src/components/auth/auth-error-banner";
 import { AuthForm } from "../../src/components/auth/auth-form";
 import { signIn } from "../../src/features/auth/api/sign-in";
 import { useAuthSession } from "../../src/features/auth/hooks/use-auth-session";
+import { useAppearancePalette } from "../../src/stores/appearance-store";
 
 export default function SignInRoute() {
+  const palette = useAppearancePalette();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -25,15 +27,17 @@ export default function SignInRoute() {
 
   if (isBootstrapping) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color="#111827" />
-        <Text style={styles.loadingText}>Restaurando sua sessao...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: palette.background }]}>
+        <ActivityIndicator size="small" color={palette.textMuted} />
+        <Text style={[styles.loadingText, { color: palette.textMuted }]}>
+          Restaurando sua sessao...
+        </Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: palette.background }]}>
       <AuthErrorBanner message={errorMessage} status={authStatus} />
 
       <AuthForm
@@ -63,18 +67,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
-    backgroundColor: "#f7f8fb",
   },
   loadingContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    backgroundColor: "#f7f8fb",
   },
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: "#4b5563",
   },
 });

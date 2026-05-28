@@ -1,5 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  densityMetrics,
+  useAppearancePalette,
+  useAppearanceStore,
+} from "../../stores/appearance-store";
+import { radius, spacing, typography } from "../../theme/tokens";
 import type { Task } from "../../types/task";
 
 interface TaskCreationMarkerProps {
@@ -9,34 +15,46 @@ interface TaskCreationMarkerProps {
 export function TaskCreationMarker({
   task,
 }: TaskCreationMarkerProps) {
+  const palette = useAppearancePalette();
+  const density = useAppearanceStore((state) => state.density);
+  const metrics = densityMetrics[density];
+
   return (
-    <View style={styles.marker} testID={`task-creation-marker-${task.id}`}>
-      <Text style={styles.label}>Criacao da tarefa</Text>
-      <Text style={styles.title}>{task.title}</Text>
+    <View
+      style={[
+        styles.marker,
+        {
+          borderColor: palette.ghostBorder,
+          backgroundColor: palette.taskSoft,
+          paddingVertical: metrics.cardPaddingVertical,
+          paddingHorizontal: metrics.cardPaddingHorizontal,
+        },
+      ]}
+      testID={`task-creation-marker-${task.id}`}
+    >
+      <Text style={[styles.label, { color: palette.task }]}>Criacao da tarefa</Text>
+      <Text style={[styles.title, { color: palette.textMuted }]}>
+        {task.title}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   marker: {
-    borderRadius: 16,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: "#f59e0b",
-    backgroundColor: "#fff7ed",
-    padding: 14,
   },
   label: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#c2410c",
+    letterSpacing: 1.4,
   },
   title: {
-    marginTop: 6,
+    marginTop: spacing.xs,
     fontSize: 15,
     fontWeight: "600",
-    color: "#7c2d12",
   },
 });

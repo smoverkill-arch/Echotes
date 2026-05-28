@@ -1,52 +1,78 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import {
+  densityMetrics,
+  useAppearancePalette,
+  useAppearanceStore,
+} from "../../stores/appearance-store";
 import type { Task } from "../../types/task";
+import { radius, spacing, typography } from "../../theme/tokens";
 
 interface TaskCardRealProps {
   task: Task;
 }
 
 export function TaskCardReal({ task }: TaskCardRealProps) {
+  const palette = useAppearancePalette();
+  const density = useAppearanceStore((state) => state.density);
+  const metrics = densityMetrics[density];
+
   return (
-    <View style={styles.card} testID={`task-card-real-${task.id}`}>
-      <Text style={styles.eyebrow}>Tarefa</Text>
-      <Text style={styles.title}>{task.title}</Text>
-      {task.content ? <Text style={styles.body}>{task.content}</Text> : null}
-      <Text style={styles.footer}>Sem horario agendado</Text>
+    <View
+      style={[
+        styles.card,
+        {
+          borderColor: palette.border,
+          borderLeftColor: palette.task,
+          backgroundColor: palette.surface,
+          paddingVertical: metrics.cardPaddingVertical,
+          paddingHorizontal: metrics.cardPaddingHorizontal,
+          shadowColor: palette.shadowColor,
+        },
+      ]}
+      testID={`task-card-real-${task.id}`}
+    >
+      <Text style={[styles.eyebrow, { color: palette.task }]}>Tarefa</Text>
+      <Text style={[styles.title, { color: palette.text, fontSize: metrics.taskTitleSize }]}>
+        {task.title}
+      </Text>
+      {task.content && metrics.showPreview ? (
+        <Text
+          numberOfLines={2}
+          style={[
+            styles.body,
+            { color: palette.textMuted, lineHeight: metrics.previewLineHeight },
+          ]}
+        >
+          {task.content}
+        </Text>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: "#fde68a",
-    backgroundColor: "#fffbeb",
-    padding: 16,
+    borderLeftWidth: 3,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#b45309",
+    letterSpacing: 1.4,
   },
   title: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0f172a",
+    marginTop: spacing.xs,
+    fontWeight: "800",
   },
   body: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#1e293b",
-  },
-  footer: {
-    marginTop: 10,
-    fontSize: 12,
-    color: "#92400e",
+    marginTop: spacing.xs,
+    fontSize: 13,
   },
 });

@@ -9,6 +9,14 @@ versioned releases when they start to exist.
 
 ### Added (004-dual-timeline-nav)
 
+- **Design v2 aplicado à superfície mobile**: linguagem dark-first com
+  superfícies charcoal, acentos configuráveis, sombras duras, cards com borda
+  lateral, calendário/header compacto e bottom bar/FAB alinhados ao handoff.
+- **Ajustes reais de aparência**: novo `appearanceStore` persistido em
+  AsyncStorage para modo claro/escuro, cor de destaque (`green`, `slate`,
+  `amber`) e densidade (`compact`, `normal`, `airy`).
+- **`SettingsSheet`**: sheet de Ajustes plugado no header do dia, com controles
+  funcionais e testes unitários para confirmar persistência local das escolhas.
 - **Dual-timeline navigation**: a superfície do dia agora entrega duas páginas
   separadas por tipo — Task Timeline (eixo à esquerda, tarefas) e Note Timeline
   (eixo à direita, notas) — com swipe horizontal via `react-native-pager-view`

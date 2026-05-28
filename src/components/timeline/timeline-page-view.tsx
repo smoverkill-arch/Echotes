@@ -11,6 +11,11 @@ import type { Task } from "../../types/task";
 import type { Note } from "../../types/note";
 import type { TimelineItemKind, TimelineNode } from "../../types/timeline";
 import { colors, radius, spacing, typography } from "../../theme/tokens";
+import {
+  densityMetrics,
+  useAppearancePalette,
+  useAppearanceStore,
+} from "../../stores/appearance-store";
 import { NoteCardReal } from "../cards/note-card-real";
 import { TaskCardGhost } from "../cards/task-card-ghost";
 import { TaskCardReal } from "../cards/task-card-real";
@@ -72,6 +77,9 @@ export function TimelinePageView({
   contentTopInset = 0,
   testID,
 }: TimelinePageViewProps) {
+  const palette = useAppearancePalette();
+  const density = useAppearanceStore((state) => state.density);
+  const metrics = densityMetrics[density];
   const pendingPressRef = useRef<{
     id: string;
     timeoutId: ReturnType<typeof setTimeout>;
@@ -130,10 +138,15 @@ export function TimelinePageView({
           accessibilityLabel={feedback.loadingLabel}
           accessibilityLiveRegion="polite"
           accessibilityState={{ busy: true }}
-          style={styles.feedbackCard}
+          style={[
+            styles.feedbackCard,
+            { borderColor: palette.border, backgroundColor: palette.surface },
+          ]}
         >
-          <ActivityIndicator color={colors.textMuted} size="small" />
-          <Text style={styles.feedbackTitle}>{feedback.loadingTitle}</Text>
+          <ActivityIndicator color={palette.textMuted} size="small" />
+          <Text style={[styles.feedbackTitle, { color: palette.text }]}>
+            {feedback.loadingTitle}
+          </Text>
         </View>
       </View>
     );
@@ -147,10 +160,18 @@ export function TimelinePageView({
           accessibilityLabel={`${feedback.errorTitle}. ${errorMessage}`}
           accessibilityLiveRegion="assertive"
           accessibilityRole="alert"
-          style={[styles.feedbackCard, styles.errorCard]}
+          style={[
+            styles.feedbackCard,
+            styles.errorCard,
+            { borderColor: palette.dangerSoft, backgroundColor: palette.dangerSoft },
+          ]}
         >
-          <Text style={[styles.feedbackTitle, styles.errorTitle]}>{feedback.errorTitle}</Text>
-          <Text style={styles.errorBody}>{errorMessage}</Text>
+          <Text style={[styles.feedbackTitle, { color: palette.danger }]}>
+            {feedback.errorTitle}
+          </Text>
+          <Text style={[styles.errorBody, { color: palette.danger }]}>
+            {errorMessage}
+          </Text>
         </View>
       </View>
     );
@@ -174,17 +195,25 @@ export function TimelinePageView({
         <View
           accessible
           accessibilityLabel={`${feedback.emptyTitle}. ${feedback.emptyBody}`}
-          style={styles.emptyState}
+          style={[
+            styles.emptyState,
+            { borderColor: palette.border, backgroundColor: palette.surfaceMuted },
+          ]}
         >
-          <Text style={styles.emptyTitle}>{feedback.emptyTitle}</Text>
-          <Text style={styles.emptyBody}>{feedback.emptyBody}</Text>
+          <Text style={[styles.emptyTitle, { color: palette.text }]}>
+            {feedback.emptyTitle}
+          </Text>
+          <Text style={[styles.emptyBody, { color: palette.textMuted }]}>
+            {feedback.emptyBody}
+          </Text>
         </View>
       ) : (
-        <View style={styles.timelineFrame}>
+        <View style={[styles.timelineFrame, { gap: metrics.timelineGap }]}>
           <View
             style={[
               styles.axisRail,
               axisPosition === "left" ? styles.axisRailLeft : styles.axisRailRight,
+              { backgroundColor: palette.border },
             ]}
             testID="timeline-axis-rail"
           />

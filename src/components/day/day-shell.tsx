@@ -29,6 +29,8 @@ import { colors, spacing } from "../../theme/tokens";
 import { BreadcrumbBar } from "./breadcrumb-bar";
 import { DayHeader } from "./day-header";
 import { DayBottomTabs } from "./day-bottom-tabs";
+import { SettingsSheet } from "./settings-sheet";
+import { useAppearancePalette } from "../../stores/appearance-store";
 import { TaskEditor } from "../forms/task-editor";
 import { NoteEditor } from "../forms/note-editor";
 import { ContinueNoteEditor } from "../forms/continue-note-editor";
@@ -149,8 +151,10 @@ export function DayShell({
   const insets = useSafeAreaInsets();
   const pagerRef = useRef<PagerView>(null);
   const chromeVisibility = useSharedValue(1);
+  const palette = useAppearancePalette();
   const [isChromeVisible, setIsChromeVisible] = useState(true);
   const [chromeHeight, setChromeHeight] = useState(0);
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
 
   // Sync pager position when tab changes via tap (not swipe)
   useEffect(() => {
@@ -193,7 +197,11 @@ export function DayShell({
     <View
       style={[
         styles.container,
-        { paddingTop: insets.top, paddingBottom: insets.bottom },
+        {
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+          backgroundColor: palette.background,
+        },
       ]}
     >
       <AuthErrorBanner status={authStatus} message={authErrorMessage} />
@@ -216,6 +224,7 @@ export function DayShell({
           onDateChange={onDateChange}
           onCalendarModeChange={onCalendarModeChange}
           onSignOut={onSignOut}
+          onSettings={() => setIsSettingsVisible(true)}
         />
 
         {temporalNavigationContext ? (
@@ -360,6 +369,11 @@ export function DayShell({
         onSaved={async () => {
           await onSaved();
         }}
+      />
+
+      <SettingsSheet
+        visible={isSettingsVisible}
+        onClose={() => setIsSettingsVisible(false)}
       />
     </View>
   );

@@ -45,6 +45,19 @@ Entregue pela feature:
 - `useSafeAreaInsets` integrado — elimina a "moldura invisível" de tela
 - `useDayTimeline` retorna `taskNodes` e `noteNodes` separados
 
+## Delivered UI Appearance
+
+O design v2 do handoff foi absorvido como linguagem visual mobile dark-first,
+mantendo as funcionalidades existentes plugadas aos mesmos fluxos.
+
+Entregue:
+
+- tema local claro/escuro
+- cor de destaque local (`green`, `slate`, `amber`)
+- densidade da timeline (`compact`, `normal`, `airy`)
+- preferencias persistidas em AsyncStorage
+- cards, calendario, bottom bar, FAB, breadcrumb e Ajustes alinhados ao v2
+
 ## Canon Status
 
 Os seis canones executaveis vivem em `docs-canonical/`. A raiz guarda
@@ -64,6 +77,7 @@ Hoje:
 - bootstrap do cliente Supabase existe em `src/lib/supabase.ts`
 - migration base existe em `supabase/migrations/001_auth_day_surface.sql`
 - testes cobrem auth, same-day, projected flow, timeline e regresses chave
+- testes cobrem Ajustes locais de aparencia
 
 ## Deferred Areas
 

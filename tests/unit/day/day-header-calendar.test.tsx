@@ -11,6 +11,7 @@ const baseProps = {
   onDateChange: jest.fn(),
   onCalendarModeChange: jest.fn(),
   onSignOut: jest.fn(),
+  onSettings: jest.fn(),
 };
 
 describe("DayHeader calendar shell", () => {

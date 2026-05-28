@@ -1,23 +1,26 @@
 export const colors = {
-  background: "#f4f6f2",
-  surface: "#ffffff",
-  surfaceMuted: "#eef3ef",
-  surfacePressed: "#e5ece7",
-  border: "#d7ded8",
-  borderStrong: "#9aa89f",
-  text: "#17211b",
-  textMuted: "#5b665f",
-  textSubtle: "#7a8580",
-  primary: "#0f6b55",
-  primaryPressed: "#0b5846",
-  primarySoft: "#dff1eb",
-  note: "#1d5f8f",
-  noteSoft: "#e4f0fb",
-  task: "#94620f",
-  taskSoft: "#fff3d6",
-  danger: "#b42318",
-  dangerSoft: "#fee4e2",
-  disabled: "#a8b0aa",
+  background: "#161c19",
+  surface: "#1e2722",
+  surfaceMuted: "#252f2a",
+  surfacePressed: "#2d3b34",
+  border: "#2e3d36",
+  borderStrong: "#3e5448",
+  text: "#deeae0",
+  textMuted: "#7a9285",
+  textSubtle: "#4e6459",
+  primary: "#d9a432",
+  primaryPressed: "#c0901e",
+  primarySoft: "#332808",
+  primaryText: "#1a1000",
+  note: "#5ab4e0",
+  noteSoft: "#0b2535",
+  task: "#d9a432",
+  taskSoft: "#332808",
+  ghostBorder: "rgba(180,148,80,0.38)",
+  shadowColor: "rgba(0,0,0,0.55)",
+  danger: "#f47171",
+  dangerSoft: "#381010",
+  disabled: "#4e6459",
   white: "#ffffff",
 } as const;
 
@@ -32,18 +35,18 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 6,
-  md: 8,
-  lg: 12,
+  sm: 4,
+  md: 6,
+  lg: 14,
   pill: 999,
 } as const;
 
 export const typography = {
-  eyebrow: 11,
+  eyebrow: 10,
   caption: 12,
   body: 14,
   bodyLarge: 16,
-  title: 22,
+  title: 26,
 } as const;
 
 export const touchTarget = {

@@ -1,4 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useAppearancePalette } from "../../stores/appearance-store";
+import { radius, spacing, typography } from "../../theme/tokens";
 import { formatDisplayDay } from "../../utils/date";
 
 interface BreadcrumbBarProps {
@@ -12,27 +14,42 @@ export function BreadcrumbBar({
   destinationDate,
   onReturn,
 }: BreadcrumbBarProps) {
+  const palette = useAppearancePalette();
   const formattedSourceDate = formatDisplayDay(sourceDate);
   const formattedDestinationDate = formatDisplayDay(destinationDate);
 
   return (
-    <View style={styles.container} testID="breadcrumb-bar">
+    <View
+      style={[
+        styles.container,
+        { borderColor: palette.primary, backgroundColor: palette.primarySoft },
+      ]}
+      testID="breadcrumb-bar"
+    >
       <View style={styles.copyBlock}>
-        <Text style={styles.eyebrow}>Contexto temporal</Text>
-        <Text style={styles.title}>Item real em {formattedDestinationDate}</Text>
-        <Text style={styles.body}>Criada em {formattedSourceDate}</Text>
+        <Text style={[styles.eyebrow, { color: palette.primary }]}>
+          Contexto temporal
+        </Text>
+        <Text style={[styles.title, { color: palette.text }]}>
+          Item real em {formattedDestinationDate}
+        </Text>
+        <Text style={[styles.body, { color: palette.textMuted }]}>
+          Criada em {formattedSourceDate}
+        </Text>
       </View>
 
       <Pressable
         accessibilityRole="button"
         style={({ pressed }) => [
           styles.button,
-          pressed ? styles.buttonPressed : null,
+          { backgroundColor: pressed ? palette.primaryPressed : palette.primary },
         ]}
         testID="breadcrumb-return-button"
         onPress={onReturn}
       >
-        <Text style={styles.buttonLabel}>Voltar para {formattedSourceDate}</Text>
+        <Text style={[styles.buttonLabel, { color: palette.primaryText }]}>
+          Voltar para {formattedSourceDate}
+        </Text>
       </Pressable>
     </View>
   );
@@ -43,48 +60,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 16,
-    borderRadius: 18,
+    gap: spacing.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#dbeafe",
-    backgroundColor: "#eff6ff",
-    padding: 16,
+    padding: spacing.md,
   },
   copyBlock: {
     flex: 1,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#1d4ed8",
+    letterSpacing: 1.4,
   },
   title: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
+    marginTop: spacing.xs,
+    fontSize: typography.body,
+    fontWeight: "800",
   },
   body: {
-    marginTop: 6,
-    fontSize: 14,
-    color: "#475569",
+    marginTop: spacing.xxs,
+    fontSize: typography.caption,
   },
   button: {
     minHeight: 44,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#111827",
-    paddingHorizontal: 16,
-  },
-  buttonPressed: {
-    opacity: 0.92,
+    paddingHorizontal: spacing.md,
   },
   buttonLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#ffffff",
+    fontSize: typography.caption,
+    fontWeight: "800",
   },
 });

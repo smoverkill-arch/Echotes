@@ -99,12 +99,16 @@ O gate local usa estes comandos:
 - `.docguardignore` exclui artefatos locais gerados pelo DocGuard, como
   `commands/`, das metricas documentais.
 - `.agents/` guarda skills do projeto.
+- `.claude/` guarda configuracoes auxiliares de agentes Claude.
 - `.agent/` e `commands/` podem surgir por automacao.
+- `.remember/` guarda memoria/cache local de ferramentas.
+- `.pnpm-store/` guarda cache local do pnpm.
 - `.codex/` guarda artefatos locais auxiliares do Codex neste workspace, como
   skills ou caches de execucao gerados durante desenvolvimento assistido.
 - `.clinerules`, `.cursor/`, `.gemini/` e `.windsurfrules` registram regras
   para ferramentas auxiliares de desenvolvimento usadas esporadicamente.
 - `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` definem o bootstrap do app.
+- `eas.json` registra perfis de build EAS para uso futuro.
 - `eslint.config.js` e `jest.config.js` definem os gates tecnicos.
 - `.expo/` guarda estado local do Expo durante desenvolvimento.
 - `.expo-export-audit/` guarda artefatos locais de auditoria de export.

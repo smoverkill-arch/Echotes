@@ -10,6 +10,8 @@ import {
 } from "react-native";
 
 import { authCredentialsSchema } from "../../schemas/auth.schema";
+import { useAppearancePalette } from "../../stores/appearance-store";
+import { radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { AuthCredentials } from "../../types/auth";
 
 interface AuthFormProps {
@@ -48,6 +50,7 @@ export function AuthForm({
   onSubmit,
   onSecondaryAction,
 }: AuthFormProps) {
+  const palette = useAppearancePalette();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
@@ -78,20 +81,40 @@ export function AuthForm({
       behavior={Platform.select({ ios: "padding", default: undefined })}
       style={styles.wrapper}
     >
-      <View style={styles.card}>
-        <Text style={styles.eyebrow}>{copy.eyebrow}</Text>
-        <Text style={styles.title}>{copy.title}</Text>
-        <Text style={styles.subtitle}>{copy.subtitle}</Text>
+      <View
+        style={[
+          styles.card,
+          {
+            borderColor: palette.border,
+            backgroundColor: palette.surface,
+            shadowColor: palette.shadowColor,
+          },
+        ]}
+      >
+        <View style={[styles.logoMark, { backgroundColor: palette.primary }]}>
+          <Text style={[styles.logoLetter, { color: palette.primaryText }]}>E</Text>
+        </View>
+        <Text style={[styles.brand, { color: palette.text }]}>Echotes</Text>
+        <Text style={[styles.subtitle, { color: palette.textMuted }]}>
+          O teu dia, em foco.
+        </Text>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={[styles.label, { color: palette.primary }]}>Email</Text>
           <TextInput
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
             placeholder="voce@exemplo.com"
-            placeholderTextColor="#9ca3af"
-            style={styles.input}
+            placeholderTextColor={palette.textSubtle}
+            style={[
+              styles.input,
+              {
+                borderColor: palette.border,
+                backgroundColor: palette.surfaceMuted,
+                color: palette.text,
+              },
+            ]}
             testID="auth-email-input"
             value={email}
             onChangeText={setEmail}
@@ -99,14 +122,21 @@ export function AuthForm({
         </View>
 
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Senha</Text>
+          <Text style={[styles.label, { color: palette.primary }]}>Senha</Text>
           <TextInput
             autoCapitalize="none"
             autoComplete="password"
             placeholder="Sua senha"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={palette.textSubtle}
             secureTextEntry
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                borderColor: palette.border,
+                backgroundColor: palette.surfaceMuted,
+                color: palette.text,
+              },
+            ]}
             testID="auth-password-input"
             value={password}
             onChangeText={setPassword}
@@ -114,7 +144,9 @@ export function AuthForm({
         </View>
 
         {validationMessage ? (
-          <Text style={styles.validationMessage}>{validationMessage}</Text>
+          <Text style={[styles.validationMessage, { color: palette.danger }]}>
+            {validationMessage}
+          </Text>
         ) : null}
 
         <Pressable
@@ -122,28 +154,37 @@ export function AuthForm({
           disabled={isButtonDisabled}
           style={({ pressed }) => [
             styles.submitButton,
-            isButtonDisabled ? styles.submitButtonDisabled : null,
-            pressed && !isButtonDisabled ? styles.submitButtonPressed : null,
+            {
+              backgroundColor: isButtonDisabled
+                ? palette.disabled
+                : pressed
+                  ? palette.primaryPressed
+                  : palette.primary,
+            },
           ]}
           testID="auth-submit-button"
           onPress={() => {
             void handleSubmit();
           }}
         >
-          <Text style={styles.submitButtonLabel}>
+          <Text style={[styles.submitButtonLabel, { color: palette.primaryText }]}>
             {isSubmitting ? "Processando..." : copy.submitLabel}
           </Text>
         </Pressable>
 
         <View style={styles.secondaryRow}>
-          <Text style={styles.secondaryPrompt}>{copy.secondaryPrompt}</Text>
+          <Text style={[styles.secondaryPrompt, { color: palette.textMuted }]}>
+            {copy.secondaryPrompt}
+          </Text>
           <Pressable
             accessibilityRole="button"
             style={styles.secondaryButton}
             testID="auth-secondary-button"
             onPress={onSecondaryAction}
           >
-            <Text style={styles.secondaryButtonLabel}>{copy.secondaryLabel}</Text>
+            <Text style={[styles.secondaryButtonLabel, { color: palette.primary }]}>
+              {copy.secondaryLabel}
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -157,92 +198,85 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    borderRadius: 24,
-    backgroundColor: "#ffffff",
-    padding: 24,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-  },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    color: "#6b7280",
-  },
-  title: {
-    marginTop: 10,
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  subtitle: {
-    marginTop: 10,
-    fontSize: 15,
-    lineHeight: 22,
-    color: "#4b5563",
-  },
-  fieldGroup: {
-    marginTop: 18,
-  },
-  label: {
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  input: {
-    minHeight: 52,
     borderRadius: 14,
+    padding: spacing.xl,
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    backgroundColor: "#f9fafb",
-    paddingHorizontal: 14,
-    fontSize: 16,
-    color: "#111827",
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
   },
-  validationMessage: {
-    marginTop: 14,
-    fontSize: 14,
-    color: "#b91c1c",
-  },
-  submitButton: {
-    marginTop: 22,
-    minHeight: 52,
-    borderRadius: 14,
+  logoMark: {
+    alignSelf: "center",
+    width: 56,
+    height: 56,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#111827",
   },
-  submitButtonDisabled: {
-    backgroundColor: "#9ca3af",
+  logoLetter: {
+    fontSize: 28,
+    fontWeight: "800",
   },
-  submitButtonPressed: {
-    opacity: 0.92,
+  brand: {
+    marginTop: spacing.lg,
+    textAlign: "center",
+    fontSize: 38,
+    fontWeight: "800",
+  },
+  subtitle: {
+    marginTop: spacing.sm,
+    textAlign: "center",
+    fontSize: typography.body,
+  },
+  fieldGroup: {
+    marginTop: spacing.lg,
+  },
+  label: {
+    marginBottom: spacing.xs,
+    fontSize: typography.eyebrow,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+  input: {
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    fontSize: typography.body,
+  },
+  validationMessage: {
+    marginTop: spacing.md,
+    fontSize: typography.body,
+  },
+  submitButton: {
+    marginTop: spacing.xl,
+    minHeight: touchTarget.androidMin,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   submitButtonLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#ffffff",
+    fontSize: typography.body,
+    fontWeight: "800",
   },
   secondaryRow: {
-    marginTop: 18,
+    marginTop: spacing.lg,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
   secondaryPrompt: {
-    fontSize: 14,
-    color: "#4b5563",
+    fontSize: typography.body,
   },
   secondaryButton: {
     paddingVertical: 4,
     paddingHorizontal: 2,
   },
   secondaryButtonLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#111827",
+    fontSize: typography.body,
+    fontWeight: "800",
   },
 });

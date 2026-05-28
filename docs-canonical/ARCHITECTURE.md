@@ -128,6 +128,17 @@ O Editor opera em `create` e `edit`.
 `create` usa item novo.
 `edit` exige `id`.
 
+### `appearanceStore`
+
+- Guarda `mode` (`dark` ou `light`).
+- Guarda `accent` (`green`, `slate` ou `amber`).
+- Guarda `density` (`compact`, `normal` ou `airy`).
+- Persiste preferencias locais em AsyncStorage.
+- Nao participa de queries, dominio de tarefa/nota, auth, calendario,
+  navegacao temporal ou derivacao da timeline.
+- A densidade altera espacamento, tamanho visual e previews dos cards, mas nao
+  remove itens nem altera a orientacao renderizada.
+
 ## Data Strategy
 
 Para `selectedDate = D`, a tela carrega:
@@ -269,6 +280,8 @@ O baseline precisa destes estados:
 - tarefa agendada.
 - ghost card.
 - breadcrumb de retorno.
+- sheet de Ajustes com modo claro/escuro, cor de destaque e densidade da
+  timeline.
 
 ## Current Baseline Boundaries
 
@@ -280,6 +293,7 @@ Implementado hoje:
 - tarefa projected com ghost e breadcrumb.
 - leitura, criacao manual, remocao e navegacao contextual de ecos diretos.
 - continuacao atomica de nota por RPC `continue_note`.
+- ajustes locais de aparencia para modo, destaque e densidade.
 - regressao automatizada do corte.
 
 Canon absorvido para fases futuras:
@@ -291,8 +305,14 @@ Canon absorvido para fases futuras:
 
 - `.docguard.json` regula o enforcement documental.
 - `.agents/` guarda skills do projeto.
+- `.claude/` guarda configuracoes auxiliares de agentes Claude, sem substituir
+  `AGENTS.md` ou os canones executaveis.
 - `.agent/` e `commands/` podem surgir por automacao.
+- `.remember/` guarda memoria/cache local de ferramentas e nao participa do
+  runtime do app.
+- `.pnpm-store/` guarda cache local do pnpm para instalacao offline/isolada.
 - `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` sustentam runtime e build local.
+- `eas.json` sustenta perfis de build EAS quando o app sair do ciclo local.
 - `eslint.config.js` e `jest.config.js` sustentam os gates tecnicos.
 
 ## Diagrams
@@ -313,6 +333,8 @@ flowchart TD
 
 ## Revision History
 
+- 2026-05-27 - Design v2 aplicado como linguagem visual mobile dark-first e
+  `appearanceStore` registrado para Ajustes locais.
 - 2026-05-13 - Correcoes do smoke S21 em `003-mobile-day-shell-ux`: bottom bar,
   calendario mensal inline, chrome colapsavel, preview de notas e eco inicial
   na criacao de nota.

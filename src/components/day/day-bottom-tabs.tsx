@@ -3,6 +3,7 @@ import { ListTodo, Plus, StickyNote } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
+import { useAppearancePalette } from "../../stores/appearance-store";
 import type { DayTab } from "../../types/timeline";
 
 interface DayBottomTabsProps {
@@ -20,6 +21,7 @@ export function DayBottomTabs({
   onCreateNote,
   onCreateTask,
 }: DayBottomTabsProps) {
+  const palette = useAppearancePalette();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleCreateNote = () => {
@@ -37,70 +39,106 @@ export function DayBottomTabs({
       {isSheetOpen ? (
         <Pressable
           accessibilityLabel="Fechar menu de criação"
-          style={styles.sheetBackdrop}
+          style={[styles.sheetBackdrop, { backgroundColor: "rgba(10,15,12,0.6)" }]}
           onPress={() => setIsSheetOpen(false)}
         >
-          <View collapsable={false} style={styles.sheet} testID="day-fab-sheet">
-            <View style={styles.handle} />
-            <Text style={styles.sheetEyebrow}>Criar</Text>
-            <Text style={styles.sheetTitle}>Escolha uma ação</Text>
+          <View
+            collapsable={false}
+            style={[styles.sheet, { backgroundColor: palette.surface }]}
+            testID="day-fab-sheet"
+          >
+            <View style={[styles.handle, { backgroundColor: palette.borderStrong }]} />
+            <Text style={[styles.sheetTitle, { color: palette.text }]}>O que queres criar?</Text>
 
             <View style={styles.menu}>
               <Pressable
                 accessibilityLabel="Criar nota"
                 accessibilityRole="button"
-                style={({ pressed }) => [styles.option, styles.noteOption, pressed && styles.optionPressed]}
+                style={({ pressed }) => [
+                  styles.option,
+                  {
+                    borderColor: palette.note,
+                    backgroundColor: pressed ? palette.surfacePressed : palette.noteSoft,
+                  },
+                ]}
                 testID="fab-create-note-button"
                 onPress={handleCreateNote}
               >
-                <Text style={styles.optionLabel}>Criar nota</Text>
-                <Text style={styles.optionHint}>Registrar uma ideia deste dia.</Text>
+                <Text style={[styles.optionLabel, { color: palette.note }]}>Criar nota</Text>
+                <Text style={[styles.optionHint, { color: palette.textMuted }]}>
+                  Registrar uma ideia deste dia.
+                </Text>
               </Pressable>
 
               <Pressable
                 accessibilityLabel="Criar tarefa"
                 accessibilityRole="button"
-                style={({ pressed }) => [styles.option, styles.taskOption, pressed && styles.optionPressed]}
+                style={({ pressed }) => [
+                  styles.option,
+                  {
+                    borderColor: palette.task,
+                    backgroundColor: pressed ? palette.surfacePressed : palette.taskSoft,
+                  },
+                ]}
                 testID="fab-create-task-button"
                 onPress={handleCreateTask}
               >
-                <Text style={styles.optionLabel}>Criar tarefa</Text>
-                <Text style={styles.optionHint}>Projetar uma ação no tempo.</Text>
+                <Text style={[styles.optionLabel, { color: palette.task }]}>Criar tarefa</Text>
+                <Text style={[styles.optionHint, { color: palette.textMuted }]}>
+                  Projetar uma ação no tempo.
+                </Text>
               </Pressable>
             </View>
 
             <Pressable
               accessibilityLabel="Cancelar criação"
               accessibilityRole="button"
-              style={({ pressed }) => [styles.cancelButton, pressed && styles.optionPressed]}
+              style={({ pressed }) => [
+                styles.cancelButton,
+                {
+                  borderColor: palette.border,
+                  backgroundColor: pressed ? palette.surfacePressed : "transparent",
+                },
+              ]}
               testID="fab-cancel-button"
               onPress={() => setIsSheetOpen(false)}
             >
-              <Text style={styles.cancelLabel}>Cancelar</Text>
+              <Text style={[styles.cancelLabel, { color: palette.textMuted }]}>Cancelar</Text>
             </Pressable>
           </View>
         </Pressable>
       ) : null}
 
-      <View accessibilityRole="tablist" style={styles.bar}>
+      <View
+        accessibilityRole="tablist"
+        style={[
+          styles.bar,
+          { borderColor: palette.border, backgroundColor: palette.surface },
+        ]}
+      >
         <Pressable
           accessibilityLabel="Ver tarefas do dia"
           accessibilityRole="tab"
           accessibilityState={{ selected: activeTab === "tasks" }}
           style={({ pressed }) => [
             styles.tab,
-            activeTab === "tasks" && styles.tabSelected,
-            pressed && styles.tabPressed,
+            activeTab === "tasks" ? { backgroundColor: palette.surfaceMuted } : null,
+            pressed ? { backgroundColor: palette.surfacePressed } : null,
           ]}
           testID="day-tab-tasks"
           onPress={() => onTabChange("tasks")}
         >
           <ListTodo
-            color={activeTab === "tasks" ? colors.task : colors.textMuted}
+            color={activeTab === "tasks" ? palette.task : palette.textSubtle}
             size={20}
             strokeWidth={2.4}
           />
-          <Text style={[styles.label, activeTab === "tasks" && styles.labelTaskSelected]}>
+          <Text
+            style={[
+              styles.label,
+              { color: activeTab === "tasks" ? palette.task : palette.textSubtle },
+            ]}
+          >
             TAREFAS
           </Text>
         </Pressable>
@@ -114,13 +152,19 @@ export function DayBottomTabs({
             disabled={isDisabled}
             style={({ pressed }) => [
               styles.fab,
-              pressed && !isDisabled && styles.fabPressed,
-              isDisabled && styles.fabDisabled,
+              {
+                backgroundColor: isDisabled
+                  ? palette.disabled
+                  : pressed
+                    ? palette.primaryPressed
+                    : palette.primary,
+                shadowColor: palette.shadowColor,
+              },
             ]}
             testID="day-fab-button"
             onPress={() => setIsSheetOpen(true)}
           >
-            <Plus color={colors.white} size={26} strokeWidth={2.5} />
+            <Plus color={palette.primaryText} size={26} strokeWidth={2.5} />
           </Pressable>
         </View>
 
@@ -130,18 +174,23 @@ export function DayBottomTabs({
           accessibilityState={{ selected: activeTab === "notes" }}
           style={({ pressed }) => [
             styles.tab,
-            activeTab === "notes" && styles.tabSelected,
-            pressed && styles.tabPressed,
+            activeTab === "notes" ? { backgroundColor: palette.surfaceMuted } : null,
+            pressed ? { backgroundColor: palette.surfacePressed } : null,
           ]}
           testID="day-tab-notes"
           onPress={() => onTabChange("notes")}
         >
           <StickyNote
-            color={activeTab === "notes" ? colors.note : colors.textMuted}
+            color={activeTab === "notes" ? palette.note : palette.textSubtle}
             size={20}
             strokeWidth={2.4}
           />
-          <Text style={[styles.label, activeTab === "notes" && styles.labelNoteSelected]}>
+          <Text
+            style={[
+              styles.label,
+              { color: activeTab === "notes" ? palette.note : palette.textSubtle },
+            ]}
+          >
             NOTAS
           </Text>
         </Pressable>
@@ -159,10 +208,7 @@ const styles = StyleSheet.create({
   },
   bar: {
     height: 68,
-    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     overflow: "visible",
@@ -176,22 +222,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     marginHorizontal: spacing.xs,
   },
-  tabSelected: {
-    backgroundColor: colors.surfaceMuted,
-  },
-  tabPressed: {
-    backgroundColor: colors.surfacePressed,
-  },
   label: {
     fontSize: typography.eyebrow,
     fontWeight: "800",
-    color: colors.textMuted,
-  },
-  labelTaskSelected: {
-    color: colors.task,
-  },
-  labelNoteSelected: {
-    color: colors.note,
   },
   fabSlot: {
     width: FAB_SIZE + spacing.md,
@@ -205,18 +238,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primary,
-    shadowColor: colors.text,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
     shadowRadius: 8,
     elevation: 6,
-  },
-  fabPressed: {
-    backgroundColor: colors.primaryPressed,
-  },
-  fabDisabled: {
-    backgroundColor: colors.disabled,
   },
   sheetBackdrop: {
     position: "absolute",
@@ -225,13 +250,11 @@ const styles = StyleSheet.create({
     right: -spacing.xl,
     top: -2000,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(23, 33, 27, 0.32)",
     zIndex: 10,
   },
   sheet: {
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
-    backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
@@ -244,15 +267,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.borderStrong,
   },
-  sheetEyebrow: {
-    fontSize: typography.caption,
-    fontWeight: "800",
-    color: colors.primary,
-  },
   sheetTitle: {
     fontSize: typography.title,
     fontWeight: "800",
-    color: colors.text,
   },
   menu: {
     gap: spacing.sm,
@@ -260,45 +277,29 @@ const styles = StyleSheet.create({
   option: {
     minHeight: touchTarget.androidMin,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
-  },
-  noteOption: {
-    borderColor: colors.noteSoft,
-  },
-  taskOption: {
-    borderColor: colors.taskSoft,
-  },
-  optionPressed: {
-    backgroundColor: colors.surfacePressed,
   },
   optionLabel: {
     fontSize: typography.bodyLarge,
     fontWeight: "800",
-    color: colors.text,
   },
   optionHint: {
     marginTop: spacing.xxs,
     fontSize: typography.caption,
-    color: colors.textMuted,
   },
   cancelButton: {
     minHeight: touchTarget.androidMin,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
   },
   cancelLabel: {
     fontSize: typography.body,
     fontWeight: "700",
-    color: colors.text,
   },
 });
