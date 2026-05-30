@@ -17,6 +17,13 @@ versioned releases when they start to exist.
   `amber`) e densidade (`compact`, `normal`, `airy`).
 - **`SettingsSheet`**: sheet de Ajustes plugado no header do dia, com controles
   funcionais e testes unitários para confirmar persistência local das escolhas.
+- **Reparo estrutural do Design v2**: header e calendario agora formam uma
+  unica superficie, a bottom bar encosta na edge inferior com SafeArea interna,
+  sheets deixam de parecer caixas aninhadas e a tipografia passa a usar fontes
+  Expo/Google carregadas no root do app.
+- **Calendario mensal expansivel no estilo do handoff**: o modo mensal agora
+  substitui a faixa semanal dentro do mesmo bloco, usa grade compacta de mes e
+  reaproveita os chevrons para navegar por meses enquanto estiver expandido.
 - **Dual-timeline navigation**: a superfície do dia agora entrega duas páginas
   separadas por tipo — Task Timeline (eixo à esquerda, tarefas) e Note Timeline
   (eixo à direita, notas) — com swipe horizontal via `react-native-pager-view`
@@ -41,6 +48,9 @@ versioned releases when they start to exist.
 
 ### Fixed
 
+- **Calendario mensal no mobile**: grade mensal renderiza seis linhas fixas de
+  sete colunas flexiveis, evitando que a coluna de sabado seja empurrada para
+  fora por `flexWrap` + largura percentual em telas estreitas.
 - **Android dev build**: configurado pnpm com `node-linker=isolated`,
   `public-hoist-pattern[]=*`, `virtual-store-dir=.p` e
   `virtual-store-dir-max-length=40` para encurtar caminhos fisicos de modulos

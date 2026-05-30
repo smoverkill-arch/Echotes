@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { CalendarMode } from "../../stores/calendar-store";
 import { useAppearancePalette } from "../../stores/appearance-store";
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import {
   addMonthsToDayKey,
@@ -29,6 +30,11 @@ interface DayHeaderProps {
 
 const WEEKDAY_HEADERS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
+const groupMonthWeeks = (days: string[]) =>
+  Array.from({ length: Math.ceil(days.length / 7) }, (_, weekIndex) =>
+    days.slice(weekIndex * 7, weekIndex * 7 + 7),
+  );
+
 export function DayHeader({
   date,
   clockDate,
@@ -44,14 +50,36 @@ export function DayHeader({
   const formattedDate = formatDisplayDay(date);
   const visibleWeek = getWeekRangeForSelectedDay(date);
   const monthGrid = getMonthGridForSelectedDay(date);
+  const monthWeeks = groupMonthWeeks(monthGrid);
 
   const selectDate = (nextDate: string) => {
     onCalendarModeChange("week");
     onDateChange(nextDate);
   };
 
+  const navigateBackward = () => {
+    onDateChange(
+      calendarMode === "month"
+        ? addMonthsToDayKey(date, -1)
+        : addWeeksToDayKey(date, -1),
+    );
+  };
+
+  const navigateForward = () => {
+    onDateChange(
+      calendarMode === "month"
+        ? addMonthsToDayKey(date, 1)
+        : addWeeksToDayKey(date, 1),
+    );
+  };
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { borderBottomColor: palette.border, backgroundColor: palette.surface },
+      ]}
+    >
       <View style={styles.topRow}>
         <View style={styles.identityBlock}>
           <Text style={[styles.eyebrow, { color: palette.primary }]}>Echotes</Text>
@@ -102,24 +130,17 @@ export function DayHeader({
         </View>
       </View>
 
-      <View
-        style={[
-          styles.calendarPanel,
-          { borderColor: palette.border, backgroundColor: palette.surface },
-        ]}
-      >
+      <View style={styles.calendarPanel}>
         <View style={styles.calendarToolbar}>
           <Pressable
             accessibilityLabel="Semana anterior"
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.iconButton,
-              { backgroundColor: pressed ? palette.surfacePressed : palette.surfaceMuted },
+              { backgroundColor: pressed ? palette.surfacePressed : "transparent" },
             ]}
             testID="day-calendar-previous-week"
-            onPress={() => {
-              onDateChange(addWeeksToDayKey(date, -1));
-            }}
+            onPress={navigateBackward}
           >
             <Text style={[styles.iconButtonLabel, { color: palette.text }]}>{"<"}</Text>
           </Pressable>
@@ -154,6 +175,9 @@ export function DayHeader({
               ]}
             >
               {formatMonthYear(date)}
+              <Text style={styles.monthButtonIndicator}>
+                {calendarMode === "month" ? "  ^" : "  v"}
+              </Text>
             </Text>
           </Pressable>
 
@@ -162,68 +186,150 @@ export function DayHeader({
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.iconButton,
-              { backgroundColor: pressed ? palette.surfacePressed : palette.surfaceMuted },
+              { backgroundColor: pressed ? palette.surfacePressed : "transparent" },
             ]}
             testID="day-calendar-next-week"
-            onPress={() => {
-              onDateChange(addWeeksToDayKey(date, 1));
-            }}
+            onPress={navigateForward}
           >
             <Text style={[styles.iconButtonLabel, { color: palette.text }]}>{">"}</Text>
           </Pressable>
         </View>
 
-        <View style={styles.weekStrip}>
-          {visibleWeek.map((day) => {
-            const isSelected = day === date;
-            const isToday = day === clockDate;
+        {calendarMode === "week" ? (
+          <View style={styles.weekStrip}>
+            {visibleWeek.map((day) => {
+              const isSelected = day === date;
+              const isToday = day === clockDate;
 
-            return (
-              <Pressable
-                key={day}
-                accessibilityLabel={`${formatWeekdayShort(day)} ${formatDisplayDay(day)}${
-                  isToday ? ", hoje" : ""
-                }${isSelected ? ", selecionado" : ""}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-                style={({ pressed }) => [
-                  styles.weekDayButton,
-                  {
-                    borderColor: isSelected || isToday ? palette.primary : palette.border,
-                    backgroundColor: pressed
-                      ? palette.surfacePressed
-                      : isSelected
-                        ? palette.primary
-                        : isToday
-                          ? palette.primarySoft
-                          : palette.surfaceMuted,
-                  },
-                ]}
-                testID={`day-calendar-week-day-${day}`}
-                onPress={() => {
-                  selectDate(day);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.weekDayName,
-                    { color: isSelected ? palette.primaryText : palette.textSubtle },
+              return (
+                <Pressable
+                  key={day}
+                  accessibilityLabel={`${formatWeekdayShort(day)} ${formatDisplayDay(day)}${
+                    isToday ? ", hoje" : ""
+                  }${isSelected ? ", selecionado" : ""}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  style={({ pressed }) => [
+                    styles.weekDayButton,
+                    {
+                      borderColor: isSelected || isToday ? palette.primary : palette.border,
+                      backgroundColor: pressed
+                        ? palette.surfacePressed
+                        : isSelected
+                          ? palette.primary
+                          : isToday
+                            ? palette.primarySoft
+                            : palette.surfaceMuted,
+                    },
                   ]}
+                  testID={`day-calendar-week-day-${day}`}
+                  onPress={() => {
+                    selectDate(day);
+                  }}
                 >
-                  {formatWeekdayShort(day)}
-                </Text>
+                  <Text
+                    style={[
+                      styles.weekDayName,
+                      { color: isSelected ? palette.primaryText : palette.textSubtle },
+                    ]}
+                  >
+                    {formatWeekdayShort(day)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.weekDayNumber,
+                      {
+                        color: isSelected
+                          ? palette.primaryText
+                          : isToday
+                            ? palette.primary
+                            : palette.text,
+                      },
+                    ]}
+                  >
+                    {formatDayOfMonth(day)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.monthSheet} testID="day-calendar-month-sheet">
+            <View style={styles.monthWeekHeader}>
+              {WEEKDAY_HEADERS.map((label, index) => (
                 <Text
-                  style={[
-                    styles.weekDayNumber,
-                    { color: isSelected ? palette.primaryText : isToday ? palette.primary : palette.text },
-                  ]}
+                  key={`${label}-${index}`}
+                  style={[styles.monthWeekLabel, { color: palette.textSubtle }]}
                 >
-                  {formatDayOfMonth(day)}
+                  {label}
                 </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+              ))}
+            </View>
+
+            <View style={styles.monthGrid}>
+              {monthWeeks.map((week, weekIndex) => (
+                <View
+                  key={`month-week-${week[0]}`}
+                  style={styles.monthWeekRow}
+                  testID={`day-calendar-month-week-${weekIndex}`}
+                >
+                  {week.map((day) => {
+                    const isSelected = day === date;
+                    const isToday = day === clockDate;
+                    const isOutsideMonth = !isSameMonth(day, date);
+
+                    return (
+                      <Pressable
+                        key={day}
+                        accessibilityLabel={`${formatDisplayDay(day)}${
+                          isToday ? ", hoje" : ""
+                        }${isSelected ? ", selecionado" : ""}`}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: isSelected }}
+                        style={({ pressed }) => [
+                          styles.monthDayButton,
+                          isOutsideMonth ? styles.monthDayOutsideVisual : null,
+                          {
+                            borderColor:
+                              isSelected || isToday ? palette.primary : "transparent",
+                            backgroundColor: pressed
+                              ? palette.surfacePressed
+                              : isSelected
+                                ? palette.primary
+                                : isToday
+                                  ? palette.primarySoft
+                                  : "transparent",
+                          },
+                        ]}
+                        testID={`day-calendar-month-day-${day}`}
+                        onPress={() => {
+                          selectDate(day);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.monthDayLabel,
+                            {
+                              color: isSelected
+                                ? palette.primaryText
+                                : isOutsideMonth
+                                  ? palette.textSubtle
+                                  : isToday
+                                    ? palette.primary
+                                    : palette.text,
+                            },
+                          ]}
+                        >
+                          {formatDayOfMonth(day)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         <View style={styles.calendarFooter}>
           <Text style={[styles.calendarHint, { color: palette.textSubtle }]}>
@@ -261,128 +367,20 @@ export function DayHeader({
         </View>
 
         {calendarMode === "month" ? (
-          <View
-            style={[
-              styles.monthSheet,
-              { borderColor: palette.border, backgroundColor: palette.surface },
+          <Pressable
+            accessibilityLabel="Fechar seletor mensal"
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.closeMonthButton,
+              { backgroundColor: pressed ? palette.surfacePressed : palette.surfaceMuted },
             ]}
-            testID="day-calendar-month-sheet"
+            testID="day-calendar-close-month"
+            onPress={() => {
+              onCalendarModeChange("week");
+            }}
           >
-            <View style={styles.monthSheetHeader}>
-              <Pressable
-                accessibilityLabel="Mes anterior"
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.iconButton,
-                  { backgroundColor: pressed ? palette.surfacePressed : palette.surfaceMuted },
-                ]}
-                testID="day-calendar-previous-month"
-                onPress={() => {
-                  onDateChange(addMonthsToDayKey(date, -1));
-                }}
-              >
-                <Text style={[styles.iconButtonLabel, { color: palette.text }]}>{"<"}</Text>
-              </Pressable>
-
-              <Text style={[styles.monthSheetTitle, { color: palette.text }]}>
-                {formatMonthYear(date)}
-              </Text>
-
-              <Pressable
-                accessibilityLabel="Proximo mes"
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.iconButton,
-                  { backgroundColor: pressed ? palette.surfacePressed : palette.surfaceMuted },
-                ]}
-                testID="day-calendar-next-month"
-                onPress={() => {
-                  onDateChange(addMonthsToDayKey(date, 1));
-                }}
-              >
-                <Text style={[styles.iconButtonLabel, { color: palette.text }]}>{">"}</Text>
-              </Pressable>
-            </View>
-
-            <View style={styles.monthWeekHeader}>
-              {WEEKDAY_HEADERS.map((label, index) => (
-                <Text
-                  key={`${label}-${index}`}
-                  style={[styles.monthWeekLabel, { color: palette.textSubtle }]}
-                >
-                  {label}
-                </Text>
-              ))}
-            </View>
-
-            <View style={styles.monthGrid}>
-              {monthGrid.map((day) => {
-                const isSelected = day === date;
-                const isToday = day === clockDate;
-                const isOutsideMonth = !isSameMonth(day, date);
-
-                return (
-                  <Pressable
-                    key={day}
-                    accessibilityLabel={`${formatDisplayDay(day)}${
-                      isToday ? ", hoje" : ""
-                    }${isSelected ? ", selecionado" : ""}`}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isSelected }}
-                    style={({ pressed }) => [
-                      styles.monthDayButton,
-                      {
-                        borderColor: isSelected || isToday ? palette.primary : palette.border,
-                        backgroundColor: pressed
-                          ? palette.surfacePressed
-                          : isSelected
-                            ? palette.primary
-                            : isOutsideMonth
-                              ? palette.surfaceMuted
-                              : palette.surface,
-                      },
-                    ]}
-                    testID={`day-calendar-month-day-${day}`}
-                    onPress={() => {
-                      selectDate(day);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.monthDayLabel,
-                        {
-                          color: isSelected
-                            ? palette.primaryText
-                            : isOutsideMonth
-                              ? palette.textSubtle
-                              : isToday
-                                ? palette.primary
-                                : palette.text,
-                        },
-                      ]}
-                    >
-                      {formatDayOfMonth(day)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <Pressable
-              accessibilityLabel="Fechar seletor mensal"
-              accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.closeMonthButton,
-                { backgroundColor: pressed ? palette.surfacePressed : palette.surfaceMuted },
-              ]}
-              testID="day-calendar-close-month"
-              onPress={() => {
-                onCalendarModeChange("week");
-              }}
-            >
-              <Text style={[styles.closeMonthLabel, { color: palette.text }]}>Recolher</Text>
-            </Pressable>
-          </View>
+            <Text style={[styles.closeMonthLabel, { color: palette.text }]}>Recolher</Text>
+          </Pressable>
         ) : null}
       </View>
     </View>
@@ -391,6 +389,10 @@ export function DayHeader({
 
 const styles = StyleSheet.create({
   container: {
+    borderBottomWidth: 1,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
     gap: spacing.md,
   },
   topRow: {
@@ -404,20 +406,21 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.eyebrow,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: 0,
     color: colors.primary,
   },
   title: {
     marginTop: spacing.xs,
     fontSize: typography.title,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   subtitle: {
     marginTop: spacing.xs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   headerActions: {
@@ -435,14 +438,12 @@ const styles = StyleSheet.create({
   },
   headerActionLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
   calendarPanel: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing.md,
     gap: spacing.md,
   },
   calendarToolbar: {
@@ -456,14 +457,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: "transparent",
   },
   iconButtonPressed: {
     backgroundColor: colors.surfacePressed,
   },
   iconButtonLabel: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   monthButton: {
@@ -486,8 +487,12 @@ const styles = StyleSheet.create({
   },
   monthButtonLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
+  },
+  monthButtonIndicator: {
+    fontSize: typography.caption,
+    fontFamily: fontFamily.bodyBold,
   },
   monthButtonLabelActive: {
     color: colors.primary,
@@ -519,12 +524,12 @@ const styles = StyleSheet.create({
   },
   weekDayName: {
     fontSize: typography.eyebrow,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.textMuted,
   },
   weekDayNumber: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   weekDayTextSelected: {
@@ -539,6 +544,7 @@ const styles = StyleSheet.create({
   calendarHint: {
     flex: 1,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   todayButton: {
@@ -557,56 +563,45 @@ const styles = StyleSheet.create({
   },
   todayButtonLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
   todayButtonLabelDisabled: {
     color: colors.textSubtle,
   },
   monthSheet: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
-  monthSheetHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-  },
-  monthSheetTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: typography.bodyLarge,
-    fontWeight: "800",
-    color: colors.text,
+    gap: spacing.xs,
   },
   monthWeekHeader: {
     flexDirection: "row",
+    gap: 2,
   },
   monthWeekLabel: {
     flex: 1,
     textAlign: "center",
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.textSubtle,
   },
   monthGrid: {
+    gap: 2,
+  },
+  monthWeekRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.xs,
+    gap: 2,
   },
   monthDayButton: {
-    width: `${(100 - 6 * 1.3) / 7}%`,
-    minHeight: touchTarget.min,
+    flex: 1,
+    minHeight: 34,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: "transparent",
+    backgroundColor: "transparent",
+  },
+  monthDayOutsideVisual: {
+    opacity: 0.34,
   },
   monthDayOutside: {
     backgroundColor: colors.surfaceMuted,
@@ -623,7 +618,7 @@ const styles = StyleSheet.create({
   },
   monthDayLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   monthDayLabelOutside: {
@@ -633,18 +628,18 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   closeMonthButton: {
-    minHeight: touchTarget.min,
+    minHeight: 34,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: radius.md,
-    backgroundColor: colors.text,
+    borderRadius: radius.sm,
+    backgroundColor: colors.surfaceMuted,
   },
   closeMonthButtonPressed: {
     backgroundColor: colors.primaryPressed,
   },
   closeMonthLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
 });

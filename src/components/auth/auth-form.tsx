@@ -11,6 +11,7 @@ import {
 
 import { authCredentialsSchema } from "../../schemas/auth.schema";
 import { useAppearancePalette } from "../../stores/appearance-store";
+import { fontFamily } from "../../theme/fonts";
 import { radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { AuthCredentials } from "../../types/auth";
 
@@ -198,7 +199,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    borderRadius: 14,
+    borderRadius: radius.md,
     padding: spacing.xl,
     borderWidth: 1,
     shadowOffset: { width: 3, height: 3 },
@@ -216,18 +217,19 @@ const styles = StyleSheet.create({
   },
   logoLetter: {
     fontSize: 28,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
   },
   brand: {
     marginTop: spacing.lg,
     textAlign: "center",
     fontSize: 38,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
   },
   subtitle: {
     marginTop: spacing.sm,
     textAlign: "center",
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
   },
   fieldGroup: {
     marginTop: spacing.lg,
@@ -235,8 +237,8 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: spacing.xs,
     fontSize: typography.eyebrow,
-    fontWeight: "800",
-    letterSpacing: 1.4,
+    fontFamily: fontFamily.bodyBold,
+    letterSpacing: 0,
     textTransform: "uppercase",
   },
   input: {
@@ -245,10 +247,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: spacing.md,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
   },
   validationMessage: {
     marginTop: spacing.md,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
   },
   submitButton: {
     marginTop: spacing.xl,
@@ -259,7 +263,7 @@ const styles = StyleSheet.create({
   },
   submitButtonLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
   secondaryRow: {
     marginTop: spacing.lg,
@@ -270,6 +274,7 @@ const styles = StyleSheet.create({
   },
   secondaryPrompt: {
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
   },
   secondaryButton: {
     paddingVertical: 4,
@@ -277,6 +282,6 @@ const styles = StyleSheet.create({
   },
   secondaryButtonLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
 });

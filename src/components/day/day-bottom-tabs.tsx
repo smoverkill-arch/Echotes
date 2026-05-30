@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { ListTodo, Plus, StickyNote } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import { useAppearancePalette } from "../../stores/appearance-store";
 import type { DayTab } from "../../types/timeline";
@@ -22,6 +24,7 @@ export function DayBottomTabs({
   onCreateTask,
 }: DayBottomTabsProps) {
   const palette = useAppearancePalette();
+  const insets = useSafeAreaInsets();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleCreateNote = () => {
@@ -113,7 +116,12 @@ export function DayBottomTabs({
         accessibilityRole="tablist"
         style={[
           styles.bar,
-          { borderColor: palette.border, backgroundColor: palette.surface },
+          {
+            borderColor: palette.border,
+            backgroundColor: palette.surface,
+            height: 68 + insets.bottom,
+            paddingBottom: insets.bottom,
+          },
         ]}
       >
         <Pressable
@@ -207,8 +215,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   bar: {
-    height: 68,
-    borderWidth: 1,
+    borderTopWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     overflow: "visible",
@@ -224,7 +231,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: typography.eyebrow,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
   fabSlot: {
     width: FAB_SIZE + spacing.md,
@@ -246,8 +253,8 @@ const styles = StyleSheet.create({
   sheetBackdrop: {
     position: "absolute",
     bottom: "100%",
-    left: -spacing.xl,
-    right: -spacing.xl,
+    left: 0,
+    right: 0,
     top: -2000,
     justifyContent: "flex-end",
     zIndex: 10,
@@ -269,7 +276,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: typography.title,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
   },
   menu: {
     gap: spacing.sm,
@@ -283,11 +290,12 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
   optionHint: {
     marginTop: spacing.xxs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
   },
   cancelButton: {
     minHeight: touchTarget.androidMin,
@@ -300,6 +308,6 @@ const styles = StyleSheet.create({
   },
   cancelLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
   },
 });

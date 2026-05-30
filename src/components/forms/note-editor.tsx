@@ -13,6 +13,7 @@ import { createNote } from "../../features/notes/api/create-note";
 import { createNoteEcho } from "../../features/notes/api/create-note-echo";
 import { listNoteCandidates } from "../../features/notes/api/list-note-candidates";
 import { updateNote } from "../../features/notes/api/update-note";
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { Note, NoteEchoCandidate, NoteEchoCandidateCursor } from "../../types/note";
 import { formatDisplayDay } from "../../utils/date";
@@ -460,8 +461,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     maxHeight: "92%",
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
@@ -486,13 +487,13 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.note,
   },
   title: {
     marginTop: spacing.xs,
     fontSize: typography.title,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   originRow: {
@@ -503,7 +504,7 @@ const styles = StyleSheet.create({
   },
   originLabel: {
     fontSize: typography.caption,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.textMuted,
   },
   originChip: {
@@ -513,7 +514,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.note,
   },
   closeButton: {
@@ -529,7 +530,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   body: {
@@ -539,7 +540,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.sm,
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   input: {
@@ -551,6 +552,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: typography.bodyLarge,
+    fontFamily: fontFamily.body,
     color: colors.text,
   },
   multiline: {
@@ -569,21 +571,20 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.danger,
   },
   errorText: {
     marginTop: spacing.xxs,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
     color: colors.danger,
   },
   initialEchoSection: {
     marginTop: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing.md,
     gap: spacing.sm,
   },
   initialEchoHeader: {
@@ -594,13 +595,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   sectionSubtitle: {
     marginTop: spacing.xxs,
     fontSize: typography.caption,
     lineHeight: 18,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   clearSelectionButton: {
@@ -613,7 +615,7 @@ const styles = StyleSheet.create({
   },
   clearSelectionLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   candidateFeedbackBlock: {
@@ -623,12 +625,13 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   emptyText: {
     marginTop: spacing.xs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   candidateItem: {
@@ -659,7 +662,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.primary,
   },
   contextChipOtherDay: {
@@ -672,12 +675,13 @@ const styles = StyleSheet.create({
   },
   candidateTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   candidateBrief: {
     fontSize: typography.caption,
     lineHeight: 18,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   loadMoreButton: {
@@ -692,7 +696,7 @@ const styles = StyleSheet.create({
   },
   loadMoreLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   actions: {
@@ -712,7 +716,7 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.text,
   },
   primaryButton: {
@@ -729,7 +733,7 @@ const styles = StyleSheet.create({
   },
   primaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
   buttonPressed: {

@@ -81,6 +81,9 @@ Mencoes inline com `@nota` seguem fora do corte entregue.
   remocao confirmada e continuacao de nota.
 - Ajustes de aparencia cobrem modo, destaque e densidade como estado local de
   UI, sem substituir as jornadas principais.
+- A verificacao visual do Design v2 deve conferir header/calendario como bloco
+  unico, bottom bar edge-to-edge, sheets sem containers aninhados e fontes
+  carregadas pelo root Expo antes de declarar a branch pronta.
 
 Jest e React Native Testing Library cobrem esses journeys hoje.
 O repo ainda nao possui suite E2E separada.

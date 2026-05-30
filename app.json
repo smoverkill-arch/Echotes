@@ -22,6 +22,12 @@
     "web": {
       "bundler": "metro",
       "output": "static"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f31dba27-3208-463b-8155-551eda1a2e03"
+      }
     }
   }
 }

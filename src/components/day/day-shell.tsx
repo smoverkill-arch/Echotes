@@ -199,7 +199,6 @@ export function DayShell({
         styles.container,
         {
           paddingTop: insets.top,
-          paddingBottom: insets.bottom,
           backgroundColor: palette.background,
         },
       ]}
@@ -211,7 +210,7 @@ export function DayShell({
         style={[
           styles.chromeOverlay,
           chromeAnimatedStyle,
-          { top: insets.top },
+          { top: insets.top, left: 0, right: 0 },
         ]}
         onLayout={handleChromeLayout}
       >
@@ -386,8 +385,6 @@ const styles = StyleSheet.create({
   },
   chromeOverlay: {
     position: "absolute",
-    left: spacing.sm,
-    right: spacing.sm,
     zIndex: 3,
     gap: spacing.md,
   },
@@ -398,6 +395,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabsWrapper: {
-    paddingBottom: spacing.xs,
+    marginHorizontal: 0,
   },
 });

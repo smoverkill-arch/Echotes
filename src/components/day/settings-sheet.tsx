@@ -6,6 +6,7 @@ import {
   useAppearancePalette,
   useAppearanceStore,
 } from "../../stores/appearance-store";
+import { fontFamily } from "../../theme/fonts";
 import { radius, spacing, touchTarget, typography } from "../../theme/tokens";
 
 interface SettingsSheetProps {
@@ -173,8 +174,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   sheet: {
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
@@ -188,8 +189,8 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.eyebrow,
-    fontWeight: "800",
-    letterSpacing: 1.4,
+    fontFamily: fontFamily.bodyBold,
+    letterSpacing: 0,
     textTransform: "uppercase",
   },
   section: {
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
   },
   switchTrack: {
     width: 44,
@@ -221,8 +222,8 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: typography.eyebrow,
-    fontWeight: "800",
-    letterSpacing: 1.4,
+    fontFamily: fontFamily.bodyBold,
+    letterSpacing: 0,
     textTransform: "uppercase",
   },
   swatches: {
@@ -243,7 +244,7 @@ const styles = StyleSheet.create({
   },
   swatchLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
   segmented: {
     flexDirection: "row",
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
   },
   segmentLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
   closeButton: {
     minHeight: touchTarget.androidMin,
@@ -271,6 +272,6 @@ const styles = StyleSheet.create({
   },
   closeLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
   },
 });

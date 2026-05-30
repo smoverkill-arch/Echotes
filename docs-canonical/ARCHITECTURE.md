@@ -139,6 +139,18 @@ O Editor opera em `create` e `edit`.
 - A densidade altera espacamento, tamanho visual e previews dos cards, mas nao
   remove itens nem altera a orientacao renderizada.
 
+### Visual System
+
+- `src/theme/fonts.ts` centraliza as fontes carregadas no root Expo com
+  `expo-font` e pacotes `@expo-google-fonts/*`.
+- A tipografia do produto usa `Bitter` para titulos/identidade e `Cabin` para
+  corpo, controles e metadados.
+- Header e calendario compoem uma unica superficie visual na tela do dia; o
+  calendario mensal expande dentro desse mesmo bloco, substitui a faixa semanal
+  enquanto aberto e usa os mesmos chevrons para navegacao mensal.
+- Bottom bar e sheets sao superficies de app, nao containers decorativos
+  aninhados: preservam SafeArea e testIDs, mas evitam "box dentro de box".
+
 ## Data Strategy
 
 Para `selectedDate = D`, a tela carrega:

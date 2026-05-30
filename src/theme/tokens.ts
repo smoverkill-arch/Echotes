@@ -46,7 +46,9 @@ export const typography = {
   caption: 12,
   body: 14,
   bodyLarge: 16,
+  subtitle: 20,
   title: 26,
+  hero: 38,
 } as const;
 
 export const touchTarget = {
