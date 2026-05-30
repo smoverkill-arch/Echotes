@@ -39,3 +39,7 @@ Thumbs.db
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Pastas de build e código nativo
+/android/
+/ios/
