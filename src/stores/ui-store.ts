@@ -44,7 +44,7 @@ const closedEditorState: EditorState = {
 };
 
 export const useUIStore = create<UIStore>((set) => ({
-  activeTab: "timeline",
+  activeTab: "tasks",
   readerState: closedReaderState,
   editorState: closedEditorState,
 

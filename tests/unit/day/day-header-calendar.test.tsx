@@ -11,6 +11,7 @@ const baseProps = {
   onDateChange: jest.fn(),
   onCalendarModeChange: jest.fn(),
   onSignOut: jest.fn(),
+  onSettings: jest.fn(),
 };
 
 describe("DayHeader calendar shell", () => {
@@ -65,10 +66,24 @@ describe("DayHeader calendar shell", () => {
     render(<DayHeader {...baseProps} calendarMode="month" />);
 
     expect(screen.getByTestId("day-calendar-month-sheet")).toBeTruthy();
+    expect(screen.queryByTestId("day-calendar-week-day-2026-04-18")).toBeNull();
+    expect(screen.getByTestId("day-calendar-month-week-0").props.children).toHaveLength(7);
+    expect(screen.getByTestId("day-calendar-month-week-5").props.children).toHaveLength(7);
+    expect(screen.getByTestId("day-calendar-month-day-2026-04-25")).toBeTruthy();
 
     fireEvent.press(screen.getByTestId("day-calendar-month-day-2026-04-30"));
 
     expect(baseProps.onCalendarModeChange).toHaveBeenCalledWith("week");
     expect(baseProps.onDateChange).toHaveBeenCalledWith("2026-04-30");
+  });
+
+  it("usa os chevrons para navegar por mes quando o calendario mensal esta aberto", () => {
+    render(<DayHeader {...baseProps} calendarMode="month" />);
+
+    fireEvent.press(screen.getByTestId("day-calendar-previous-week"));
+    fireEvent.press(screen.getByTestId("day-calendar-next-week"));
+
+    expect(baseProps.onDateChange).toHaveBeenNthCalledWith(1, "2026-03-01");
+    expect(baseProps.onDateChange).toHaveBeenNthCalledWith(2, "2026-05-01");
   });
 });

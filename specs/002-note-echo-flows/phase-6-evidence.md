@@ -128,8 +128,8 @@ Exit code: 0.
 Result:
 
 ```text
-PASS — All 176 checks passed
-Badge: CDD_Guard-172/177_passed
+PASS — All 181 checks passed
+Badge: CDD_Guard-179/182_passed
 ```
 
 The command still prints the known Windows line after the PASS:

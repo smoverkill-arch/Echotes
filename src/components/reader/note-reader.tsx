@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { Note, RelatedNote } from "../../types/note";
 import { formatDisplayDay } from "../../utils/date";
@@ -286,8 +287,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     maxHeight: "92%",
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
@@ -307,15 +308,15 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.eyebrow,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     textTransform: "uppercase",
-    letterSpacing: 0.8,
+    letterSpacing: 0,
     color: colors.note,
   },
   title: {
     marginTop: spacing.sm,
     fontSize: typography.title,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   noteMetaRow: {
@@ -332,23 +333,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.note,
   },
   noteMetaText: {
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   brief: {
     marginTop: spacing.lg,
     fontSize: typography.body,
     lineHeight: 20,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   body: {
     marginTop: spacing.md,
     fontSize: typography.bodyLarge,
     lineHeight: 24,
+    fontFamily: fontFamily.body,
     color: colors.text,
   },
   primaryActionArea: {
@@ -368,7 +372,7 @@ const styles = StyleSheet.create({
   },
   continueLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
   secondaryActions: {
@@ -391,15 +395,11 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   echoSection: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceMuted,
-    padding: spacing.md,
+    paddingTop: spacing.xs,
     gap: spacing.md,
   },
   echoSectionDivider: {
@@ -416,36 +416,34 @@ const styles = StyleSheet.create({
   },
   echoTitle: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   echoSubtitle: {
     marginTop: spacing.xxs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   emptyEchoBox: {
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderLeftWidth: 2,
+    borderLeftColor: colors.border,
     padding: spacing.md,
   },
   emptyEchoTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   emptyEchoText: {
     marginTop: spacing.xs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   relatedNoteItem: {
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
     padding: spacing.md,
     gap: spacing.sm,
   },
@@ -466,7 +464,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.primary,
   },
   relationChipOtherDay: {
@@ -479,6 +477,7 @@ const styles = StyleSheet.create({
   },
   relationKind: {
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   relatedOpenButton: {
@@ -490,23 +489,25 @@ const styles = StyleSheet.create({
   },
   relatedTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   relatedMeta: {
     marginTop: spacing.xs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   relatedBrief: {
     marginTop: spacing.xs,
     fontSize: typography.caption,
     lineHeight: 18,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   echoFeedbackText: {
     fontSize: typography.caption,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.primary,
   },
   removeEchoButton: {
@@ -523,7 +524,7 @@ const styles = StyleSheet.create({
   },
   removeEchoLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.danger,
   },
   reloadButton: {
@@ -541,7 +542,7 @@ const styles = StyleSheet.create({
   },
   reloadLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.danger,
   },
   footerActions: {
@@ -562,7 +563,7 @@ const styles = StyleSheet.create({
   },
   closeLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
 });

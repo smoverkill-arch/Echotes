@@ -1,14 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import {
-  colors,
-  fontFamily,
-  letterSpacing,
-  lineHeight,
-  radius,
-  spacing,
-  typography,
-} from "../../theme/tokens";
+  densityMetrics,
+  useAppearancePalette,
+  useAppearanceStore,
+} from "../../stores/appearance-store";
+import { radius, spacing, typography } from "../../theme/tokens";
 import type { Task } from "../../types/task";
 import { extractTimePart, formatDisplayDay } from "../../utils/date";
 
@@ -17,57 +14,98 @@ interface TaskCardGhostProps {
 }
 
 export function TaskCardGhost({ task }: TaskCardGhostProps) {
+  const palette = useAppearancePalette();
+  const density = useAppearanceStore((state) => state.density);
+  const metrics = densityMetrics[density];
   const scheduledTime = task.scheduled_at
     ? extractTimePart(task.scheduled_at).slice(0, 5)
     : null;
 
   return (
-    <View style={styles.card} testID={`task-card-ghost-${task.id}`}>
-      <Text style={styles.eyebrow}>Projetada</Text>
-      <Text style={styles.title}>{task.title}</Text>
-      {task.content ? <Text style={styles.body}>{task.content}</Text> : null}
-      <Text style={styles.footer}>
-        → {formatDisplayDay(task.target_day)}
-        {scheduledTime ? ` às ${scheduledTime}` : ""}
-      </Text>
+    <View
+      style={[
+        styles.card,
+        {
+          borderColor: palette.ghostBorder,
+          paddingVertical: metrics.cardPaddingVertical,
+          paddingHorizontal: metrics.cardPaddingHorizontal,
+        },
+      ]}
+      testID={`task-card-ghost-${task.id}`}
+    >
+      <View style={styles.ghostContent}>
+        <View style={styles.copy}>
+          <Text style={[styles.eyebrow, { color: palette.textSubtle }]}>Projetada</Text>
+          <Text style={[styles.title, { color: palette.textMuted, fontSize: metrics.taskTitleSize }]}>
+            {task.title}
+          </Text>
+          {task.content && metrics.showPreview ? (
+            <Text numberOfLines={2} style={[styles.body, { color: palette.textSubtle }]}>
+              {task.content}
+            </Text>
+          ) : null}
+        </View>
+        <View style={styles.destination}>
+          <View style={[styles.destinationChip, { backgroundColor: palette.taskSoft }]}>
+            <Text style={[styles.destinationChipLabel, { color: palette.task }]}>
+              {formatDisplayDay(task.target_day)}
+            </Text>
+          </View>
+          <Text style={[styles.footer, { color: palette.textSubtle }]}>
+            Vai para {formatDisplayDay(task.target_day)}
+            {scheduledTime ? ` as ${scheduledTime}` : ""}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.xl,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: colors.taskGhostBorder,
-    backgroundColor: colors.taskGhostSoft,
-    padding: spacing.lg,
+    opacity: 0.82,
+  },
+  ghostContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  destination: {
+    alignItems: "flex-end",
+    gap: spacing.xs,
   },
   eyebrow: {
-    fontFamily: fontFamily.bodyExtraBold,
     fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: letterSpacing.wider,
-    color: colors.taskGhost,
+    letterSpacing: 1.4,
   },
   title: {
-    fontFamily: fontFamily.displayBold,
-    marginTop: spacing.sm,
-    fontSize: typography.bodyLarge,
-    lineHeight: typography.bodyLarge * lineHeight.snug,
-    color: colors.taskGhost,
+    marginTop: spacing.xs,
+    fontWeight: "700",
   },
   body: {
-    fontFamily: fontFamily.bodyRegular,
-    marginTop: spacing.sm,
-    fontSize: typography.body,
-    lineHeight: typography.body * lineHeight.normal,
-    color: colors.taskGhost,
+    marginTop: spacing.xs,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  destinationChip: {
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  destinationChipLabel: {
+    fontSize: typography.eyebrow,
+    fontWeight: "800",
   },
   footer: {
-    fontFamily: fontFamily.bodyMedium,
-    marginTop: spacing.sm,
-    fontSize: typography.caption,
-    color: colors.taskGhost,
+    fontSize: typography.eyebrow,
   },
 });

@@ -11,4 +11,10 @@ module.exports = {
     "!**/*.d.ts",
   ],
   testPathIgnorePatterns: ["/node_modules/", "/.expo/"],
+  moduleNameMapper: {
+    "^react-native-safe-area-context$": "<rootDir>/__mocks__/react-native-safe-area-context.js",
+    "^react-native-pager-view$": "<rootDir>/__mocks__/react-native-pager-view.js",
+    "^@react-native-async-storage/async-storage$":
+      "@react-native-async-storage/async-storage/jest/async-storage-mock",
+  },
 };

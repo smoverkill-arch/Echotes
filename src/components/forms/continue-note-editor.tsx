@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import { buildContinueNoteBrief } from "../../features/notes/utils/build-continue-note-brief";
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { ContinueNoteInput, Note } from "../../types/note";
 import {
@@ -326,9 +327,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(23, 33, 27, 0.45)",
   },
   sheet: {
-    maxHeight: "92%",
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    maxHeight: "94%",
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
@@ -353,13 +354,13 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.caption,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyBold,
     color: colors.primary,
   },
   title: {
     marginTop: spacing.xs,
     fontSize: typography.title,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   originRow: {
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
   },
   originLabel: {
     fontSize: typography.caption,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.textMuted,
   },
   originChip: {
@@ -380,7 +381,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.primary,
   },
   closeButton: {
@@ -396,7 +397,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   body: {
@@ -406,7 +407,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.sm,
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   input: {
@@ -418,6 +419,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: typography.bodyLarge,
+    fontFamily: fontFamily.body,
     color: colors.text,
   },
   dayControls: {
@@ -438,7 +440,7 @@ const styles = StyleSheet.create({
   },
   dayControlLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   todayButton: {
@@ -463,12 +465,13 @@ const styles = StyleSheet.create({
   },
   warningTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.danger,
   },
   warningText: {
     marginTop: spacing.xxs,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
     color: colors.danger,
   },
   errorBlock: {
@@ -479,12 +482,13 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.danger,
   },
   errorText: {
     marginTop: spacing.xxs,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
     color: colors.danger,
   },
   actions: {
@@ -504,7 +508,7 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.text,
   },
   primaryButton: {
@@ -521,7 +525,7 @@ const styles = StyleSheet.create({
   },
   primaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
   buttonPressed: {

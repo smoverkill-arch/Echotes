@@ -19,9 +19,18 @@
 - Toda mudanca em auth precisa preservar bootstrap, restauracao e logout.
 - Toda mudanca em schema precisa atualizar suite de schema e canon associado.
 - Toda mudanca na camada visual precisa preservar `note -> direita` e `task_* -> esquerda`.
+- Toda mudanca em Ajustes de aparencia precisa provar que preferencias locais
+  mudam tema/destaque/densidade sem afetar fluxos do dia.
 - Toda mudanca em gate documental precisa preservar o contrato do DocGuard.
 
 ## Mandatory Canonical Cases
+
+### Appearance
+
+1. Alternar modo claro/escuro.
+2. Selecionar cor de destaque.
+3. Selecionar densidade da timeline.
+4. Fechar Ajustes sem acionar criacao, Reader, Editor ou navegacao temporal.
 
 ### Tasks
 
@@ -56,6 +65,8 @@ Mencoes inline com `@nota` seguem fora do corte entregue.
 - `src/features/timeline/utils/*` usa suites em `tests/unit/timeline/`.
 - `src/components/timeline/*` usa suites em `tests/unit/timeline/`.
 - `src/features/day/hooks/*` usa suites em `tests/unit/day/`.
+- `src/stores/appearance-store.ts` e `src/components/day/settings-sheet.tsx`
+  usam `tests/unit/day/settings-sheet.test.tsx`.
 - `app/day/[date].tsx` usa suites em `tests/integration/day/`.
 - `supabase/migrations/*` e `.docguard.json` usam a suite documental em `tests/unit/docs/`.
 - `002-note-echo-flows` usa `@req 002-note-echo-flows:*` nas suites criadas
@@ -68,6 +79,11 @@ Mencoes inline com `@nota` seguem fora do corte entregue.
 - US3 cobre projetar tarefa, abrir destino e voltar ao contexto de origem.
 - `002-note-echo-flows` cobre Reader de notas conectadas, adicionamento manual,
   remocao confirmada e continuacao de nota.
+- Ajustes de aparencia cobrem modo, destaque e densidade como estado local de
+  UI, sem substituir as jornadas principais.
+- A verificacao visual do Design v2 deve conferir header/calendario como bloco
+  unico, bottom bar edge-to-edge, sheets sem containers aninhados e fontes
+  carregadas pelo root Expo antes de declarar a branch pronta.
 
 Jest e React Native Testing Library cobrem esses journeys hoje.
 O repo ainda nao possui suite E2E separada.
@@ -106,6 +122,7 @@ O repo ainda nao possui suite E2E separada.
 
 ## Revision History
 
+- 2026-05-27 - Casos de Ajustes de aparencia e mapa de suite registrados.
 - 2026-05-11 - `002-note-echo-flows` registrado no mapa de suites, tags
   `@req` e gates de fechamento da Phase 6.
 - 2026-05-01 - Mapa de suites simplificado, contrato documental explicitado e referencias reformuladas para leitura estavel pelo guard.

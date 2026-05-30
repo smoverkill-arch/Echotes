@@ -1,6 +1,7 @@
 # Node / package manager
 node_modules/
 .pnpm-store/
+.p/
 .agent/
 /commands/
 

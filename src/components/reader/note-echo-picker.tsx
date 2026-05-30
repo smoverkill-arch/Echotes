@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { listNoteCandidates } from "../../features/notes/api/list-note-candidates";
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type {
   Note,
@@ -239,8 +240,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     maxHeight: "88%",
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
@@ -257,7 +258,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.eyebrow,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     textTransform: "uppercase",
     letterSpacing: 0,
     color: colors.note,
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
   title: {
     marginTop: spacing.sm,
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   originRow: {
@@ -282,11 +283,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.note,
   },
   originText: {
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   closeButton: {
@@ -303,7 +305,7 @@ const styles = StyleSheet.create({
   },
   closeLabel: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   feedbackBox: {
@@ -323,12 +325,13 @@ const styles = StyleSheet.create({
   },
   feedbackTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   feedbackBody: {
     marginTop: spacing.xs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   list: {
@@ -338,10 +341,8 @@ const styles = StyleSheet.create({
   },
   candidateButton: {
     minHeight: 84,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceMuted,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.primary,
   },
   candidateChipOtherDay: {
@@ -380,21 +381,23 @@ const styles = StyleSheet.create({
   },
   candidateDay: {
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   candidateTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   candidateBrief: {
     fontSize: typography.caption,
     lineHeight: 18,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   disabledLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.textMuted,
   },
   footer: {
@@ -419,7 +422,7 @@ const styles = StyleSheet.create({
   },
   loadMoreLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   loadMoreLabelDisabled: {

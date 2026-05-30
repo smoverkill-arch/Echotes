@@ -12,6 +12,7 @@ import {
 import { createTask } from "../../features/tasks/api/create-task";
 import { updateTask } from "../../features/tasks/api/update-task";
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { Task } from "../../types/task";
 import {
@@ -376,9 +377,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(23, 33, 27, 0.45)",
   },
   sheet: {
-    maxHeight: "92%",
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    maxHeight: "94%",
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
@@ -403,13 +404,13 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.task,
   },
   title: {
     marginTop: spacing.xs,
     fontSize: typography.title,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   originRow: {
@@ -420,7 +421,7 @@ const styles = StyleSheet.create({
   },
   originLabel: {
     fontSize: typography.caption,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.textMuted,
   },
   originChip: {
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.task,
   },
   closeButton: {
@@ -446,32 +447,33 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   body: {
     marginTop: spacing.lg,
   },
   contextBlock: {
-    borderRadius: radius.md,
-    backgroundColor: colors.taskSoft,
+    borderLeftWidth: 2,
+    borderLeftColor: colors.task,
     padding: spacing.md,
   },
   contextTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.task,
   },
   contextText: {
     marginTop: spacing.xxs,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
     color: colors.task,
   },
   label: {
     marginTop: spacing.md,
     marginBottom: spacing.sm,
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   input: {
@@ -483,6 +485,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: typography.bodyLarge,
+    fontFamily: fontFamily.body,
     color: colors.text,
   },
   multiline: {
@@ -507,7 +510,7 @@ const styles = StyleSheet.create({
   },
   dayControlLabel: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   todayButton: {
@@ -523,6 +526,7 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: spacing.xs,
     fontSize: typography.caption,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   errorBlock: {
@@ -533,12 +537,13 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.danger,
   },
   errorText: {
     marginTop: spacing.xxs,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
     color: colors.danger,
   },
   actions: {
@@ -558,7 +563,7 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.text,
   },
   primaryButton: {
@@ -575,7 +580,7 @@ const styles = StyleSheet.create({
   },
   primaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
   buttonPressed: {

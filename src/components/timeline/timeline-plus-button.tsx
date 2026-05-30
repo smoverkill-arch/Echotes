@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Plus, StickyNote, CheckSquare, X } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -7,17 +6,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import {
-  colors,
-  fontFamily,
-  letterSpacing,
-  lineHeight,
-  radius,
-  shadow,
-  spacing,
-  touchTarget,
-  typography,
-} from "../../theme/tokens";
+import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 
 interface TimelinePlusButtonProps {
   isSheetOpen: boolean;
@@ -59,25 +48,8 @@ export function TimelinePlusButton({
         <View style={styles.sheetBackdrop} testID="timeline-plus-sheet-backdrop">
           <View collapsable={false} style={styles.sheet} testID="timeline-plus-sheet">
             <View style={styles.handle} />
-
-            <View style={styles.sheetHeader}>
-              <View style={styles.sheetTitleBlock}>
-                <Text style={styles.sheetEyebrow}>Registrar</Text>
-                <Text style={styles.sheetTitle}>O que você quer criar?</Text>
-              </View>
-              <Pressable
-                accessibilityLabel="Cancelar criação"
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.closeButton,
-                  pressed ? styles.closeButtonPressed : null,
-                ]}
-                testID="timeline-plus-cancel-button"
-                onPress={onCloseSheet}
-              >
-                <X color={colors.textMuted} size={18} strokeWidth={2} />
-              </Pressable>
-            </View>
+            <Text style={styles.sheetEyebrow}>Criar</Text>
+            <Text style={styles.sheetTitle}>Escolha uma acao</Text>
 
             <View style={styles.menu}>
               <Pressable
@@ -91,17 +63,8 @@ export function TimelinePlusButton({
                 testID="timeline-create-note-button"
                 onPress={onCreateNote}
               >
-                <View style={styles.optionIcon}>
-                  <StickyNote color={colors.note} size={20} strokeWidth={2} />
-                </View>
-                <View style={styles.optionCopy}>
-                  <Text style={[styles.optionLabel, styles.noteLabelColor]}>
-                    Nota
-                  </Text>
-                  <Text style={styles.optionHint}>
-                    Registre uma ideia ou pensamento do dia.
-                  </Text>
-                </View>
+                <Text style={styles.optionLabel}>Criar nota</Text>
+                <Text style={styles.optionHint}>Registrar uma ideia deste dia.</Text>
               </Pressable>
 
               <Pressable
@@ -115,19 +78,23 @@ export function TimelinePlusButton({
                 testID="timeline-create-task-button"
                 onPress={onCreateTask}
               >
-                <View style={styles.optionIcon}>
-                  <CheckSquare color={colors.task} size={20} strokeWidth={2} />
-                </View>
-                <View style={styles.optionCopy}>
-                  <Text style={[styles.optionLabel, styles.taskLabelColor]}>
-                    Tarefa
-                  </Text>
-                  <Text style={styles.optionHint}>
-                    Projete uma ação neste ou em outro dia.
-                  </Text>
-                </View>
+                <Text style={styles.optionLabel}>Criar tarefa</Text>
+                <Text style={styles.optionHint}>Projetar uma acao no tempo.</Text>
               </Pressable>
             </View>
+
+            <Pressable
+              accessibilityLabel="Cancelar criacao"
+              accessibilityRole="button"
+              style={({ pressed }) => [
+                styles.cancelButton,
+                pressed ? styles.optionPressed : null,
+              ]}
+              testID="timeline-plus-cancel-button"
+              onPress={onCloseSheet}
+            >
+              <Text style={styles.cancelLabel}>Cancelar</Text>
+            </Pressable>
           </View>
         </View>
       ) : null}
@@ -146,7 +113,7 @@ export function TimelinePlusButton({
         testID="timeline-plus-button"
         onPress={onOpenSheet}
       >
-        <Plus color={colors.white} size={24} strokeWidth={2.5} />
+        <Text style={styles.buttonLabel}>+</Text>
       </Pressable>
     </Animated.View>
   );
@@ -162,67 +129,40 @@ const styles = StyleSheet.create({
   sheetBackdrop: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "flex-end",
-    backgroundColor: colors.overlay,
+    backgroundColor: "rgba(23, 33, 27, 0.32)",
   },
   sheet: {
-    borderTopLeftRadius: radius.xxl,
-    borderTopRightRadius: radius.xxl,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xxxl,
-    gap: spacing.lg,
+    paddingBottom: spacing.xxl,
+    gap: spacing.md,
   },
   handle: {
     alignSelf: "center",
     width: 38,
     height: 4,
     borderRadius: radius.pill,
-    backgroundColor: colors.border,
-  },
-  sheetHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-  sheetTitleBlock: {
-    flex: 1,
+    backgroundColor: colors.borderStrong,
   },
   sheetEyebrow: {
-    fontFamily: fontFamily.bodyExtraBold,
-    fontSize: typography.eyebrow,
-    textTransform: "uppercase",
-    letterSpacing: letterSpacing.widest,
+    fontSize: typography.caption,
+    fontWeight: "800",
     color: colors.primary,
   },
   sheetTitle: {
-    fontFamily: fontFamily.displayBold,
-    marginTop: spacing.xs,
     fontSize: typography.title,
-    lineHeight: typography.title * lineHeight.tight,
+    fontWeight: "800",
     color: colors.text,
-  },
-  closeButton: {
-    width: touchTarget.min,
-    height: touchTarget.min,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
-  },
-  closeButtonPressed: {
-    backgroundColor: colors.surfacePressed,
   },
   menu: {
     gap: spacing.sm,
   },
   option: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
     minHeight: touchTarget.androidMin,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     backgroundColor: colors.surfaceMuted,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
@@ -230,59 +170,60 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   noteOption: {
-    borderColor: colors.noteBorder,
-    backgroundColor: colors.noteSoft,
+    borderColor: colors.noteSoft,
   },
   taskOption: {
-    borderColor: colors.taskBorder,
-    backgroundColor: colors.taskSoft,
+    borderColor: colors.taskSoft,
   },
   optionPressed: {
-    opacity: 0.88,
+    backgroundColor: colors.surfacePressed,
   },
-  optionIcon: {
-    width: 40,
-    height: 40,
+  cancelButton: {
+    minHeight: touchTarget.androidMin,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    ...shadow.sm,
-  },
-  optionCopy: {
-    flex: 1,
   },
   optionLabel: {
-    fontFamily: fontFamily.displaySemiBold,
     fontSize: typography.bodyLarge,
+    fontWeight: "800",
     color: colors.text,
   },
-  noteLabelColor: {
-    color: colors.note,
-  },
-  taskLabelColor: {
-    color: colors.task,
-  },
   optionHint: {
-    fontFamily: fontFamily.bodyRegular,
     marginTop: spacing.xxs,
     fontSize: typography.caption,
-    lineHeight: typography.caption * lineHeight.normal,
     color: colors.textMuted,
   },
+  cancelLabel: {
+    fontSize: typography.body,
+    fontWeight: "700",
+    color: colors.text,
+  },
   button: {
+    marginRight: 0,
+    marginBottom: 0,
     width: 56,
     height: 56,
     borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.primary,
-    ...shadow.md,
   },
   buttonPressed: {
     backgroundColor: colors.primaryPressed,
   },
   buttonDisabled: {
     backgroundColor: colors.disabled,
+  },
+  buttonLabel: {
+    fontSize: 28,
+    lineHeight: 30,
+    fontWeight: "600",
+    color: colors.white,
   },
 });

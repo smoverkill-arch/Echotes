@@ -8,18 +8,26 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-system-ui"
     ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.aramak7773.echotes"
     },
     "web": {
       "bundler": "metro",
       "output": "static"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f31dba27-3208-463b-8155-551eda1a2e03"
+      }
     }
   }
 }

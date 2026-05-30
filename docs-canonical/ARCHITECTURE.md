@@ -17,7 +17,10 @@ O repo tambem guarda regressao automatizada.
 ## Product Truths
 
 - O dia e a unidade principal do produto.
-- A timeline mistura notas e tarefas em um eixo temporal unico.
+- Cada dia expoe duas paginas de timeline separadas por tipo: Task Timeline
+  (tarefas, eixo a esquerda) e Note Timeline (notas, eixo a direita).
+- As duas paginas sao navegaveis por swipe horizontal (react-native-pager-view)
+  e pela bottom bar; o icone ativo reflete a pagina visivel.
 - `created_at` define a posicao intradiaria base.
 - `scheduled_at` cria um segundo ponto real para tarefas com horario.
 - Tarefas usam projecao temporal.
@@ -31,7 +34,9 @@ O repo tambem guarda regressao automatizada.
 - `src/components/day/day-shell.tsx` compoe a superficie diaria.
 - `src/components/day/day-bottom-tabs.tsx` mantem as lentes do dia na bottom
   bar persistente.
-- `src/components/timeline/*` renderiza eixo, wrappers e acao principal.
+- `src/components/timeline/*` renderiza eixo, wrappers de pagina e acao
+  principal. `TimelinePageView` e `TimelinePageItem` encapsulam o layout
+  de tipo unico (eixo esquerdo ou direito, card full-width).
 - `src/components/cards/*` renderiza cards reais, marker e ghost.
 - `src/components/reader/*` abre overlays de leitura.
   O Reader de nota organiza acao primaria, acoes secundarias e acao destrutiva
@@ -122,6 +127,29 @@ O Reader abre apenas item existente.
 O Editor opera em `create` e `edit`.
 `create` usa item novo.
 `edit` exige `id`.
+
+### `appearanceStore`
+
+- Guarda `mode` (`dark` ou `light`).
+- Guarda `accent` (`green`, `slate` ou `amber`).
+- Guarda `density` (`compact`, `normal` ou `airy`).
+- Persiste preferencias locais em AsyncStorage.
+- Nao participa de queries, dominio de tarefa/nota, auth, calendario,
+  navegacao temporal ou derivacao da timeline.
+- A densidade altera espacamento, tamanho visual e previews dos cards, mas nao
+  remove itens nem altera a orientacao renderizada.
+
+### Visual System
+
+- `src/theme/fonts.ts` centraliza as fontes carregadas no root Expo com
+  `expo-font` e pacotes `@expo-google-fonts/*`.
+- A tipografia do produto usa `Bitter` para titulos/identidade e `Cabin` para
+  corpo, controles e metadados.
+- Header e calendario compoem uma unica superficie visual na tela do dia; o
+  calendario mensal expande dentro desse mesmo bloco, substitui a faixa semanal
+  enquanto aberto e usa os mesmos chevrons para navegacao mensal.
+- Bottom bar e sheets sao superficies de app, nao containers decorativos
+  aninhados: preservam SafeArea e testIDs, mas evitam "box dentro de box".
 
 ## Data Strategy
 
@@ -264,6 +292,8 @@ O baseline precisa destes estados:
 - tarefa agendada.
 - ghost card.
 - breadcrumb de retorno.
+- sheet de Ajustes com modo claro/escuro, cor de destaque e densidade da
+  timeline.
 
 ## Current Baseline Boundaries
 
@@ -275,6 +305,7 @@ Implementado hoje:
 - tarefa projected com ghost e breadcrumb.
 - leitura, criacao manual, remocao e navegacao contextual de ecos diretos.
 - continuacao atomica de nota por RPC `continue_note`.
+- ajustes locais de aparencia para modo, destaque e densidade.
 - regressao automatizada do corte.
 
 Canon absorvido para fases futuras:
@@ -286,8 +317,14 @@ Canon absorvido para fases futuras:
 
 - `.docguard.json` regula o enforcement documental.
 - `.agents/` guarda skills do projeto.
+- `.claude/` guarda configuracoes auxiliares de agentes Claude, sem substituir
+  `AGENTS.md` ou os canones executaveis.
 - `.agent/` e `commands/` podem surgir por automacao.
+- `.remember/` guarda memoria/cache local de ferramentas e nao participa do
+  runtime do app.
+- `.pnpm-store/` guarda cache local do pnpm para instalacao offline/isolada.
 - `app.json`, `babel.config.js`, `metro.config.js` e `tsconfig.json` sustentam runtime e build local.
+- `eas.json` sustenta perfis de build EAS quando o app sair do ciclo local.
 - `eslint.config.js` e `jest.config.js` sustentam os gates tecnicos.
 
 ## Diagrams
@@ -308,6 +345,8 @@ flowchart TD
 
 ## Revision History
 
+- 2026-05-27 - Design v2 aplicado como linguagem visual mobile dark-first e
+  `appearanceStore` registrado para Ajustes locais.
 - 2026-05-13 - Correcoes do smoke S21 em `003-mobile-day-shell-ux`: bottom bar,
   calendario mensal inline, chrome colapsavel, preview de notas e eco inicial
   na criacao de nota.

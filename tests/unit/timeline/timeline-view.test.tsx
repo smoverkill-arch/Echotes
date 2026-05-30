@@ -91,8 +91,6 @@ const renderTimelineView = (
   nodes: TimelineNode[],
   overrides: Partial<Parameters<typeof TimelineView>[0]> = {},
 ) => {
-  const onCreateNote = jest.fn();
-  const onCreateTask = jest.fn();
   const onOpenReader = jest.fn();
   const onOpenEditor = jest.fn();
   const onNavigateToTask = jest.fn();
@@ -103,8 +101,6 @@ const renderTimelineView = (
       nodes={nodes}
       isLoading={false}
       errorMessage={null}
-      onCreateNote={onCreateNote}
-      onCreateTask={onCreateTask}
       onOpenReader={onOpenReader}
       onOpenEditor={onOpenEditor}
       onNavigateToTask={onNavigateToTask}

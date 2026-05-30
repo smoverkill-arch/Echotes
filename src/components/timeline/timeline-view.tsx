@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -8,14 +8,6 @@ import {
   View,
 } from "react-native";
 
-import {
-  colors,
-  fontFamily,
-  lineHeight,
-  radius,
-  spacing,
-  typography,
-} from "../../theme/tokens";
 import type { Note } from "../../types/note";
 import type { Task } from "../../types/task";
 import type { DayTab, TimelineItemKind, TimelineNode } from "../../types/timeline";
@@ -25,7 +17,6 @@ import { TaskCardReal } from "../cards/task-card-real";
 import { TaskCardTimed } from "../cards/task-card-timed";
 import { TaskCreationMarker } from "../cards/task-creation-marker";
 import { TimelineItemWrapper } from "./timeline-item-wrapper";
-import { TimelinePlusButton } from "./timeline-plus-button";
 
 interface TimelineFeedbackCopy {
   loadingTitle: string;
@@ -40,24 +31,24 @@ const feedbackCopyByTab: Record<DayTab, TimelineFeedbackCopy> = {
     loadingTitle: "Carregando o dia...",
     loadingLabel: "Carregando a timeline do dia.",
     errorTitle: "Falha ao carregar a timeline",
-    emptyTitle: "Hoje ainda em branco.",
+    emptyTitle: "Nada registrado neste dia ainda.",
     emptyBody:
-      "Use o + para criar uma nota, uma tarefa deste dia ou projetar uma tarefa para outro dia.",
+      "Use o botao + para criar uma nota, uma tarefa deste dia ou uma tarefa projetada para outro dia.",
   },
   tasks: {
     loadingTitle: "Carregando as tarefas...",
     loadingLabel: "Carregando as tarefas do dia.",
     errorTitle: "Falha ao carregar as tarefas",
-    emptyTitle: "Nenhuma tarefa neste recorte.",
+    emptyTitle: "Nenhuma tarefa neste recorte ainda.",
     emptyBody:
-      "Use o + para criar uma tarefa deste dia ou projetar uma para outro dia.",
+      "Use o botao + para criar uma tarefa deste dia ou uma tarefa projetada para outro dia.",
   },
   notes: {
     loadingTitle: "Carregando as notas...",
     loadingLabel: "Carregando as notas do dia.",
     errorTitle: "Falha ao carregar as notas",
-    emptyTitle: "Nenhuma nota neste recorte.",
-    emptyBody: "Use o + para registrar uma ideia ou pensamento do dia.",
+    emptyTitle: "Nenhuma nota neste recorte ainda.",
+    emptyBody: "Use o botao + para criar uma nota deste dia.",
   },
 };
 
@@ -66,14 +57,11 @@ interface TimelineViewProps {
   nodes: TimelineNode[];
   isLoading: boolean;
   errorMessage: string | null;
-  onCreateNote: () => void;
-  onCreateTask: () => void;
   onOpenReader: (kind: TimelineItemKind, id: string) => void;
   onOpenEditor: (kind: TimelineItemKind, id: string) => void;
   onNavigateToTask: (task: Task) => void;
   onScrollInteractionStart?: () => void;
   onScrollInteractionEnd?: () => void;
-  isChromeVisible?: boolean;
   contentTopInset?: number;
 }
 
@@ -82,21 +70,17 @@ export function TimelineView({
   nodes,
   isLoading,
   errorMessage,
-  onCreateNote,
-  onCreateTask,
   onOpenReader,
   onOpenEditor,
   onNavigateToTask,
   onScrollInteractionStart,
   onScrollInteractionEnd,
-  isChromeVisible = true,
   contentTopInset = 0,
 }: TimelineViewProps) {
   const pendingPressRef = useRef<{
     id: string;
     timeoutId: ReturnType<typeof setTimeout>;
   } | null>(null);
-  const [isPlusSheetOpen, setIsPlusSheetOpen] = useState(false);
   const copy = feedbackCopyByTab[activeTab];
   const isTimelineTab = activeTab === "timeline";
 
@@ -105,12 +89,6 @@ export function TimelineView({
       clearPendingPress();
     };
   }, []);
-
-  useEffect(() => {
-    if (isLoading) {
-      setIsPlusSheetOpen(false);
-    }
-  }, [isLoading]);
 
   const clearPendingPress = () => {
     if (!pendingPressRef.current) {
@@ -180,16 +158,6 @@ export function TimelineView({
     return null;
   };
 
-  const handleOpenNoteEditor = () => {
-    setIsPlusSheetOpen(false);
-    onCreateNote();
-  };
-
-  const handleOpenTaskEditor = () => {
-    setIsPlusSheetOpen(false);
-    onCreateTask();
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.contentArea}>
@@ -202,7 +170,7 @@ export function TimelineView({
             style={styles.loadingCard}
             testID="timeline-loading-state"
           >
-            <ActivityIndicator color={colors.textMuted} size="small" />
+            <ActivityIndicator color="#475569" size="small" />
             <Text style={styles.loadingTitle}>{copy.loadingTitle}</Text>
           </View>
         ) : null}
@@ -286,19 +254,6 @@ export function TimelineView({
           </ScrollView>
         ) : null}
 
-        <TimelinePlusButton
-          isSheetOpen={isPlusSheetOpen}
-          onOpenSheet={() => {
-            setIsPlusSheetOpen(true);
-          }}
-          onCloseSheet={() => {
-            setIsPlusSheetOpen(false);
-          }}
-          onCreateNote={handleOpenNoteEditor}
-          onCreateTask={handleOpenTaskEditor}
-          isDisabled={isLoading}
-          isChromeVisible={isChromeVisible}
-        />
       </View>
     </View>
   );
@@ -315,39 +270,38 @@ const styles = StyleSheet.create({
   loadingCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.md,
-    borderRadius: radius.lg,
+    gap: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
+    borderColor: "#dbe4ee",
+    backgroundColor: "#ffffff",
+    padding: 16,
   },
   loadingTitle: {
-    fontFamily: fontFamily.bodyMedium,
-    fontSize: typography.body,
-    color: colors.textMuted,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#334155",
   },
   feedbackCard: {
-    borderRadius: radius.lg,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.dangerBorder,
-    backgroundColor: colors.dangerSoft,
-    padding: spacing.lg,
+    borderColor: "#fecaca",
+    backgroundColor: "#fef2f2",
+    padding: 16,
   },
   feedbackTitle: {
-    fontFamily: fontFamily.bodyBold,
-    fontSize: typography.body,
-    color: colors.danger,
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#991b1b",
   },
   feedbackBody: {
-    fontFamily: fontFamily.bodyRegular,
-    marginTop: spacing.xs,
-    fontSize: typography.body,
-    lineHeight: typography.body * lineHeight.normal,
-    color: colors.danger,
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#7f1d1d",
   },
   scrollContent: {
-    gap: spacing.md,
+    gap: 12,
     paddingBottom: 96,
   },
   scrollView: {
@@ -355,10 +309,10 @@ const styles = StyleSheet.create({
   },
   timelineFrame: {
     position: "relative",
-    gap: spacing.sm,
+    gap: 10,
   },
   linearList: {
-    gap: spacing.md,
+    gap: 12,
   },
   listCardButton: {
     width: "100%",
@@ -373,25 +327,24 @@ const styles = StyleSheet.create({
     left: "50%",
     marginLeft: -1,
     width: 2,
-    backgroundColor: colors.border,
+    backgroundColor: "#cbd5e1",
   },
   emptyState: {
-    borderRadius: radius.lg,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
+    borderColor: "#e5e7eb",
+    backgroundColor: "#ffffff",
+    padding: 18,
   },
   emptyTitle: {
-    fontFamily: fontFamily.displaySemiBold,
-    fontSize: typography.bodyLarge,
-    color: colors.text,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
   },
   emptyBody: {
-    fontFamily: fontFamily.bodyRegular,
-    marginTop: spacing.sm,
-    fontSize: typography.body,
-    lineHeight: typography.body * lineHeight.normal,
-    color: colors.textMuted,
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#4b5563",
   },
 });

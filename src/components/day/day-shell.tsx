@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LayoutChangeEvent } from "react-native";
 import { StyleSheet, View } from "react-native";
 import Animated, {
@@ -8,6 +8,8 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import PagerView from "react-native-pager-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AuthErrorBanner } from "../auth/auth-error-banner";
 import type {
@@ -26,14 +28,20 @@ import type { AuthStatus } from "../../types/auth";
 import { colors, spacing } from "../../theme/tokens";
 import { BreadcrumbBar } from "./breadcrumb-bar";
 import { DayHeader } from "./day-header";
+import { DayBottomTabs } from "./day-bottom-tabs";
+import { SettingsSheet } from "./settings-sheet";
+import { useAppearancePalette } from "../../stores/appearance-store";
 import { TaskEditor } from "../forms/task-editor";
 import { NoteEditor } from "../forms/note-editor";
 import { ContinueNoteEditor } from "../forms/continue-note-editor";
 import { NoteEchoPicker } from "../reader/note-echo-picker";
 import { NoteReader } from "../reader/note-reader";
 import { TaskReader } from "../reader/task-reader";
-import { TimelineView } from "../timeline/timeline-view";
-import { DayBottomTabs } from "./day-bottom-tabs";
+import {
+  TimelinePageView,
+  taskPageFeedback,
+  notePageFeedback,
+} from "../timeline/timeline-page-view";
 
 export interface DayShellSavedOptions {
   openReader?: {
@@ -54,7 +62,8 @@ interface DayShellProps {
   calendarMode: CalendarMode;
   readerState: ReaderState;
   editorState: EditorState;
-  timelineNodes: TimelineNode[];
+  taskNodes: TimelineNode[];
+  noteNodes: TimelineNode[];
   isTimelineLoading: boolean;
   timelineErrorMessage: string | null;
   temporalNavigationContext: TemporalNavigationContext | null;
@@ -102,7 +111,8 @@ export function DayShell({
   calendarMode,
   readerState,
   editorState,
-  timelineNodes,
+  taskNodes,
+  noteNodes,
   isTimelineLoading,
   timelineErrorMessage,
   temporalNavigationContext,
@@ -138,9 +148,18 @@ export function DayShell({
   onCloseEditor,
   onSaved,
 }: DayShellProps) {
+  const insets = useSafeAreaInsets();
+  const pagerRef = useRef<PagerView>(null);
   const chromeVisibility = useSharedValue(1);
+  const palette = useAppearancePalette();
   const [isChromeVisible, setIsChromeVisible] = useState(true);
   const [chromeHeight, setChromeHeight] = useState(0);
+  const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+
+  // Sync pager position when tab changes via tap (not swipe)
+  useEffect(() => {
+    pagerRef.current?.setPage(activeTab === "notes" ? 1 : 0);
+  }, [activeTab]);
 
   const showChrome = useCallback(() => {
     setIsChromeVisible(true);
@@ -160,28 +179,39 @@ export function DayShell({
 
   const handleChromeLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = event.nativeEvent.layout.height;
-
-    setChromeHeight((currentHeight) =>
-      Math.abs(currentHeight - nextHeight) > 1 ? nextHeight : currentHeight,
+    setChromeHeight((current) =>
+      Math.abs(current - nextHeight) > 1 ? nextHeight : current,
     );
   }, []);
 
   const chromeAnimatedStyle = useAnimatedStyle(() => ({
     opacity: chromeVisibility.value,
     transform: [
-      {
-        translateY: interpolate(chromeVisibility.value, [0, 1], [-32, 0]),
-      },
+      { translateY: interpolate(chromeVisibility.value, [0, 1], [-32, 0]) },
     ],
   }));
 
+  const contentTopInset = chromeHeight + spacing.md;
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: palette.background,
+        },
+      ]}
+    >
       <AuthErrorBanner status={authStatus} message={authErrorMessage} />
 
       <Animated.View
         pointerEvents={isChromeVisible ? "auto" : "none"}
-        style={[styles.chromeOverlay, chromeAnimatedStyle]}
+        style={[
+          styles.chromeOverlay,
+          chromeAnimatedStyle,
+          { top: insets.top, left: 0, right: 0 },
+        ]}
         onLayout={handleChromeLayout}
       >
         <DayHeader
@@ -193,6 +223,7 @@ export function DayShell({
           onDateChange={onDateChange}
           onCalendarModeChange={onCalendarModeChange}
           onSignOut={onSignOut}
+          onSettings={() => setIsSettingsVisible(true)}
         />
 
         {temporalNavigationContext ? (
@@ -204,23 +235,59 @@ export function DayShell({
         ) : null}
       </Animated.View>
 
-      <TimelineView
-        activeTab={activeTab}
-        nodes={timelineNodes}
-        isLoading={isTimelineLoading}
-        errorMessage={timelineErrorMessage}
-        onCreateNote={onCreateNote}
-        onCreateTask={onCreateTask}
-        onOpenReader={onOpenReader}
-        onOpenEditor={onOpenEditor}
-        onNavigateToTask={onNavigateToTask}
-        onScrollInteractionEnd={showChrome}
-        onScrollInteractionStart={hideChrome}
-        isChromeVisible={isChromeVisible}
-        contentTopInset={chromeHeight + spacing.md}
-      />
+      <PagerView
+        ref={pagerRef}
+        style={styles.pager}
+        initialPage={activeTab === "notes" ? 1 : 0}
+        onPageSelected={(e) => {
+          const page = e.nativeEvent.position;
+          onTabChange(page === 0 ? "tasks" : "notes");
+        }}
+      >
+        <View key="tasks" style={styles.page}>
+          <TimelinePageView
+            axisPosition="left"
+            nodes={taskNodes}
+            isLoading={isTimelineLoading}
+            errorMessage={timelineErrorMessage}
+            feedback={taskPageFeedback}
+            onOpenReader={onOpenReader}
+            onOpenEditor={onOpenEditor}
+            onNavigateToTask={onNavigateToTask}
+            onScrollInteractionStart={hideChrome}
+            onScrollInteractionEnd={showChrome}
+            contentTopInset={contentTopInset}
+            testID="task-timeline-page"
+          />
+        </View>
 
-      <DayBottomTabs activeTab={activeTab} onTabChange={onTabChange} />
+        <View key="notes" style={styles.page}>
+          <TimelinePageView
+            axisPosition="right"
+            nodes={noteNodes}
+            isLoading={isTimelineLoading}
+            errorMessage={timelineErrorMessage}
+            feedback={notePageFeedback}
+            onOpenReader={onOpenReader}
+            onOpenEditor={onOpenEditor}
+            onNavigateToTask={onNavigateToTask}
+            onScrollInteractionStart={hideChrome}
+            onScrollInteractionEnd={showChrome}
+            contentTopInset={contentTopInset}
+            testID="note-timeline-page"
+          />
+        </View>
+      </PagerView>
+
+      <View style={styles.tabsWrapper}>
+        <DayBottomTabs
+          activeTab={activeTab}
+          isDisabled={isTimelineLoading}
+          onTabChange={onTabChange}
+          onCreateNote={onCreateNote}
+          onCreateTask={onCreateTask}
+        />
+      </View>
 
       <NoteReader
         visible={readerState.isOpen && readerState.kind === "note"}
@@ -228,9 +295,7 @@ export function DayShell({
         relatedNotes={relatedNotes}
         onClose={onCloseReader}
         onEdit={() => {
-          if (activeNote) {
-            onOpenEditor("note", activeNote.id);
-          }
+          if (activeNote) onOpenEditor("note", activeNote.id);
         }}
         onOpenRelatedNote={onOpenRelatedNote}
         onReloadRelatedNote={onReloadRelatedNote}
@@ -269,9 +334,7 @@ export function DayShell({
         }
         onClose={onCloseReader}
         onEdit={() => {
-          if (activeTask) {
-            onOpenEditor("task", activeTask.id);
-          }
+          if (activeTask) onOpenEditor("task", activeTask.id);
         }}
       />
 
@@ -306,6 +369,11 @@ export function DayShell({
           await onSaved();
         }}
       />
+
+      <SettingsSheet
+        visible={isSettingsVisible}
+        onClose={() => setIsSettingsVisible(false)}
+      />
     </View>
   );
 }
@@ -313,17 +381,20 @@ export function DayShell({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: spacing.md,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.xl,
     backgroundColor: colors.background,
   },
   chromeOverlay: {
     position: "absolute",
-    top: spacing.xl,
-    left: spacing.xl,
-    right: spacing.xl,
     zIndex: 3,
     gap: spacing.md,
+  },
+  pager: {
+    flex: 1,
+  },
+  page: {
+    flex: 1,
+  },
+  tabsWrapper: {
+    marginHorizontal: 0,
   },
 });

@@ -1,15 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
-import {
-  colors,
-  fontFamily,
-  letterSpacing,
-  lineHeight,
-  radius,
-  spacing,
-  touchTarget,
-  typography,
-} from "../../theme/tokens";
+import { useAppearancePalette } from "../../stores/appearance-store";
+import { radius, spacing, typography } from "../../theme/tokens";
 import { formatDisplayDay } from "../../utils/date";
 
 interface BreadcrumbBarProps {
@@ -23,27 +14,42 @@ export function BreadcrumbBar({
   destinationDate,
   onReturn,
 }: BreadcrumbBarProps) {
+  const palette = useAppearancePalette();
   const formattedSourceDate = formatDisplayDay(sourceDate);
   const formattedDestinationDate = formatDisplayDay(destinationDate);
 
   return (
-    <View style={styles.container} testID="breadcrumb-bar">
+    <View
+      style={[
+        styles.container,
+        { borderColor: palette.primary, backgroundColor: palette.primarySoft },
+      ]}
+      testID="breadcrumb-bar"
+    >
       <View style={styles.copyBlock}>
-        <Text style={styles.eyebrow}>Contexto temporal</Text>
-        <Text style={styles.title}>Item real em {formattedDestinationDate}</Text>
-        <Text style={styles.body}>Criada em {formattedSourceDate}</Text>
+        <Text style={[styles.eyebrow, { color: palette.primary }]}>
+          Contexto temporal
+        </Text>
+        <Text style={[styles.title, { color: palette.text }]}>
+          Item real em {formattedDestinationDate}
+        </Text>
+        <Text style={[styles.body, { color: palette.textMuted }]}>
+          Criada em {formattedSourceDate}
+        </Text>
       </View>
 
       <Pressable
         accessibilityRole="button"
         style={({ pressed }) => [
           styles.button,
-          pressed ? styles.buttonPressed : null,
+          { backgroundColor: pressed ? palette.primaryPressed : palette.primary },
         ]}
         testID="breadcrumb-return-button"
         onPress={onReturn}
       >
-        <Text style={styles.buttonLabel}>← {formattedSourceDate}</Text>
+        <Text style={[styles.buttonLabel, { color: palette.primaryText }]}>
+          Voltar para {formattedSourceDate}
+        </Text>
       </Pressable>
     </View>
   );
@@ -55,49 +61,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: spacing.lg,
-    borderRadius: radius.xl,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.noteBorder,
-    backgroundColor: colors.noteSoft,
-    padding: spacing.lg,
+    padding: spacing.md,
   },
   copyBlock: {
     flex: 1,
   },
   eyebrow: {
-    fontFamily: fontFamily.bodyExtraBold,
     fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: letterSpacing.wider,
-    color: colors.note,
+    letterSpacing: 1.4,
   },
   title: {
-    fontFamily: fontFamily.displaySemiBold,
-    marginTop: spacing.sm,
-    fontSize: typography.bodyLarge,
-    lineHeight: typography.bodyLarge * lineHeight.snug,
-    color: colors.text,
+    marginTop: spacing.xs,
+    fontSize: typography.body,
+    fontWeight: "800",
   },
   body: {
-    fontFamily: fontFamily.bodyRegular,
-    marginTop: spacing.xs,
+    marginTop: spacing.xxs,
     fontSize: typography.caption,
-    color: colors.textMuted,
   },
   button: {
-    minHeight: touchTarget.min,
-    borderRadius: radius.md,
+    minHeight: 44,
+    borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.text,
-    paddingHorizontal: spacing.lg,
-  },
-  buttonPressed: {
-    opacity: 0.88,
+    backgroundColor: "#111827",
+    paddingHorizontal: spacing.md,
   },
   buttonLabel: {
-    fontFamily: fontFamily.bodyBold,
     fontSize: typography.caption,
-    color: colors.white,
+    fontWeight: "800",
   },
 });

@@ -5,7 +5,8 @@
       "Bash(gh api *)",
       "Bash(python3 -c ' *)",
       "Bash(corepack pnpm *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(findstr /I \"pager gesture reanimated navigation\")"
     ]
   }
 }

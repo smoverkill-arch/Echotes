@@ -1,66 +1,78 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import {
-  colors,
-  fontFamily,
-  letterSpacing,
-  lineHeight,
-  radius,
-  shadow,
-  spacing,
-  typography,
-} from "../../theme/tokens";
+  densityMetrics,
+  useAppearancePalette,
+  useAppearanceStore,
+} from "../../stores/appearance-store";
 import type { Task } from "../../types/task";
+import { radius, spacing, typography } from "../../theme/tokens";
 
 interface TaskCardRealProps {
   task: Task;
 }
 
 export function TaskCardReal({ task }: TaskCardRealProps) {
+  const palette = useAppearancePalette();
+  const density = useAppearanceStore((state) => state.density);
+  const metrics = densityMetrics[density];
+
   return (
-    <View style={styles.card} testID={`task-card-real-${task.id}`}>
-      <Text style={styles.eyebrow}>Tarefa</Text>
-      <Text style={styles.title}>{task.title}</Text>
-      {task.content ? <Text style={styles.body}>{task.content}</Text> : null}
-      <Text style={styles.footer}>Sem horário agendado</Text>
+    <View
+      style={[
+        styles.card,
+        {
+          borderColor: palette.border,
+          borderLeftColor: palette.task,
+          backgroundColor: palette.surface,
+          paddingVertical: metrics.cardPaddingVertical,
+          paddingHorizontal: metrics.cardPaddingHorizontal,
+          shadowColor: palette.shadowColor,
+        },
+      ]}
+      testID={`task-card-real-${task.id}`}
+    >
+      <Text style={[styles.eyebrow, { color: palette.task }]}>Tarefa</Text>
+      <Text style={[styles.title, { color: palette.text, fontSize: metrics.taskTitleSize }]}>
+        {task.title}
+      </Text>
+      {task.content && metrics.showPreview ? (
+        <Text
+          numberOfLines={2}
+          style={[
+            styles.body,
+            { color: palette.textMuted, lineHeight: metrics.previewLineHeight },
+          ]}
+        >
+          {task.content}
+        </Text>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.xl,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.taskBorder,
-    backgroundColor: colors.taskSoft,
-    padding: spacing.lg,
-    ...shadow.sm,
+    borderLeftWidth: 3,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
   },
   eyebrow: {
-    fontFamily: fontFamily.bodyExtraBold,
     fontSize: typography.eyebrow,
+    fontWeight: "800",
     textTransform: "uppercase",
-    letterSpacing: letterSpacing.wider,
-    color: colors.task,
+    letterSpacing: 1.4,
   },
   title: {
-    fontFamily: fontFamily.displayBold,
-    marginTop: spacing.sm,
-    fontSize: typography.bodyLarge,
-    lineHeight: typography.bodyLarge * lineHeight.snug,
-    color: colors.text,
+    marginTop: spacing.xs,
+    fontWeight: "800",
   },
   body: {
-    fontFamily: fontFamily.bodyRegular,
-    marginTop: spacing.sm,
-    fontSize: typography.body,
-    lineHeight: typography.body * lineHeight.normal,
-    color: colors.textMuted,
-  },
-  footer: {
-    fontFamily: fontFamily.bodyMedium,
-    marginTop: spacing.sm,
-    fontSize: typography.caption,
-    color: colors.task,
+    marginTop: spacing.xs,
+    fontSize: 13,
   },
 });

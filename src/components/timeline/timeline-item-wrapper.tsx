@@ -1,21 +1,12 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { colors, radius, spacing } from "../../theme/tokens";
 import type { TimelineNode } from "../../types/timeline";
 
 type TimelineSide = "left" | "right";
 
 const resolveTimelineSide = (node: TimelineNode): TimelineSide =>
   node.type === "note" ? "right" : "left";
-
-/** Resolve a cor do dot do eixo com base no tipo do nó da timeline. */
-const resolveAxisDotBorderColor = (node: TimelineNode): string => {
-  if (node.type === "note") return colors.note;
-  if (node.type === "task_timed") return colors.taskTimed;
-  if (node.type === "task_ghost") return colors.taskGhost;
-  return colors.task;
-};
 
 interface TimelineItemWrapperProps {
   node: TimelineNode;
@@ -29,7 +20,6 @@ export function TimelineItemWrapper({
   children,
 }: TimelineItemWrapperProps) {
   const side = resolveTimelineSide(node);
-  const dotBorderColor = resolveAxisDotBorderColor(node);
 
   return (
     <View style={styles.row} testID={`timeline-item-wrapper-${side}-${node.id}`}>
@@ -53,10 +43,7 @@ export function TimelineItemWrapper({
       </View>
 
       <View style={styles.axisColumn}>
-        <View
-          style={[styles.axisDot, { borderColor: dotBorderColor }]}
-          testID={`timeline-axis-dot-${node.id}`}
-        />
+        <View style={styles.axisDot} testID={`timeline-axis-dot-${node.id}`} />
       </View>
 
       <View style={[styles.sideColumn, styles.rightColumn]}>
@@ -92,10 +79,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   leftColumn: {
-    paddingRight: spacing.lg,
+    paddingRight: 16,
   },
   rightColumn: {
-    paddingLeft: spacing.lg,
+    paddingLeft: 16,
   },
   axisColumn: {
     width: 32,
@@ -105,14 +92,14 @@ const styles = StyleSheet.create({
   axisDot: {
     width: 14,
     height: 14,
-    borderRadius: radius.pill,
+    borderRadius: 7,
     borderWidth: 2,
-    // borderColor é injetado dinamicamente via resolveAxisDotBorderColor
-    backgroundColor: colors.surface,
+    borderColor: "#94a3b8",
+    backgroundColor: "#ffffff",
   },
   nodeButton: {
     width: "92%",
-    borderRadius: radius.xl,
+    borderRadius: 18,
   },
   nodeButtonLeft: {
     alignSelf: "flex-end",

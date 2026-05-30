@@ -7,76 +7,60 @@ versioned releases when they start to exist.
 
 ## [Unreleased]
 
-### Added — Frente A: Design System Foundation (UI/UX Upgrade)
+### Added (004-dual-timeline-nav)
 
-- **`src/theme/tokens.ts`**: expansão completa do sistema de design tokens.
-  Adicionados `colorsDark` (paleta dark mode Editorial Orgânica completa),
-  `fontFamily` (Lora serif + Inter sans-serif), `shadow` (sm/md/lg),
-  `lineHeight`, `letterSpacing`, `radius.xl/xxl`, `spacing.xxxl` e tokens
-  semânticos faltantes: `noteBorder`, `taskBorder`, `taskTimed*`, `taskGhost*`,
-  `dangerBorder`, `overlay`.
-
-- **`app/_layout.tsx`**: carregamento de fontes customizadas via `useFonts`.
-  Fontes registradas: `Lora_600SemiBold`, `Lora_700Bold`, `Inter_400Regular`,
-  `Inter_500Medium`, `Inter_600SemiBold`, `Inter_700Bold`, `Inter_800ExtraBold`.
-  `SplashScreen.preventAutoHideAsync()` mantém splash visível até fontes prontas.
-
-- **`package.json`**: dependências adicionadas — `expo-font ~14.0.0`,
-  `expo-splash-screen ~0.29.0`, `@expo-google-fonts/lora ^0.3.0`,
-  `@expo-google-fonts/inter ^0.3.0`. Executar `corepack pnpm install`.
-
-### Changed — Frente A: Design System Foundation (UI/UX Upgrade)
-
-- **`src/components/cards/task-card-real.tsx`**: migrado de hardcodes para
-  tokens (`colors.taskBorder`, `colors.taskSoft`, `fontFamily`, `shadow.sm`,
-  `radius.xl`, `lineHeight`, `letterSpacing`). Copy corrigido: "Sem horário
-  agendado".
-
-- **`src/components/cards/task-card-timed.tsx`**: migrado para tokens
-  `taskTimedBorder`, `taskTimedSoft`, `taskTimed`. Copy corrigido: "Horário:
-  HH:MM".
-
-- **`src/components/cards/task-card-ghost.tsx`**: migrado para tokens
-  `taskGhostBorder`, `taskGhostSoft`, `taskGhost`. Eyebrow corrigido de **"Ghost
-  card"** para **"Projetada"** (terminologia interna removida). Footer com "→"
-  e acentuação correta.
-
-- **`src/components/cards/note-card-real.tsx`**: aplicados `fontFamily`,
-  `shadow.sm`, `radius.xl`, `noteBorder`, `lineHeight`, `letterSpacing`.
-  Badge de eco com copy condicional singular/plural.
-
-- **`src/components/timeline/timeline-item-wrapper.tsx`**: axis dot migrado
-  de cor fixa `#94a3b8` para cor semântica por tipo de nó (`colors.note`,
-  `colors.task`, `colors.taskTimed`, `colors.taskGhost`). Padding do eixo e
-  `borderRadius` via tokens.
-
-- **`src/components/timeline/timeline-view.tsx`**: todos os hardcodes de cor
-  nos estados loading/error/empty e no axis rail migrados para tokens. Tipografia
-  com `fontFamily` e `lineHeight`. Copy dos empty states reescrito.
-
-- **`src/components/day/day-header.tsx`**: ícones `ChevronLeft`/`ChevronRight`
-  do Lucide substituem os caracteres `"<"` e `">"`. Botão sign-out recebe ícone
-  `LogOut` em lugar de texto. Tipografia completa com `fontFamily` (Lora no
-  título do dia, Inter nas labels). Textos com acentuação correta.
-
-- **`src/components/day/day-bottom-tabs.tsx`**: label "TIME LINE" corrigido
-  para "Timeline". Ícones com `strokeWidth` dinâmico por estado ativo. Sombra
-  `shadow.sm`. `fontFamily` com variação regular/extraBold por estado.
-
-- **`src/components/day/breadcrumb-bar.tsx`**: migrado inteiramente para tokens.
-  Estilo harmonizado com nota (usa `noteSoft`/`noteBorder`). Botão de retorno
-  com `fontFamily.bodyBold`.
-
-- **`src/components/timeline/timeline-plus-button.tsx`**: FAB com ícone `<Plus
-  />` do Lucide substituindo o caractere `"+"`. Sheet redesenhada com ícones
-  `StickyNote`/`CheckSquare` por opção, botão `<X />` de fechar no header,
-  `shadow.md` no FAB, `borderRadius` `radius.xxl` no topo do sheet, overlay
-  via `colors.overlay`.
+- **Design v2 aplicado à superfície mobile**: linguagem dark-first com
+  superfícies charcoal, acentos configuráveis, sombras duras, cards com borda
+  lateral, calendário/header compacto e bottom bar/FAB alinhados ao handoff.
+- **Ajustes reais de aparência**: novo `appearanceStore` persistido em
+  AsyncStorage para modo claro/escuro, cor de destaque (`green`, `slate`,
+  `amber`) e densidade (`compact`, `normal`, `airy`).
+- **`SettingsSheet`**: sheet de Ajustes plugado no header do dia, com controles
+  funcionais e testes unitários para confirmar persistência local das escolhas.
+- **Reparo estrutural do Design v2**: header e calendario agora formam uma
+  unica superficie, a bottom bar encosta na edge inferior com SafeArea interna,
+  sheets deixam de parecer caixas aninhadas e a tipografia passa a usar fontes
+  Expo/Google carregadas no root do app.
+- **Calendario mensal expansivel no estilo do handoff**: o modo mensal agora
+  substitui a faixa semanal dentro do mesmo bloco, usa grade compacta de mes e
+  reaproveita os chevrons para navegar por meses enquanto estiver expandido.
+- **Dual-timeline navigation**: a superfície do dia agora entrega duas páginas
+  separadas por tipo — Task Timeline (eixo à esquerda, tarefas) e Note Timeline
+  (eixo à direita, notas) — com swipe horizontal via `react-native-pager-view`
+  (ViewPager2 equivalente).
+- **`TimelinePageItem`** e **`TimelinePageView`**: novos componentes de
+  renderização para páginas de timeline de tipo único; cards com `flex: 1`
+  (largura total real) sem coluna central.
+- **`DayBottomTabs` redesenhado**: layout de três colunas `[Tarefas] [FAB] [Notas]`;
+  FAB central de 56 × 56 px com `elevation: 6` perfurando a borda da bar; ícone
+  ativo reflete a página visível; FAB sempre abre sheet de escolha (nota ou tarefa);
+  após criação o app muda para a página do tipo criado quando o usuário está em
+  outra página.
+- **SafeArea integrado**: `useSafeAreaInsets` em `DayShell` elimina a
+  "moldura invisível" que impedia aproveitamento do espaço de tela.
+- **`useDayTimeline`** retorna `taskNodes` e `noteNodes` separados; o
+  parâmetro `activeTab` foi removido.
+- **Auto-switch de página**: após criação de nota enquanto na página de tarefas
+  (e vice-versa), o PagerView navega automaticamente para a página do item criado.
+- Mocks de teste adicionados: `__mocks__/react-native-pager-view.js` (renders
+  all pages simultaneously) e `__mocks__/react-native-safe-area-context.js`
+  (zero insets); ambos registrados em `jest.config.js`.
 
 ### Fixed
 
-
-
+- **Calendario mensal no mobile**: grade mensal renderiza seis linhas fixas de
+  sete colunas flexiveis, evitando que a coluna de sabado seja empurrada para
+  fora por `flexWrap` + largura percentual em telas estreitas.
+- **Android dev build**: configurado pnpm com `node-linker=isolated`,
+  `public-hoist-pattern[]=*`, `virtual-store-dir=.p` e
+  `virtual-store-dir-max-length=40` para encurtar caminhos fisicos de modulos
+  nativos no Windows e evitar falha de CMake/Ninja em `app:assembleDebug`.
+- **Android local run**: `pnpm run android` agora exporta o SDK definido em
+  `android/local.properties` antes de chamar o Expo, garantindo que `adb` seja
+  encontrado quando o SDK nao esta no caminho padrao do Windows.
+- **Android dev runtime**: alinhadas as versões nativas esperadas pelo Expo SDK
+  54 (`expo`, `expo-linking`, `expo-system-ui`, `react-native-pager-view` e
+  `react-native-svg`) para evitar `NoClassDefFoundError` ao abrir a dev build.
 - **`delete-note-echo.ts`**: lógica de falso positivo `already_removed` quando
   `echoId` não pertencia ao par `noteIdA/noteIdB`; adicionada verificação
   secundária por ID antes de concluir sucesso (Copilot review finding)

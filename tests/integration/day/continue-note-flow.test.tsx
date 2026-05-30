@@ -142,7 +142,7 @@ beforeEach(() => {
     pendingReaderOpen: null,
   });
   useUIStore.setState({
-    activeTab: "timeline",
+    activeTab: "tasks",
     readerState: { kind: null, id: null, isOpen: false },
     editorState: { mode: null, kind: null, id: null, isOpen: false },
   });

@@ -15,6 +15,7 @@ import { useCalendarStore } from "../../src/stores/calendar-store";
 import { useDayTimeline } from "../../src/features/day/hooks/use-day-timeline";
 import { useNavigationStore } from "../../src/stores/navigation-store";
 import { useUIStore } from "../../src/stores/ui-store";
+import { useAppearancePalette } from "../../src/stores/appearance-store";
 import type {
   ContinueNoteInput,
   NoteEchoCandidate,
@@ -43,6 +44,7 @@ const resolveDateParam = (
 };
 
 export default function ProtectedDayRoute() {
+  const palette = useAppearancePalette();
   const router = useRouter();
   const params = useLocalSearchParams<{ date?: string | string[] }>();
   const setSelectedDate = useCalendarStore((state) => state.setSelectedDate);
@@ -122,11 +124,12 @@ export default function ProtectedDayRoute() {
     notes,
     echoes,
     taskLookup,
-    timelineNodes,
+    taskNodes,
+    noteNodes,
     isLoading: isTimelineLoading,
     errorMessage: timelineErrorMessage,
     reload,
-  } = useDayTimeline(resolvedDate, activeTab);
+  } = useDayTimeline(resolvedDate);
   const handleDateChange = useCallback(
     (nextDate: string) => {
       if (nextDate === resolvedDate) {
@@ -449,18 +452,20 @@ export default function ProtectedDayRoute() {
 
   if (isBootstrapping || isSigningOut) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color="#111827" />
-        <Text style={styles.loadingText}>Carregando sua superficie diaria...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: palette.background }]}>
+        <ActivityIndicator size="small" color={palette.textMuted} />
+        <Text style={[styles.loadingText, { color: palette.textMuted }]}>
+          Carregando sua superficie diaria...
+        </Text>
       </View>
     );
   }
 
   if (authStatus === "config_error" || authStatus === "session_expired") {
     return (
-      <View style={styles.feedbackContainer}>
+      <View style={[styles.feedbackContainer, { backgroundColor: palette.background }]}>
         <AuthErrorBanner message={errorMessage} status={authStatus} />
-        <Text style={styles.feedbackText}>
+        <Text style={[styles.feedbackText, { color: palette.textMuted }]}>
           Redirecionando para o fluxo publico...
         </Text>
       </View>
@@ -490,7 +495,8 @@ export default function ProtectedDayRoute() {
       calendarMode={calendarMode}
       readerState={readerState}
       editorState={editorState}
-      timelineNodes={timelineNodes}
+      taskNodes={taskNodes}
+      noteNodes={noteNodes}
       isTimelineLoading={isTimelineLoading}
       timelineErrorMessage={timelineErrorMessage}
       temporalNavigationContext={destinationTemporalContext}
@@ -583,9 +589,18 @@ export default function ProtectedDayRoute() {
       onCloseReader={closeReader}
       onCloseEditor={closeEditor}
       onSaved={async (options?: DayShellSavedOptions) => {
+        // Capture before closeEditor clears the state
+        const createdKind = editorState.kind;
         await reload();
         closeEditor();
         closeReader();
+
+        // Auto-switch to the page matching the created item type
+        if (createdKind === "note" && activeTab !== "notes") {
+          setActiveTab("notes");
+        } else if (createdKind === "task" && activeTab !== "tasks") {
+          setActiveTab("tasks");
+        }
 
         if (options?.echoFeedbackMessage) {
           setEchoFeedbackMessage(options.echoFeedbackMessage);
@@ -605,23 +620,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    backgroundColor: "#f7f8fb",
   },
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: "#4b5563",
   },
   feedbackContainer: {
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
-    backgroundColor: "#f7f8fb",
   },
   feedbackText: {
     marginTop: 12,
     fontSize: 15,
-    color: "#4b5563",
   },
 });

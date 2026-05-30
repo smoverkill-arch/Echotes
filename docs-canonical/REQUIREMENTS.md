@@ -189,6 +189,13 @@
 - Breadcrumb deve comunicar retorno ao dia de origem.
 - A timeline deve reforcar a sensacao de avancar pelo dia, nao de navegar por
   uma lista generica.
+- `UI-APPEARANCE-001` A superficie diaria deve oferecer Ajustes de aparencia
+  locais para modo claro/escuro, cor de destaque e densidade da timeline.
+- `UI-APPEARANCE-002` Ajustes de aparencia nao podem alterar dominio, dados,
+  auth, criacao, Reader, Editor, ecos, ghost navigation ou ordenacao temporal.
+- `UI-APPEARANCE-003` A densidade da timeline deve afetar somente espacamento,
+  tamanho visual e exibicao de previews, preservando todos os itens e a
+  orientacao `task -> esquerda` / `note -> direita`.
 
 ## Non-Functional Requirements
 
@@ -249,10 +256,13 @@ retornar ao contexto original sem perder o vinculo temporal.
 | Projected tasks + breadcrumb | `src/features/timeline/utils/derive-timeline-nodes.ts`, `src/stores/navigation-store.ts`, `src/components/day/breadcrumb-bar.tsx` | `tests/integration/day/ghost-navigation.test.tsx`, `tests/integration/day/day-surface-regression.test.tsx` |
 | Timeline derivation + render axis | `src/features/day/hooks/*`, `src/components/timeline/*` | `tests/unit/timeline/*`, `tests/unit/day/use-day-entries.test.tsx` |
 | Note echo flows | `src/features/notes/api/*`, `src/features/notes/utils/*`, `src/components/reader/note-reader.tsx`, `src/components/forms/continue-note-editor.tsx`, `supabase/migrations/004_note_echo_flows.sql` | `tests/unit/notes/*`, `tests/integration/day/note-echo-*.test.tsx`, `tests/integration/day/continue-note-flow.test.tsx` |
+| Appearance preferences | `src/stores/appearance-store.ts`, `src/components/day/settings-sheet.tsx`, `src/theme/tokens.ts` | `tests/unit/day/settings-sheet.test.tsx`, `tests/unit/day/day-header-calendar.test.tsx` |
 
 ## Revision History
 
 - 2026-05-11 - `002-note-echo-flows` registrado como entrega ativa para ecos
   manuais e `continue_note`; mencoes inline permanecem fora do corte.
+- 2026-05-27 - Ajustes locais de aparencia registrados para modo, destaque e
+  densidade sem alterar dominio do dia.
 - 2026-04-26 - Requisitos ampliados com regras estruturais, dominio fechado de
   tarefas/notas e postura honesta de canon em consolidacao

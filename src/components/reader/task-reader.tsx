@@ -1,6 +1,7 @@
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import type { TemporalNavigationContext } from "../../stores/navigation-store";
+import { fontFamily } from "../../theme/fonts";
 import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import type { Task } from "../../types/task";
 import { extractTimePart, formatDisplayDay } from "../../utils/date";
@@ -134,8 +135,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     maxHeight: "88%",
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.md,
+    borderTopRightRadius: radius.md,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
@@ -160,13 +161,13 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.task,
   },
   title: {
     marginTop: spacing.xs,
     fontSize: typography.title,
-    fontWeight: "800",
+    fontFamily: fontFamily.display,
     color: colors.text,
   },
   closeButton: {
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: typography.bodyLarge,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   bodyScroll: {
@@ -196,20 +197,20 @@ const styles = StyleSheet.create({
   metaCard: {
     minWidth: "47%",
     flexGrow: 1,
-    borderRadius: radius.md,
-    backgroundColor: colors.taskSoft,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
   },
   metaLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.task,
   },
   metaValue: {
     marginTop: spacing.xxs,
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.text,
   },
   contextBlock: {
@@ -220,12 +221,13 @@ const styles = StyleSheet.create({
   },
   contextTitle: {
     fontSize: typography.body,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.task,
   },
   contextText: {
     marginTop: spacing.xxs,
     fontSize: typography.body,
+    fontFamily: fontFamily.body,
     color: colors.textMuted,
   },
   contentBlock: {
@@ -237,13 +239,14 @@ const styles = StyleSheet.create({
   },
   contentLabel: {
     fontSize: typography.caption,
-    fontWeight: "800",
+    fontFamily: fontFamily.bodyBold,
     color: colors.textMuted,
   },
   contentText: {
     marginTop: spacing.xs,
     fontSize: typography.bodyLarge,
     lineHeight: 24,
+    fontFamily: fontFamily.body,
     color: colors.text,
   },
   actions: {
@@ -263,7 +266,7 @@ const styles = StyleSheet.create({
   },
   secondaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodySemiBold,
     color: colors.text,
   },
   primaryButton: {
@@ -280,7 +283,7 @@ const styles = StyleSheet.create({
   },
   primaryLabel: {
     fontSize: typography.body,
-    fontWeight: "700",
+    fontFamily: fontFamily.bodyBold,
     color: colors.white,
   },
   buttonPressed: {
