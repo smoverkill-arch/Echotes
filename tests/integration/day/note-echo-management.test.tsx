@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react-native";
 import { Alert } from "react-native";
 
-import ProtectedDayRoute from "../../../app/day/[date]";
+import ProtectedDayRoute from "../../../app/day/[date]/note/[id]";
 import { useAuthStore } from "../../../src/stores/auth-store";
 import { useCalendarStore } from "../../../src/stores/calendar-store";
 import { useNavigationStore } from "../../../src/stores/navigation-store";
@@ -20,10 +20,13 @@ import { createSupabaseNoteEchoMock } from "../../support/supabase-note-echo-moc
 const mockRouter = {
   replace: jest.fn(),
   push: jest.fn(),
+  back: jest.fn(),
+  setParams: jest.fn(),
 };
 
-const mockSearchParams: { date?: string | string[] } = {
+const mockSearchParams: { date?: string | string[]; id?: string | string[] } = {
   date: "2026-05-01",
+  id: "10000000-0000-4000-8000-000000000001",
 };
 
 // @req 002-note-echo-flows:FR-006
@@ -127,16 +130,6 @@ const flushMicrotasks = async (passes = 5) => {
   }
 };
 
-const openSourceReader = async () => {
-  jest.useFakeTimers();
-  fireEvent.press(screen.getByTestId(`timeline-node-${sourceNote.id}:note`));
-  await act(async () => {
-    jest.advanceTimersByTime(250);
-  });
-  jest.useRealTimers();
-  await flushMicrotasks();
-};
-
 beforeEach(() => {
   jest.clearAllMocks();
   mockSearchParams.date = "2026-05-01";
@@ -159,9 +152,10 @@ beforeEach(() => {
     selectedDate: "2026-05-01",
     clockDate: "2026-05-01",
   });
+  mockSearchParams.date = "2026-05-01";
+  mockSearchParams.id = sourceNote.id;
   useNavigationStore.setState({
     temporalNavigationContext: null,
-    pendingReaderOpen: null,
   });
   useUIStore.setState({
     activeTab: "tasks",
@@ -189,7 +183,6 @@ describe("note echo management flow", () => {
 
     render(<ProtectedDayRoute />);
     await flushMicrotasks();
-    await openSourceReader();
 
     expect(
       await screen.findByTestId(

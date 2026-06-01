@@ -33,6 +33,9 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Kombai (artefato descartado)
+.kombai/
+
 # Playwright
 /test-results/
 /playwright-report/

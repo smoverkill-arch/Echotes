@@ -3,5 +3,5 @@ const { defineConfig, globalIgnores } = require("eslint/config");
 
 module.exports = defineConfig([
   expoConfig,
-  globalIgnores([".expo/*", "coverage/*", "dist/*"]),
+  globalIgnores([".expo/*", "coverage/*", "dist/*", ".remember/*"]),
 ]);

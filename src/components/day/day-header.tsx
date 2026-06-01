@@ -1,9 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 import type { CalendarMode } from "../../stores/calendar-store";
 import { useAppearancePalette } from "../../stores/appearance-store";
+import { BrandMark } from "../brand/brand-mark";
 import { fontFamily } from "../../theme/fonts";
-import { colors, radius, spacing, touchTarget, typography } from "../../theme/tokens";
+import { radius, spacing, touchTarget, typography } from "../../theme/tokens";
 import {
   addMonthsToDayKey,
   addWeeksToDayKey,
@@ -47,6 +49,7 @@ export function DayHeader({
   onSettings,
 }: DayHeaderProps) {
   const palette = useAppearancePalette();
+  const isToday = date === clockDate;
   const formattedDate = formatDisplayDay(date);
   const visibleWeek = getWeekRangeForSelectedDay(date);
   const monthGrid = getMonthGridForSelectedDay(date);
@@ -80,12 +83,8 @@ export function DayHeader({
         { borderBottomColor: palette.border, backgroundColor: palette.surface },
       ]}
     >
-      <View style={styles.topRow}>
-        <View style={styles.identityBlock}>
-          <Text style={[styles.eyebrow, { color: palette.primary }]}>Echotes</Text>
-          <Text style={[styles.title, { color: palette.text }]}>{formattedDate}</Text>
-          <Text style={[styles.subtitle, { color: palette.textSubtle }]}>{email}</Text>
-        </View>
+      <View style={styles.brandRow}>
+        <BrandMark size="sm" />
 
         <View style={styles.headerActions}>
           <Pressable
@@ -101,9 +100,7 @@ export function DayHeader({
             testID="day-header-settings-button"
             onPress={onSettings}
           >
-            <Text style={[styles.headerActionLabel, { color: palette.textMuted }]}>
-              Ajustes
-            </Text>
+            <Text style={[styles.headerActionLabel, { color: palette.textMuted }]}>Ajustes</Text>
           </Pressable>
 
           <Pressable
@@ -128,6 +125,21 @@ export function DayHeader({
             </Text>
           </Pressable>
         </View>
+      </View>
+
+      <View style={styles.identityBlock}>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: palette.text }]}>{formattedDate}</Text>
+          {isToday ? (
+            <View
+              style={[styles.todayChip, { backgroundColor: palette.primarySoft }]}
+              testID="day-header-today-chip"
+            >
+              <Text style={[styles.todayChipLabel, { color: palette.primary }]}>Hoje</Text>
+            </View>
+          ) : null}
+        </View>
+        <Text style={[styles.subtitle, { color: palette.textSubtle }]}>{email}</Text>
       </View>
 
       <View style={styles.calendarPanel}>
@@ -196,28 +208,28 @@ export function DayHeader({
         </View>
 
         {calendarMode === "week" ? (
-          <View style={styles.weekStrip}>
+          <Animated.View key="week" entering={FadeIn.duration(160)} style={styles.weekStrip}>
             {visibleWeek.map((day) => {
               const isSelected = day === date;
-              const isToday = day === clockDate;
+              const dayIsToday = day === clockDate;
 
               return (
                 <Pressable
                   key={day}
                   accessibilityLabel={`${formatWeekdayShort(day)} ${formatDisplayDay(day)}${
-                    isToday ? ", hoje" : ""
+                    dayIsToday ? ", hoje" : ""
                   }${isSelected ? ", selecionado" : ""}`}
                   accessibilityRole="button"
                   accessibilityState={{ selected: isSelected }}
                   style={({ pressed }) => [
                     styles.weekDayButton,
                     {
-                      borderColor: isSelected || isToday ? palette.primary : palette.border,
+                      borderColor: isSelected || dayIsToday ? palette.primary : palette.border,
                       backgroundColor: pressed
                         ? palette.surfacePressed
                         : isSelected
                           ? palette.primary
-                          : isToday
+                          : dayIsToday
                             ? palette.primarySoft
                             : palette.surfaceMuted,
                     },
@@ -241,7 +253,7 @@ export function DayHeader({
                       {
                         color: isSelected
                           ? palette.primaryText
-                          : isToday
+                          : dayIsToday
                             ? palette.primary
                             : palette.text,
                       },
@@ -252,9 +264,14 @@ export function DayHeader({
                 </Pressable>
               );
             })}
-          </View>
+          </Animated.View>
         ) : (
-          <View style={styles.monthSheet} testID="day-calendar-month-sheet">
+          <Animated.View
+            key="month"
+            entering={FadeIn.duration(160)}
+            style={styles.monthSheet}
+            testID="day-calendar-month-sheet"
+          >
             <View style={styles.monthWeekHeader}>
               {WEEKDAY_HEADERS.map((label, index) => (
                 <Text
@@ -275,14 +292,14 @@ export function DayHeader({
                 >
                   {week.map((day) => {
                     const isSelected = day === date;
-                    const isToday = day === clockDate;
+                    const dayIsToday = day === clockDate;
                     const isOutsideMonth = !isSameMonth(day, date);
 
                     return (
                       <Pressable
                         key={day}
                         accessibilityLabel={`${formatDisplayDay(day)}${
-                          isToday ? ", hoje" : ""
+                          dayIsToday ? ", hoje" : ""
                         }${isSelected ? ", selecionado" : ""}`}
                         accessibilityRole="button"
                         accessibilityState={{ selected: isSelected }}
@@ -291,12 +308,12 @@ export function DayHeader({
                           isOutsideMonth ? styles.monthDayOutsideVisual : null,
                           {
                             borderColor:
-                              isSelected || isToday ? palette.primary : "transparent",
+                              isSelected || dayIsToday ? palette.primary : "transparent",
                             backgroundColor: pressed
                               ? palette.surfacePressed
                               : isSelected
                                 ? palette.primary
-                                : isToday
+                                : dayIsToday
                                   ? palette.primarySoft
                                   : "transparent",
                           },
@@ -314,7 +331,7 @@ export function DayHeader({
                                 ? palette.primaryText
                                 : isOutsideMonth
                                   ? palette.textSubtle
-                                  : isToday
+                                  : dayIsToday
                                     ? palette.primary
                                     : palette.text,
                             },
@@ -328,12 +345,12 @@ export function DayHeader({
                 </View>
               ))}
             </View>
-          </View>
+          </Animated.View>
         )}
 
         <View style={styles.calendarFooter}>
           <Text style={[styles.calendarHint, { color: palette.textSubtle }]}>
-            {date === clockDate ? "Voce esta em hoje" : "Dia selecionado fora de hoje"}
+            {isToday ? "Voce esta em hoje" : "Dia selecionado fora de hoje"}
           </Text>
           <Pressable
             accessibilityLabel="Voltar para hoje"
@@ -341,15 +358,14 @@ export function DayHeader({
             style={({ pressed }) => [
               styles.todayButton,
               {
-                backgroundColor:
-                  date === clockDate
-                    ? palette.surfaceMuted
-                    : pressed
-                      ? palette.primaryPressed
-                      : palette.primary,
+                backgroundColor: isToday
+                  ? palette.surfaceMuted
+                  : pressed
+                    ? palette.primaryPressed
+                    : palette.primary,
               },
             ]}
-            disabled={date === clockDate}
+            disabled={isToday}
             testID="day-calendar-today-button"
             onPress={() => {
               selectDate(clockDate);
@@ -358,7 +374,7 @@ export function DayHeader({
             <Text
               style={[
                 styles.todayButtonLabel,
-                { color: date === clockDate ? palette.textSubtle : palette.primaryText },
+                { color: isToday ? palette.textSubtle : palette.primaryText },
               ]}
             >
               Hoje
@@ -395,38 +411,42 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     gap: spacing.md,
   },
-  topRow: {
+  brandRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: spacing.lg,
   },
   identityBlock: {
-    flex: 1,
+    gap: spacing.xxs,
   },
-  eyebrow: {
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  title: {
+    fontSize: typography.title,
+    fontFamily: fontFamily.display,
+  },
+  todayChip: {
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xxs,
+  },
+  todayChipLabel: {
     fontSize: typography.eyebrow,
     fontFamily: fontFamily.bodyBold,
     textTransform: "uppercase",
-    letterSpacing: 0,
-    color: colors.primary,
-  },
-  title: {
-    marginTop: spacing.xs,
-    fontSize: typography.title,
-    fontFamily: fontFamily.display,
-    color: colors.text,
+    letterSpacing: 0.8,
   },
   subtitle: {
-    marginTop: spacing.xs,
     fontSize: typography.caption,
     fontFamily: fontFamily.body,
-    color: colors.textMuted,
   },
   headerActions: {
     flexDirection: "row",
     gap: spacing.xs,
-    marginTop: 22,
   },
   headerActionButton: {
     minHeight: touchTarget.min,
@@ -442,8 +462,8 @@ const styles = StyleSheet.create({
   },
   calendarPanel: {
     borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: spacing.md,
+    borderTopColor: "transparent",
+    paddingTop: spacing.xs,
     gap: spacing.md,
   },
   calendarToolbar: {
@@ -457,15 +477,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.md,
-    backgroundColor: "transparent",
-  },
-  iconButtonPressed: {
-    backgroundColor: colors.surfacePressed,
   },
   iconButtonLabel: {
     fontSize: typography.bodyLarge,
     fontFamily: fontFamily.bodyBold,
-    color: colors.text,
   },
   monthButton: {
     flex: 1,
@@ -474,28 +489,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
     paddingHorizontal: spacing.md,
-  },
-  monthButtonActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySoft,
-  },
-  monthButtonPressed: {
-    backgroundColor: colors.surfacePressed,
   },
   monthButtonLabel: {
     fontSize: typography.body,
     fontFamily: fontFamily.bodyBold,
-    color: colors.text,
   },
   monthButtonIndicator: {
     fontSize: typography.caption,
     fontFamily: fontFamily.bodyBold,
-  },
-  monthButtonLabelActive: {
-    color: colors.primary,
   },
   weekStrip: {
     flexDirection: "row",
@@ -507,33 +509,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
     gap: spacing.xxs,
-  },
-  weekDayToday: {
-    borderColor: colors.primary,
-  },
-  weekDaySelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary,
-  },
-  weekDayPressed: {
-    backgroundColor: colors.surfacePressed,
   },
   weekDayName: {
     fontSize: typography.eyebrow,
     fontFamily: fontFamily.bodyBold,
-    color: colors.textMuted,
   },
   weekDayNumber: {
     fontSize: typography.bodyLarge,
     fontFamily: fontFamily.display,
-    color: colors.text,
-  },
-  weekDayTextSelected: {
-    color: colors.white,
   },
   calendarFooter: {
     flexDirection: "row",
@@ -545,29 +530,17 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.caption,
     fontFamily: fontFamily.body,
-    color: colors.textMuted,
   },
   todayButton: {
     minHeight: touchTarget.min,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.pill,
-    backgroundColor: colors.primary,
     paddingHorizontal: spacing.lg,
-  },
-  todayButtonDisabled: {
-    backgroundColor: colors.surfaceMuted,
-  },
-  todayButtonPressed: {
-    backgroundColor: colors.primaryPressed,
   },
   todayButtonLabel: {
     fontSize: typography.caption,
     fontFamily: fontFamily.bodyBold,
-    color: colors.white,
-  },
-  todayButtonLabelDisabled: {
-    color: colors.textSubtle,
   },
   monthSheet: {
     gap: spacing.xs,
@@ -581,7 +554,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: typography.caption,
     fontFamily: fontFamily.bodyBold,
-    color: colors.textSubtle,
   },
   monthGrid: {
     gap: 2,
@@ -598,48 +570,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: "transparent",
-    backgroundColor: "transparent",
   },
   monthDayOutsideVisual: {
     opacity: 0.34,
   },
-  monthDayOutside: {
-    backgroundColor: colors.surfaceMuted,
-  },
-  monthDayToday: {
-    borderColor: colors.primary,
-  },
-  monthDaySelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary,
-  },
-  monthDayPressed: {
-    backgroundColor: colors.surfacePressed,
-  },
   monthDayLabel: {
     fontSize: typography.body,
     fontFamily: fontFamily.bodyBold,
-    color: colors.text,
-  },
-  monthDayLabelOutside: {
-    color: colors.textSubtle,
-  },
-  monthDayLabelSelected: {
-    color: colors.white,
   },
   closeMonthButton: {
     minHeight: 34,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.sm,
-    backgroundColor: colors.surfaceMuted,
-  },
-  closeMonthButtonPressed: {
-    backgroundColor: colors.primaryPressed,
   },
   closeMonthLabel: {
     fontSize: typography.body,
     fontFamily: fontFamily.bodyBold,
-    color: colors.white,
   },
 });

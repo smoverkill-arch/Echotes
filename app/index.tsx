@@ -3,13 +3,15 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { useAuthSession } from "../src/features/auth/hooks/use-auth-session";
 import { useAppearancePalette } from "../src/stores/appearance-store";
+import { useOnboardingStore } from "../src/stores/onboarding-store";
 
 export default function IndexRoute() {
   const palette = useAppearancePalette();
-  const { authStatus, isAuthenticated, isBootstrapping, protectedDayHref, signInHref } =
-    useAuthSession();
+  const { authStatus, isAuthenticated, isBootstrapping, signInHref } = useAuthSession();
+  const onboardingSeen = useOnboardingStore((state) => state.hasSeen);
+  const onboardingHydrated = useOnboardingStore((state) => state.hasHydrated);
 
-  if (isBootstrapping || authStatus === "signing_out") {
+  if (isBootstrapping || !onboardingHydrated || authStatus === "signing_out") {
     return (
       <View style={[styles.container, { backgroundColor: palette.background }]}>
         <ActivityIndicator size="small" color={palette.textMuted} />
@@ -20,8 +22,12 @@ export default function IndexRoute() {
     );
   }
 
+  if (!onboardingSeen) {
+    return <Redirect href="/onboarding" />;
+  }
+
   if (isAuthenticated) {
-    return <Redirect href={protectedDayHref} />;
+    return <Redirect href="/home" />;
   }
 
   return <Redirect href={signInHref} />;

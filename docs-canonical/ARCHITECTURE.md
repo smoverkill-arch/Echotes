@@ -28,9 +28,16 @@ O repo tambem guarda regressao automatizada.
 
 ## Component Map
 
-- `app/index.tsx` inicia a sessao e redireciona o app.
+- `app/index.tsx` inicia a sessao e roteia para onboarding, home ou fluxo
+  publico conforme estado de onboarding e auth.
+- `app/onboarding.tsx` apresenta o onboarding inicial uma unica vez.
+- `app/home.tsx` entrega o painel inicial autenticado com resumo do dia.
 - `app/(auth)/sign-in.tsx` e `app/(auth)/sign-up.tsx` formam o fluxo publico.
-- `app/day/[date].tsx` entrega a rota protegida do dia.
+- `app/day/[date]/_layout.tsx` define o Stack das telas do dia.
+- `app/day/[date]/index.tsx` entrega a rota protegida do dia e hospeda o
+  `DayShell`.
+- `app/day/[date]/note/[id].tsx` e `app/day/[date]/task/[id].tsx` entregam o
+  Reader de nota e o Reader de tarefa como rotas proprias empilhadas.
 - `src/components/day/day-shell.tsx` compoe a superficie diaria.
 - `src/components/day/day-bottom-tabs.tsx` mantem as lentes do dia na bottom
   bar persistente.
@@ -38,11 +45,16 @@ O repo tambem guarda regressao automatizada.
   principal. `TimelinePageView` e `TimelinePageItem` encapsulam o layout
   de tipo unico (eixo esquerdo ou direito, card full-width).
 - `src/components/cards/*` renderiza cards reais, marker e ghost.
-- `src/components/reader/*` abre overlays de leitura.
+- `src/components/reader/*` renderiza o conteudo de leitura usado pelas rotas
+  de Reader de nota e tarefa.
   O Reader de nota organiza acao primaria, acoes secundarias e acao destrutiva
   separadamente para preservar clareza em mobile.
 - `src/components/forms/*` abre overlays de criacao e edicao.
-- `src/features/day/hooks/*` carrega entradas e monta a timeline.
+- `src/components/ui/*` guarda primitivas de UI compartilhadas (`PrimaryAction`,
+  `SecondaryAction`, `Chip`, `SectionLabel`).
+- `src/components/brand/brand-mark.tsx` renderiza a marca do produto.
+- `src/features/day/hooks/*` carrega entradas, monta a timeline e controla o
+  Reader de nota (`use-note-reader-controller`).
 - `src/features/tasks/*` concentra regras e APIs de tarefa.
 - `src/features/notes/*` concentra regras e APIs de nota.
 - `src/theme/*` guarda tokens compartilhados de cor, espaco, raio, tipografia
@@ -85,10 +97,14 @@ A orientacao esquerda ou direita pertence apenas a camada de renderizacao.
 
 ## Routes
 
-- `/` faz bootstrap e redirecionamento.
+- `/` faz bootstrap e roteia para onboarding, home ou fluxo publico.
+- `/onboarding` apresenta o onboarding inicial uma unica vez.
+- `/home` abre o painel inicial autenticado.
 - `/(auth)/sign-in` abre a entrada publica.
 - `/(auth)/sign-up` abre o cadastro publico.
 - `/day/[date]` abre a superficie diaria protegida.
+- `/day/[date]/note/[id]` abre o Reader de nota como rota empilhada.
+- `/day/[date]/task/[id]` abre o Reader de tarefa como rota empilhada.
 
 ## Stores
 
@@ -112,18 +128,18 @@ A orientacao esquerda ou direita pertence apenas a camada de renderizacao.
 - Guarda `sourceTaskId`.
 - Guarda `returnScrollOffset`.
 - Guarda `isTemporalNavigationActive`.
-- Guarda `pendingReaderOpen` para abrir uma nota depois de navegacao entre dias.
 
-Esse store sustenta a navegacao temporal de tarefas e a abertura contextual
-one-shot de nota conectada ou continuada em outro dia.
+Esse store sustenta a navegacao temporal de tarefas. A abertura de nota
+conectada ou continuada em outro dia agora usa a rota propria de Reader
+(`/day/[date]/note/[id]`), nao um overlay one-shot.
 
 ### `uiStore`
 
 - Guarda `activeDayTab`.
-- Guarda `readerState`.
+- Guarda `readerState` (legado; o Reader agora e rota e nao depende mais dele).
 - Guarda `editorState`.
 
-O Reader abre apenas item existente.
+O Editor abre apenas sobre a rota ativa.
 O Editor opera em `create` e `edit`.
 `create` usa item novo.
 `edit` exige `id`.
@@ -194,14 +210,18 @@ Ordenacao:
 
 ## Reader and Editor
 
-Reader e Editor vivem sobre a superficie do dia.
-Eles nao viram rotas proprias.
+O Reader de nota e o Reader de tarefa sao rotas proprias empilhadas sobre a
+superficie do dia (`/day/[date]/note/[id]` e `/day/[date]/task/[id]`).
+O Editor permanece como overlay sobre a rota ativa.
 
-- clique simples abre Reader.
+- clique simples empurra a rota de Reader correspondente.
 - double tap abre Editor em `edit`.
 - o Reader tambem oferece botao de editar.
-- nota e tarefa compartilham a ideia de sheet mobile sobre a superficie do dia.
+- fechar o Reader volta na pilha de rotas (`router.back`).
+- nota e tarefa compartilham a ideia de leitura mobile sobre a superficie do dia.
 - cada dominio usa formulario e leitura proprios.
+- `use-note-reader-controller` concentra o estado do Reader de nota (ecos,
+  picker, continuidade) consumido pela rota.
 - o header/calendario vivem como overlay sobre a timeline/listas: recolhem
   visualmente durante scroll vertical, deixam o conteudo rolar por tras e
   voltam quando a rolagem entra em repouso sem reocupar altura de layout.
@@ -248,8 +268,8 @@ por `002-note-echo-flows`.
   Reader da nota criada e preserva a nota se apenas o eco falhar.
 - Criacao manual usa `kind = manual_link`.
 - Remocao exige confirmacao e apaga somente a relacao selecionada.
-- Notas conectadas de outro dia navegam para `/day/[date]` e usam
-  `pendingReaderOpen` para abrir o Reader uma unica vez.
+- Notas conectadas de outro dia empurram a rota
+  `/day/[date]/note/[id]` do destino, abrindo o Reader da nota diretamente.
 - `Continuar desta nota` preserva o contrato `newNoteDay` em `YYYY-MM-DD`, mas
   apresenta controles mobile de dia anterior, dia seguinte e hoje antes de
   chamar a RPC atomica `continue_note`.
@@ -279,8 +299,8 @@ Ao continuar uma nota, o sistema:
 - cria eco `continue_note`.
 - preserva o link com a nota de origem.
 - executa criacao de nota e eco de forma atomica via RPC `continue_note`.
-- quando o dia escolhido e diferente, navega ao destino e abre a nova nota com
-  `pendingReaderOpen`.
+- ao concluir, empurra a rota `/day/[newNoteDay]/note/[id]` da nova nota,
+  seja no mesmo dia ou em um dia futuro.
 
 ## Visual States
 
@@ -332,18 +352,26 @@ Canon absorvido para fases futuras:
 ```mermaid
 flowchart TD
   A["Expo Router"] --> B["Auth Flow"]
+  A --> O["Onboarding / Home"]
   A --> C["Protected Day Route"]
   C --> D["DayShell"]
+  C --> R["Note/Task Reader Routes"]
   D --> E["useDayTimeline"]
   E --> F["useDayEntries"]
   F --> G["Supabase Client"]
   D --> H["calendarStore / navigationStore / uiStore"]
-  D --> I["TimelineView + cards + overlays"]
+  D --> I["TimelineView + cards + editors"]
+  R --> S["use-note-reader-controller"]
   G --> J["Supabase Auth"]
   G --> K["Postgres + RLS"]
 ```
 
 ## Revision History
+
+- 2026-05-31 - `005-ui-ux-improvement`: superficie do dia reestruturada em rotas
+  aninhadas (`day/[date]/index`, `note/[id]`, `task/[id]`), Reader virou rota
+  propria, overlay `pendingReaderOpen` removido do `navigationStore`, e
+  adicionados onboarding, home e primitivas de UI.
 
 - 2026-05-27 - Design v2 aplicado como linguagem visual mobile dark-first e
   `appearanceStore` registrado para Ajustes locais.

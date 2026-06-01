@@ -1,15 +1,27 @@
 describe("src/lib/env", () => {
-  const originalEnv = process.env;
+  const originalUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  const originalAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
   beforeEach(() => {
     jest.resetModules();
-    process.env = { ...originalEnv };
+    // Apaga as chaves no proprio process.env em vez de reatribuir o objeto:
+    // reatribuir faz o @expo/env (via babel-preset-expo) recarregar o .env e
+    // repor as variaveis, mascarando o caminho de erro testado aqui.
     delete process.env.EXPO_PUBLIC_SUPABASE_URL;
     delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
   });
 
-  afterAll(() => {
-    process.env = originalEnv;
+  afterEach(() => {
+    if (originalUrl === undefined) {
+      delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+    } else {
+      process.env.EXPO_PUBLIC_SUPABASE_URL = originalUrl;
+    }
+    if (originalAnonKey === undefined) {
+      delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+    } else {
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = originalAnonKey;
+    }
   });
 
   // @req FR-021

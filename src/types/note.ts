@@ -116,18 +116,6 @@ export interface DeleteEchoInput {
   noteIdB: string;
 }
 
-export type PendingReaderOpenOrigin =
-  | "connected_note_tap"
-  | "continue_note_created";
-
-export interface PendingReaderOpen {
-  noteId: string;
-  noteDay: string;
-  requestId: string;
-  sessionUserId: string;
-  actionOrigin: PendingReaderOpenOrigin;
-}
-
 export interface ContinueCommittedPendingOpen {
   newNoteId: string;
   newNoteDay: string;

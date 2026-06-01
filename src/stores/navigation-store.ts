@@ -1,7 +1,5 @@
 import { create } from "zustand";
 
-import type { PendingReaderOpen } from "../types/note";
-
 export interface TemporalNavigationContext {
   sourceDate: string;
   destinationDate: string;
@@ -13,7 +11,6 @@ export interface TemporalNavigationContext {
 
 interface NavigationStore {
   temporalNavigationContext: TemporalNavigationContext | null;
-  pendingReaderOpen: PendingReaderOpen | null;
   setTemporalNavigationContext: (
     context: Omit<
       TemporalNavigationContext,
@@ -21,16 +18,12 @@ interface NavigationStore {
     >,
   ) => void;
   consumePendingOpenTaskId: () => void;
-  setPendingReaderOpen: (pendingReaderOpen: PendingReaderOpen) => void;
-  consumePendingReaderOpen: (requestId: string) => void;
-  clearPendingReaderOpen: () => void;
   setReturnScrollOffset: (offset: number | null) => void;
   clearTemporalNavigationContext: () => void;
 }
 
 export const useNavigationStore = create<NavigationStore>((set) => ({
   temporalNavigationContext: null,
-  pendingReaderOpen: null,
 
   setTemporalNavigationContext: (context) => {
     set({
@@ -51,23 +44,6 @@ export const useNavigationStore = create<NavigationStore>((set) => ({
           }
         : null,
     }));
-  },
-
-  setPendingReaderOpen: (pendingReaderOpen) => {
-    set({ pendingReaderOpen });
-  },
-
-  consumePendingReaderOpen: (requestId) => {
-    set((state) => ({
-      pendingReaderOpen:
-        state.pendingReaderOpen?.requestId === requestId
-          ? null
-          : state.pendingReaderOpen,
-    }));
-  },
-
-  clearPendingReaderOpen: () => {
-    set({ pendingReaderOpen: null });
   },
 
   setReturnScrollOffset: (offset) => {

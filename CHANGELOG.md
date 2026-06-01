@@ -7,6 +7,37 @@ versioned releases when they start to exist.
 
 ## [Unreleased]
 
+### Changed (005-ui-ux-improvement)
+
+- **Superficie do dia em rotas aninhadas**: o monolito `app/day/[date].tsx` foi
+  dividido em `app/day/[date]/index.tsx` (host do `DayShell`),
+  `app/day/[date]/note/[id].tsx` (Reader de nota) e
+  `app/day/[date]/task/[id].tsx` (Reader de tarefa), com `_layout.tsx` definindo
+  o Stack das telas do dia.
+- **Reader como rota real**: o Reader de nota e de tarefa deixaram de ser
+  overlays one-shot e passaram a ser rotas empilhadas; abrir um item empurra a
+  rota correspondente e fechar volta na pilha (`router.back`).
+- **`pendingReaderOpen` removido**: o mecanismo de abertura pendente saiu do
+  `navigationStore` e o tipo `PendingReaderOpen` saiu de `types/note.ts`. A
+  navegacao cross-day para nota conectada ou continuada agora empurra
+  diretamente `/day/[date]/note/[id]`.
+- **`use-note-reader-controller`**: novo hook que concentra o estado do Reader
+  de nota (ecos, picker de eco, continuidade) consumido pela rota.
+- **`readerState` legado**: permanece no `uiStore` por compatibilidade, mas nao
+  controla mais a visibilidade do Reader.
+
+### Added (005-ui-ux-improvement)
+
+- **Onboarding inicial** (`app/onboarding.tsx` + `onboarding-store`): paineis
+  de boas-vindas exibidos uma unica vez, com persistencia local.
+- **Home autenticada** (`app/home.tsx`): painel inicial com resumo do dia e
+  atalhos para abrir o dia e criar nota/tarefa.
+- **Gate de roteamento** (`app/index.tsx`): redireciona para onboarding, home ou
+  fluxo publico conforme estado de onboarding e auth.
+- **Primitivas de UI** (`src/components/ui/*`): `PrimaryAction`,
+  `SecondaryAction`, `Chip`, `SectionLabel`, e `BrandMark` em
+  `src/components/brand/`.
+
 ### Added (004-dual-timeline-nav)
 
 - **Design v2 aplicado à superfície mobile**: linguagem dark-first com

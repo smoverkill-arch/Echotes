@@ -1,6 +1,7 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react-native";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 
-import ProtectedDayRoute from "../../../app/day/[date]";
+import ProtectedDayRoute from "../../../app/day/[date]/index";
+import TaskReaderRoute from "../../../app/day/[date]/task/[id]";
 import { useAuthStore } from "../../../src/stores/auth-store";
 import { useCalendarStore } from "../../../src/stores/calendar-store";
 import { useNavigationStore } from "../../../src/stores/navigation-store";
@@ -26,9 +27,11 @@ const mockRouter = {
   push: jest.fn((href: string) => {
     navigateToDay(String(href));
   }),
+  back: jest.fn(),
+  setParams: jest.fn(),
 };
 
-const mockSearchParams: { date?: string | string[] } = {
+const mockSearchParams: { date?: string | string[]; id?: string | string[] } = {
   date: "2026-04-18",
 };
 
@@ -374,8 +377,11 @@ describe("US3 ghost navigation", () => {
     expect(screen.getByTestId("breadcrumb-bar")).toBeTruthy();
     expect(screen.getByText("Item real em 20-04-2026")).toBeTruthy();
     expect(screen.getByText("Criada em 18-04-2026")).toBeTruthy();
-    expect(screen.getByText("Reader de tarefa")).toBeTruthy();
-    expect(screen.getByTestId("task-reader-context-meta")).toBeTruthy();
+    await waitFor(() => {
+      expect(mockRouter.push).toHaveBeenCalledWith(
+        "/day/2026-04-20/task/20000000-0000-4000-8000-000000000001",
+      );
+    });
   });
 
   // @req 002-note-echo-flows:FR-018
@@ -383,26 +389,13 @@ describe("US3 ghost navigation", () => {
     await renderReadyDayRoute();
     await createProjectedTaskFromOrigin();
     await navigateToProjectedTaskDestination();
-
-    fireEvent.press(screen.getByTestId("task-reader-edit-button"));
-
-    expect(await screen.findByDisplayValue("Tarefa futura")).toBeTruthy();
-    fireEvent.changeText(
-      screen.getByTestId("task-editor-title-input"),
-      "Tarefa futura revisada",
-    );
-
-    await act(async () => {
-      fireEvent.press(screen.getByTestId("task-editor-submit-button"));
+    await waitFor(() => {
+      expect(mockRouter.push).toHaveBeenCalledWith(
+        "/day/2026-04-20/task/20000000-0000-4000-8000-000000000001",
+      );
     });
-    await flushMicrotasks();
-    expect(
-      screen.getByTestId(
-        "task-card-timed-20000000-0000-4000-8000-000000000001",
-      ),
-    ).toBeTruthy();
-    expect(screen.getByText("Tarefa futura revisada")).toBeTruthy();
 
+    expect(screen.getByTestId("breadcrumb-bar")).toBeTruthy();
     fireEvent.press(screen.getByTestId("breadcrumb-return-button"));
     await flushMicrotasks();
     expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-18");
@@ -411,6 +404,47 @@ describe("US3 ghost navigation", () => {
         "task-card-ghost-20000000-0000-4000-8000-000000000001",
       ),
     ).toBeTruthy();
-    expect(screen.getByText("Tarefa futura revisada")).toBeTruthy();
+  });
+
+  // @req 002-note-echo-flows:FR-018
+  it("edita o item real pela rota de tarefa do destino", async () => {
+    mockSearchParams.date = "2026-04-20";
+    mockSearchParams.id = "20000000-0000-4000-8000-000000000001";
+    mockTasksTable.push({
+      id: "20000000-0000-4000-8000-000000000001",
+      user_id: authenticatedSession.userId,
+      title: "Tarefa futura",
+      content: null,
+      tag_id: null,
+      color: null,
+      is_color_overridden: false,
+      source_day: "2026-04-18",
+      target_day: "2026-04-20",
+      created_at: "2026-04-18T19:00:00+00:00",
+      updated_at: "2026-04-18T19:00:00+00:00",
+      scheduled_at: "2026-04-20T18:30:00+00:00",
+      status: "open",
+      completed_at: null,
+    });
+
+    render(<TaskReaderRoute />);
+    await flushMicrotasks();
+
+    expect(screen.getByText("Reader de tarefa")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("task-reader-edit-button"));
+    expect(await screen.findByDisplayValue("Tarefa futura")).toBeTruthy();
+    fireEvent.changeText(
+      screen.getByTestId("task-editor-title-input"),
+      "Tarefa futura revisada",
+    );
+    await act(async () => {
+      fireEvent.press(screen.getByTestId("task-editor-submit-button"));
+    });
+    await flushMicrotasks();
+
+    expect(mockTasksTable[0]?.title).toBe("Tarefa futura revisada");
   });
 });
+
+

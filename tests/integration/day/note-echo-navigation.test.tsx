@@ -4,10 +4,10 @@ import {
   fireEvent,
   render,
   screen,
-  waitFor,
 } from "@testing-library/react-native";
 
-import ProtectedDayRoute from "../../../app/day/[date]";
+import ProtectedDayRoute from "../../../app/day/[date]/index";
+import NoteReaderRoute from "../../../app/day/[date]/note/[id]";
 import { useAuthStore } from "../../../src/stores/auth-store";
 import { useCalendarStore } from "../../../src/stores/calendar-store";
 import { useNavigationStore } from "../../../src/stores/navigation-store";
@@ -17,27 +17,14 @@ import { createSupabaseNoteEchoMock } from "../../support/supabase-note-echo-moc
 
 // @req 002-note-echo-flows:FR-011
 // @req 002-note-echo-flows:FR-012
-const navigateToDay = (href: string) => {
-  const match = href.match(/^\/day\/(\d{4}-\d{2}-\d{2})$/);
-
-  if (!match) {
-    return;
-  }
-
-  mockSearchParams.date = match[1];
-  useCalendarStore.setState({ selectedDate: match[1] });
-};
-
 const mockRouter = {
-  replace: jest.fn((href: string) => {
-    navigateToDay(String(href));
-  }),
-  push: jest.fn((href: string) => {
-    navigateToDay(String(href));
-  }),
+  replace: jest.fn(),
+  push: jest.fn(),
+  back: jest.fn(),
+  setParams: jest.fn(),
 };
 
-const mockSearchParams: { date?: string | string[] } = {
+const mockSearchParams: { date?: string | string[]; id?: string | string[] } = {
   date: "2026-04-18",
 };
 
@@ -120,27 +107,10 @@ const flushMicrotasks = async (passes = 4) => {
   }
 };
 
-const renderReadyDayRoute = async () => {
-  render(<ProtectedDayRoute />);
-  await flushMicrotasks();
-
-  expect(screen.getByTestId("day-tab-tasks")).toBeTruthy();
-  expect(screen.queryByTestId("timeline-loading-state")).toBeNull();
-};
-
-const openSourceReader = async () => {
-  jest.useFakeTimers();
-  fireEvent.press(screen.getByTestId(`timeline-node-${sourceNote.id}:note`));
-  await act(async () => {
-    jest.advanceTimersByTime(250);
-  });
-  jest.useRealTimers();
-  await flushMicrotasks();
-};
-
 beforeEach(() => {
   jest.clearAllMocks();
   mockSearchParams.date = "2026-04-18";
+  mockSearchParams.id = undefined;
   mockSupabase.reset();
   mockSupabase.setTableRows("notes", [sourceNote, targetNote]);
   mockSupabase.setTableRows("tasks", []);
@@ -151,7 +121,6 @@ beforeEach(() => {
   });
   useNavigationStore.setState({
     temporalNavigationContext: null,
-    pendingReaderOpen: null,
   });
   useUIStore.setState({
     activeTab: "tasks",
@@ -174,28 +143,41 @@ afterEach(() => {
 });
 
 describe("note echo cross-day navigation", () => {
-  it("abre nota conectada de outro dia e reabre o Reader no destino", async () => {
-    await renderReadyDayRoute();
+  it("empurra a rota do Reader de nota ao tocar no card", async () => {
+    render(<ProtectedDayRoute />);
+    await flushMicrotasks();
+
     expect(screen.getByText("Ecos 1")).toBeTruthy();
 
-    await openSourceReader();
-    expect(await screen.findByText("Nota conectada futura")).toBeTruthy();
-    await waitFor(() => {
-      expect(
-        mockSupabase.queryCalls.filter(
-          (call) => call.table === "notes" && call.operation === "in",
-        ),
-      ).toHaveLength(1);
+    jest.useFakeTimers();
+    fireEvent.press(screen.getByTestId(`timeline-node-${sourceNote.id}:note`));
+    await act(async () => {
+      jest.advanceTimersByTime(250);
     });
+    jest.useRealTimers();
+
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      `/day/2026-04-18/note/${sourceNote.id}`,
+    );
+  });
+
+  it("abre nota conectada de outro dia empurrando a rota cross-day", async () => {
+    mockSearchParams.date = "2026-04-18";
+    mockSearchParams.id = sourceNote.id;
+
+    render(<NoteReaderRoute />);
+    await flushMicrotasks();
+
+    expect(screen.getByText("Reader de nota")).toBeTruthy();
+    expect(await screen.findByText("Nota conectada futura")).toBeTruthy();
 
     fireEvent.press(
       screen.getByTestId(`note-reader-open-related-note-${targetNote.id}`),
     );
     await flushMicrotasks();
 
-    expect(mockRouter.push).toHaveBeenCalledWith("/day/2026-04-19");
-    expect(screen.getAllByText("19-04-2026").length).toBeGreaterThan(0);
-    expect(screen.getByText("Reader de nota")).toBeTruthy();
-    expect(screen.getAllByText("Nota conectada futura").length).toBeGreaterThan(0);
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      `/day/2026-04-19/note/${targetNote.id}`,
+    );
   });
 });

@@ -86,4 +86,25 @@ describe("DayHeader calendar shell", () => {
     expect(baseProps.onDateChange).toHaveBeenNthCalledWith(1, "2026-03-01");
     expect(baseProps.onDateChange).toHaveBeenNthCalledWith(2, "2026-05-01");
   });
+
+  // @req UI-HEADER-001
+  it("mostra a marca Echotes e o chip de hoje quando o dia selecionado e hoje", () => {
+    render(<DayHeader {...baseProps} />);
+
+    expect(screen.getByText("Echotes")).toBeTruthy();
+    expect(screen.getByText("18-04-2026")).toBeTruthy();
+    expect(screen.getByTestId("day-header-today-chip")).toBeTruthy();
+  });
+
+  // @req UI-HEADER-001
+  it("alterna o calendario entre semana e mes pelo toggle", () => {
+    const { rerender } = render(<DayHeader {...baseProps} calendarMode="week" />);
+
+    fireEvent.press(screen.getByTestId("day-calendar-month-toggle"));
+    expect(baseProps.onCalendarModeChange).toHaveBeenLastCalledWith("month");
+
+    rerender(<DayHeader {...baseProps} calendarMode="month" />);
+    fireEvent.press(screen.getByTestId("day-calendar-month-toggle"));
+    expect(baseProps.onCalendarModeChange).toHaveBeenLastCalledWith("week");
+  });
 });

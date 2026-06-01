@@ -11,6 +11,8 @@ import { createSupabaseNoteEchoMock } from "../../support/supabase-note-echo-moc
 const mockRouter = {
   replace: jest.fn(),
   push: jest.fn(),
+  back: jest.fn(),
+  setParams: jest.fn(),
 };
 
 const mockSearchParams: { date?: string | string[] } = {
@@ -290,8 +292,11 @@ describe("US2 same-day day surface", () => {
         screen.getByTestId("note-card-real-10000000-0000-4000-8000-000000000001"),
       ).toBeTruthy();
     });
-    expect(await screen.findByText("Reader de nota")).toBeTruthy();
-    fireEvent.press(screen.getByTestId("note-reader-close-button"));
+    await waitFor(() => {
+      expect(mockRouter.push).toHaveBeenCalledWith(
+        "/day/2026-04-18/note/10000000-0000-4000-8000-000000000001",
+      );
+    });
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("day-fab-button"));
@@ -345,22 +350,9 @@ describe("US2 same-day day surface", () => {
       jest.useRealTimers();
     }
 
-    expect(await screen.findByText("Reader de nota")).toBeTruthy();
-
-    fireEvent.press(screen.getByTestId("note-reader-edit-button"));
-
-    fireEvent.changeText(
-      await screen.findByTestId("note-editor-title-input"),
-      "Nota do dia atualizada",
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      "/day/2026-04-18/note/10000000-0000-4000-8000-000000000001",
     );
-
-    await act(async () => {
-      fireEvent.press(screen.getByTestId("note-editor-submit-button"));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText("Nota do dia atualizada")).toBeTruthy();
-    });
   });
 
   it("exibe e aceita DD-MM-AAAA no editor e persiste day key interna", async () => {
@@ -467,7 +459,6 @@ describe("US2 same-day day surface", () => {
         screen.getByTestId("note-card-real-10000000-0000-4000-8000-000000000001"),
       ).toBeTruthy();
     });
-    fireEvent.press(screen.getByTestId("note-reader-close-button"));
 
     await act(async () => {
       fireEvent.press(screen.getByTestId("day-fab-button"));

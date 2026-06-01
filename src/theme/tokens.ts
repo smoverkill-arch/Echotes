@@ -55,3 +55,30 @@ export const touchTarget = {
   min: 44,
   androidMin: 48,
 } as const;
+
+export const elevation = {
+  none: {
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  card: {
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+  },
+  raised: {
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  overlay: {
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.32,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+} as const;

@@ -196,6 +196,25 @@
 - `UI-APPEARANCE-003` A densidade da timeline deve afetar somente espacamento,
   tamanho visual e exibicao de previews, preservando todos os itens e a
   orientacao `task -> esquerda` / `note -> direita`.
+- `UI-ONBOARDING-001` O app deve apresentar onboarding inicial uma unica vez,
+  persistir `hasSeen` localmente e rotear a raiz para onboarding, home ou
+  sign-in conforme onboarding visto e estado de auth, respeitando a hidratacao.
+- `UI-DASHBOARD-001` A home autenticada deve exibir o resumo do dia do relogio
+  (contagens de tarefas, notas e ecos), destacar a proxima tarefa agendada,
+  mostrar estado vazio quando aplicavel, oferecer atalho para abrir o dia e
+  redirecionar para sign-in sem sessao.
+- `UI-HEADER-001` O header do dia deve exibir a marca Echotes e o chip de hoje
+  quando o dia selecionado for o do relogio e permitir alternar o calendario
+  entre semana e mes.
+- `UI-BRAND-001` A marca deve renderizar em tamanhos com wordmark opcional e
+  permanecer consistente ao trocar modo e cor de destaque.
+- `UI-PRIMITIVE-001` As primitivas de UI compartilhadas devem expor tons,
+  respeitar `disabled` e disparar acao apenas quando habilitadas.
+- `UI-READER-ROUTE-001` O Reader de nota e de tarefa devem ser rotas empilhadas
+  (`/day/[date]/note/[id]` e `/day/[date]/task/[id]`); fechar volta na pilha.
+- `UI-READER-ROUTE-002` A abertura de nota conectada de outro dia e a
+  continuacao de nota devem empurrar a rota da nota de destino, sem estado
+  one-shot global.
 
 ## Non-Functional Requirements
 
@@ -251,15 +270,20 @@ retornar ao contexto original sem perder o vinculo temporal.
 
 | Requirement group | Primary implementation | Primary verification |
 |-------------|------|-------|
-| Auth + protection | `app/index.tsx`, `app/(auth)/*`, `app/day/[date].tsx`, `src/features/auth/*` | `tests/integration/auth/auth-session-flow.test.tsx` |
+| Auth + protection | `app/index.tsx`, `app/(auth)/*`, `app/day/[date]/index.tsx`, `src/features/auth/*` | `tests/integration/auth/auth-session-flow.test.tsx` |
 | Same-day notes/tasks | `src/features/notes/*`, `src/features/tasks/*`, `src/components/forms/*`, `src/components/reader/*` | `tests/integration/day/day-surface-same-day.test.tsx` |
 | Projected tasks + breadcrumb | `src/features/timeline/utils/derive-timeline-nodes.ts`, `src/stores/navigation-store.ts`, `src/components/day/breadcrumb-bar.tsx` | `tests/integration/day/ghost-navigation.test.tsx`, `tests/integration/day/day-surface-regression.test.tsx` |
 | Timeline derivation + render axis | `src/features/day/hooks/*`, `src/components/timeline/*` | `tests/unit/timeline/*`, `tests/unit/day/use-day-entries.test.tsx` |
 | Note echo flows | `src/features/notes/api/*`, `src/features/notes/utils/*`, `src/components/reader/note-reader.tsx`, `src/components/forms/continue-note-editor.tsx`, `supabase/migrations/004_note_echo_flows.sql` | `tests/unit/notes/*`, `tests/integration/day/note-echo-*.test.tsx`, `tests/integration/day/continue-note-flow.test.tsx` |
 | Appearance preferences | `src/stores/appearance-store.ts`, `src/components/day/settings-sheet.tsx`, `src/theme/tokens.ts` | `tests/unit/day/settings-sheet.test.tsx`, `tests/unit/day/day-header-calendar.test.tsx` |
+| App entry + dashboard + UI primitives | `app/index.tsx`, `app/onboarding.tsx`, `app/home.tsx`, `src/stores/onboarding-store.ts`, `src/components/brand/*`, `src/components/ui/*` | `tests/unit/onboarding/*`, `tests/unit/home/home-dashboard.test.tsx`, `tests/unit/ui/primitives.test.tsx` |
+| Reader as route | `app/day/[date]/_layout.tsx`, `app/day/[date]/note/[id].tsx`, `app/day/[date]/task/[id].tsx`, `src/features/day/hooks/use-note-reader-controller.ts` | `tests/integration/day/note-echo-navigation.test.tsx`, `tests/integration/day/continue-note-flow.test.tsx` |
 
 ## Revision History
 
+- 2026-05-31 - `005-ui-ux-improvement` registrado: onboarding inicial, home
+  autenticada, gate de roteamento na raiz, Reader de nota/tarefa como rotas
+  empilhadas (remocao de `pendingReaderOpen`) e primitivas de UI/marca.
 - 2026-05-11 - `002-note-echo-flows` registrado como entrega ativa para ecos
   manuais e `continue_note`; mencoes inline permanecem fora do corte.
 - 2026-05-27 - Ajustes locais de aparencia registrados para modo, destaque e

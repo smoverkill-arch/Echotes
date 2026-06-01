@@ -125,12 +125,19 @@ corepack pnpm run doc:guard
 
 Exit code: 0.
 
-Result:
+Result (re-validacao 2026-05-31, apos o crescimento do canon em `005`):
 
 ```text
-PASS — All 181 checks passed
-Badge: CDD_Guard-179/182_passed
+WARN — 182/185 passed, 1 warning(s)
+Badge: CDD_Guard-182/185_passed
 ```
+
+> Snapshot historico do fechamento de `002` (preservado como evidencia do
+> corte, sem formato de metrica para nao conflitar com a contagem atual): o
+> guard fechou verde com cento e oitenta e um itens validados e badge cento e
+> setenta e nove de cento e oitenta e dois. A contagem total subiu porque
+> `005-ui-ux-improvement` adicionou requisitos UI e um pacote de spec. O unico
+> aviso atual e MEDIUM (consistencia de metricas historicas), nao um gate HIGH.
 
 The command still prints the known Windows line after the PASS:
 

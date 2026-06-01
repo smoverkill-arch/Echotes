@@ -6,6 +6,7 @@ import { restoreSession } from "../../../src/features/auth/api/restore-session";
 import { signOut } from "../../../src/features/auth/api/sign-out";
 import { useCalendarStore } from "../../../src/stores/calendar-store";
 import { useAuthStore } from "../../../src/stores/auth-store";
+import { useOnboardingStore } from "../../../src/stores/onboarding-store";
 import type { AuthenticatedSession } from "../../../src/types/auth";
 
 const mockRouter = {
@@ -111,6 +112,7 @@ describe("US1 auth session flow", () => {
       selectedDate: "2026-04-18",
       clockDate: "2026-04-18",
     });
+    useOnboardingStore.setState({ hasSeen: true, hasHydrated: true });
     setUnauthenticatedState();
   });
 
